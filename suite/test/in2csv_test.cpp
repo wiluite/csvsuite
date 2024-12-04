@@ -128,7 +128,6 @@ int main() {
     "null value"_test = [&] {
         struct Args : in2csv_args {
             // TODO : fixme with argument "\N"
-            // TODO : check against clang sanitizer
             Args() { file = "_"; format = "csv"; null_value = {R"(N+)"}; }
         } args;
 
@@ -142,7 +141,6 @@ int main() {
     "null value blanks"_test = [&] {
         struct Args : in2csv_args {
             // TODO : fixme with argument "\N"
-            // TODO : check against clang sanitizer
             Args() { file = "_"; format = "csv"; null_value = {R"(N-)"}; blanks = true;}
         } args;
 
@@ -320,6 +318,7 @@ int main() {
         }));
     };
 #endif
+
     "convert xlsx with unicode sheet"_test = [&] {
         struct Args : in2csv_args {
             Args() { file = "sheets.xlsx"; sheet = "ʤ"; }

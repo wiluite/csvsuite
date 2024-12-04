@@ -40,11 +40,6 @@ namespace {
         if (can_be_number.size() < get_header().size())
             can_be_number.push_back(1);
 
-//        if (number == 1.0) {
-//            oss << "1.0";
-//            return;
-//        }
-
         if (is_date_column(column)) {
             using date::operator<<;
             std::ostringstream local_oss;
@@ -109,7 +104,7 @@ namespace {
 
         using func_type = std::function<std::string(elem_type const &)>;
 
-#if !defined(CSVKIT_UNIT_TEST)
+#if !defined(CSVSUITE_UNIT_TEST)
         static
 #endif
         std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
