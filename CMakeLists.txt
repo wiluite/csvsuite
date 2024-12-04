@@ -13,7 +13,7 @@ endif()
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 
-include(external)
+include(CMakeLists.csv_co.obligate.dependency.in)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)
 
@@ -28,7 +28,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if (IO_CSVSUITE_UTILS AND NOT _SANITY_CHECK) # Some C stuff (before any added C++ definitions)
-configure_file(CMakeLists.txt.soci.obligate.dependency1.in external_deps/CMakeLists.txt)
+configure_file(CMakeLists.soci.obligate.dependency.in external_deps/CMakeLists.txt)
 file(COPY ${CMAKE_SOURCE_DIR}/suite/external/local_sqlite3/src DESTINATION "${CMAKE_BINARY_DIR}/external_deps")
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external_deps" )
 execute_process(COMMAND "${CMAKE_COMMAND}" --build . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external_deps" )
