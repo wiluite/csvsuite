@@ -1,0 +1,83 @@
+2023-10-05	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Fix a bug in NLS Util.
+
+2023-10-04	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Fix NLS Util bug when translate on Windows.
+	Update getlocale rewritten in Python.
+	Modify the GPL version in the copyright statement in the file to 3.
+	Update FILELIST.
+
+2023-10-01	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	* nls_util/nls_util.py: Converted from 'CR LF' to 'LF'.
+	Fix a bug in NLS Util.
+
+2023-09-25	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Add Python for dependency.
+	Add new CMake variable 'buildaux_dir'.
+	Remove NLS Util in C++.
+	Fix typos in 'toold/getlocale.cpp'.
+	Rename NLS Util from 'nls-util' to 'nls_util' for snake_case.
+
+2023-09-23	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Update NLS Util's filename format.
+	Fix a typo in nls_util.py
+	Add Python2 support in NLS Util.
+
+2023-09-17	LYF511        <61766249+LYF511@users.noreply.github.com>
+
+	Update nls-util rewritten in Python.
+
+2023-09-09	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Fix bugs caused by 'nls-util' when cross-compiling.
+
+2023-08-25	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Remove '${srcdir}' '${outdir}'.
+	Add cppp-platform package.
+
+2023-08-24	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Optimize structure and import methods.
+
+2023-08-08	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Fix uninstall bug.
+
+2023-07-28	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Use C source code to get locale infomation.
+	Support using Win32 API to get locale infomation on Native Windows.
+
+2023-07-26	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Add locale support.
+	Add CMake macro 'cppp_nls_autotranslate'.
+
+2023-07-25	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Add NLS Util.
+	Add C++ Plus CMake modules linker.
+	Remove autoupdate GitHub CI.
+	Add MSVC support.
+	Add MSVC 'execution_character_set'.
+
+2023-07-21	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Fix ChangeLog datetime format.
+	Replace `COPYING.LIB` to `COPYING` in files.
+
+2023-07-3	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Add C++ Plus dist utils
+
+2023-06-29	ChenPi11      <wushengwuxi-msctinoulk@outlook.com>
+
+	Add ChangeLog.
+	Remove autoconf buildsystem support.
+	Update CMake scripts.

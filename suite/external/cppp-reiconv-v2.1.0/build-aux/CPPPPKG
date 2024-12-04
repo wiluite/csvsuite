@@ -1,0 +1,17 @@
+{
+    "name" : "build-aux",
+    "version" : "0.0.1-rc1",
+    "list_file_path": "FILELIST",
+    "description": "Common C++ Plus build aux scripts for CMake build, or other operations.",
+    "authors": [
+        "The C++ Plus Project",
+        "ChenPi11"
+    ],
+    "webpage": "https://github.com/cppp-project/build-aux",
+    "subpackages": {
+
+    },
+    "license": [
+        "GPLv3"
+    ]
+}
