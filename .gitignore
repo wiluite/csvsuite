@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+include/config.h
+cmake-build*
+.idea*
+build*
+exe
+*.bat
+msbuild_
+*.ignore

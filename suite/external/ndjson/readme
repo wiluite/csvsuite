@@ -1,0 +1,2 @@
+read-by-line and use jsoncons?
+At least, try to use ArduinoJson7 which supports that.

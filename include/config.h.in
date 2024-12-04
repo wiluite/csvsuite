@@ -1,0 +1,3 @@
+#pragma once
+
+${COMPILER_DEFINES}

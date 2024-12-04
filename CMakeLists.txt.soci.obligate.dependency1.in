@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.16)
+PROJECT(sqlite3)
+
+if (MSVC)
+else()
+    add_definitions(-Wno-implicit-fallthrough)
+endif()
+if (MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+endif()
+add_library(local_sqlite3 SHARED src/sqlite3.c)
+
+add_definitions(-DSQLITE_ENABLE_RTREE)
+add_definitions(-DSQLITE_ENABLE_FTS4)
+add_definitions(-DSQLITE_ENABLE_FTS5)
+add_definitions(-DSQLITE_ENABLE_JSON1)
+add_definitions(-DSQLITE_ENABLE_RBU)
+add_definitions(-DSQLITE_ENABLE_STAT4)
+
+add_definitions(-DSQLITE_THREADSAFE=0)
+

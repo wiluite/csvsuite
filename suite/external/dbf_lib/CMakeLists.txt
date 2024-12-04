@@ -1,0 +1,15 @@
+if (MSVC)
+    add_definitions(/wd4131)
+else()
+    remove_definitions(-Wno-old-style-cast -fcoroutines -Wno-reorder)
+    if (IS_GNU)
+        add_definitions(-Wno-stringop-truncation)
+    else() #CLANG
+        add_definitions(-Wno-deprecated-non-prototype)
+        if ((_SANITY_CHECK) AND (IS_CLANG))
+            add_definitions(-Wno-unused-command-line-argument)
+        endif()
+    endif()
+endif()
+
+add_library(dbf STATIC src/dbf.c src/ioapi/ioapi.c)

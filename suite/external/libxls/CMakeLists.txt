@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.16)
+
+include_directories(. include)
+
+add_subdirectory(iconv_c_connector)
+
+if (MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
+    add_definitions(/wd4245)
+    add_definitions(/wd4706)
+else()
+    remove_definitions(-Wno-old-style-cast -fcoroutines -Wno-reorder)
+    add_definitions(-Wno-implicit-fallthrough)
+    if ((_SANITY_CHECK) AND (IS_CLANG))
+        add_definitions(-Wno-unused-command-line-argument)
+    endif()
+endif()
+add_library(xls STATIC src/xlstool.c src/endian.c src/locale.c src/ole.c src/xls.c)
+target_link_libraries(xls iconv_c_connector)

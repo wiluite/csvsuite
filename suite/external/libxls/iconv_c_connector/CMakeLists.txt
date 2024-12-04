@@ -1,0 +1,2 @@
+add_library(iconv_c_connector STATIC iconv_c_connector.cpp)
+target_link_libraries(iconv_c_connector libcppp-reiconv.static)

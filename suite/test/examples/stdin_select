@@ -1,0 +1,1 @@
+select cast(3.1415 * 13.37 as integer) as answer
