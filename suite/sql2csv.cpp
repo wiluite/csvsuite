@@ -8,8 +8,8 @@
 using namespace ocilib;
 
 #include <cli.h>
-#include <rowset-query-impl.h>
-#include <local-sqlite3-dep.h>
+#include <sql_utils/rowset-query-impl.h>
+#include <sql_utils/local-sqlite3-dep.h>
 
 using namespace ::csvkit::cli;
 
