@@ -102,6 +102,7 @@ namespace in2csv::detail::fixed {
                     auto b = bytes_from(_, 0, std::get<1>(starts[i]));
                     auto e = bytes_from(_, b, std::get<1>(lengths[i]));
                     auto piece = std::string(_.begin() + b, _.begin() + e + b);
+                    piece.erase(0, piece.find_first_not_of(' '));
                     piece.erase(piece.find_last_not_of(' ') + 1);
                     std::cout << piece << (i < names.size() - 1 ? "," : "");
                 }

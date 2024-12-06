@@ -813,29 +813,49 @@ target_include_directories(in2csv_test
 )
 add_test(in2csv_test in2csv_test)
 
-add_executable(in2csv_test_date in2csv_test_date.cpp ../src/in2csv/in2csv_csv.cpp)
+add_executable(in2csv_date_test in2csv_date_test.cpp ../src/in2csv/in2csv_csv.cpp)
 add_custom_command(
-        TARGET in2csv_test_date POST_BUILD
+        TARGET in2csv_date_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_date_format.csv
         ${CMAKE_CURRENT_BINARY_DIR}/test_date_format.csv)
 add_custom_command(
-        TARGET in2csv_test_date POST_BUILD
+        TARGET in2csv_date_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_date_format_converted.csv
         ${CMAKE_CURRENT_BINARY_DIR}/test_date_format_converted.csv)
 add_custom_command(
-        TARGET in2csv_test_date POST_BUILD
+        TARGET in2csv_date_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_numeric_date_format.csv
         ${CMAKE_CURRENT_BINARY_DIR}/test_numeric_date_format.csv)
 
-target_link_libraries(in2csv_test_date libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
-target_include_directories(in2csv_test_date
+target_link_libraries(in2csv_date_test libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
+target_include_directories(in2csv_date_test
         PRIVATE
         ../external/jsoncons/include
 )
-add_test(in2csv_test_date in2csv_test_date)
+add_test(in2csv_date_test in2csv_date_test)
+
+add_executable(in2csv_fixed_format_test in2csv_fixed_format_test.cpp ../src/in2csv/in2csv_fixed.cpp)
+add_custom_command(
+        TARGET in2csv_fixed_format_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/testfixed
+        ${CMAKE_CURRENT_BINARY_DIR}/testfixed)
+add_custom_command(
+          TARGET in2csv_fixed_format_test POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_SOURCE_DIR}/suite/test/examples/testfixed_schema.csv
+          ${CMAKE_CURRENT_BINARY_DIR}/testfixed_schema.csv)
+add_custom_command(
+          TARGET in2csv_fixed_format_test POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_SOURCE_DIR}/suite/test/examples/testfixed_converted.csv
+          ${CMAKE_CURRENT_BINARY_DIR}/testfixed_converted.csv)
+
+target_link_libraries(in2csv_fixed_format_test libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
+add_test(in2csv_fixed_format_test in2csv_fixed_format_test)
 
 endif()
 
