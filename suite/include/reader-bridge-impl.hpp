@@ -66,7 +66,7 @@ namespace csv_co {
             precision_calculator() {
                 if (!no_maxprec_) {
                     fun_impl = [&] (std::string & rep) -> unsigned char {
-                        rep.erase(0, rep.find_first_not_of(" "));
+                        rep.erase(0, rep.find_first_not_of(' '));
                         rep.erase(rep.find_last_not_of(" \t\r") + 1);
                         std::erase(rep, ' ');
                         boost::multiprecision::cpp_dec_float_50 val(abs(boost::multiprecision::cpp_dec_float_50(rep)));
