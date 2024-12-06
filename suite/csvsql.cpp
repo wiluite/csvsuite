@@ -400,8 +400,8 @@ namespace csvsql::detail {
         return (e.raw_string_view().find(',') == std::string_view::npos) ? std::string(e.str()) : e;
     }
 
-    #include "src/csvsql_soci.cpp"
-    #include "src/csvsql_ocilib.cpp"
+    #include "src/csvsql/csvsql_soci.cpp"
+    #include "src/csvsql/csvsql_ocilib.cpp"
 
     void reset_environment() {
         create_table_composer::file_no = 0;
