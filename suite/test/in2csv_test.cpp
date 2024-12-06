@@ -129,10 +129,10 @@ int main() {
     "null value"_test = [&] {
         struct Args : in2csv_args {
             // TODO : fixme with argument "\N"
-            Args() { file = "_"; format = "csv"; null_value = {R"(N+)"}; }
+            Args() { file = "_"; format = "csv"; null_value = {R"(\N)"}; }
         } args;
 
-        std::istringstream iss("a,b\nn/a,N+");
+        std::istringstream iss("a,b\nn/a,\\N");
         stdin_subst new_cin(iss);
 
         CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -142,10 +142,10 @@ int main() {
     "null value blanks"_test = [&] {
         struct Args : in2csv_args {
             // TODO : fixme with argument "\N"
-            Args() { file = "_"; format = "csv"; null_value = {R"(N-)"}; blanks = true;}
+            Args() { file = "_"; format = "csv"; null_value = {R"(\N)"}; blanks = true;}
         } args;
 
-        std::istringstream iss("a,b\nn/a,N-\n");
+        std::istringstream iss("a,b\nn/a,\\N\n");
         stdin_subst new_cin(iss);
 
         CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
