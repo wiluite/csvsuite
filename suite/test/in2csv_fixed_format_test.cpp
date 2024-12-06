@@ -10,6 +10,8 @@
 #include "common_args.h"
 #include "strm_redir.h"
 #include "stdin_subst.h"
+#include "test_reader_macros.h"
+#include "../include/in2csv/in2csv_fixed.h"
 
 #define CALL_TEST_AND_REDIRECT_TO_COUT(call)    \
     std::stringstream cout_buffer;              \
@@ -80,6 +82,43 @@ int main() {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
             expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
+    };
+
+    "next test"_test = [&] {
+        struct Args : in2csv_args {
+            Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
+        } args;
+
+        try {
+            test_reader_r1 r1("foo column\n 0");
+            in2csv::detail::fixed::schema_decoder dec(r1, args);
+        } catch (std::exception const & e) {
+            expect(std::string(e.what()) == R"(ValueError: A column named "column" must exist in the schema file.)");
+        }
+        try {
+            test_reader_r1 r1("column\n 0");
+            in2csv::detail::fixed::schema_decoder dec(r1, args);
+        } catch (std::exception const & e) {
+            expect(std::string(e.what()) == R"(ValueError: A column named "start" must exist in the schema file.)");
+        }
+        try {
+            test_reader_r1 r1("start,column\n 1, name");
+            in2csv::detail::fixed::schema_decoder dec(r1, args);
+        } catch (std::exception const & e) {
+            expect(std::string(e.what()) == R"(ValueError: A column named "length" must exist in the schema file.)");
+        }
+        expect(nothrow([&] {
+            test_reader_r1 r1("length,start,column, another information\n 6, 0, name, ###");
+            in2csv::detail::fixed::schema_decoder dec(r1, args);
+        }));
+
+        try {
+            test_reader_r1 r1("length,start,column, another information\n bad_len, 0, name, ###");
+            in2csv::detail::fixed::schema_decoder dec(r1, args);
+        } catch (std::exception const & e) {
+            expect(std::string(e.what()) == R"(A value of unsupported type ' bad_len' for length.)");
+        }
+
     };
 
 }

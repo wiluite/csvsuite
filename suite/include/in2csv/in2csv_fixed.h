@@ -42,10 +42,21 @@ namespace in2csv::detail {
                             unsigned col = 0;
                             for (auto e : rowspan) {
                                 auto et {elem_type{e}};
-                                if (et.is_num())
-                                    all[columns[col]].emplace_back(static_cast<unsigned>(et.num()));
-                                else if (et.is_str())
-                                    all[columns[col]].push_back(et.operator csv_co::unquoted_cell_string());
+                                if (et.is_num()) {
+                                    auto const value = columns[col];
+                                    if (value == "column")
+                                        all[value].emplace_back(et.operator csv_co::unquoted_cell_string());
+                                    else
+                                        all[value].emplace_back(static_cast<unsigned>(et.num()));
+                                }
+                                else if (et.is_str()) {
+                                    auto const value = columns[col];
+                                    if (value != "start" and value != "length" )
+                                        all[value].push_back(et.operator csv_co::unquoted_cell_string());
+                                    else
+                                        throw std::runtime_error("A value of unsupported type '"
+                                            + et.operator csv_co::unquoted_cell_string() + "' for " + value + '.');
+                                }
                                 else
                                     throw std::runtime_error("A value of unsupported type or a null value is in the schema file.");
                                 ++col;
