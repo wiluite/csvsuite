@@ -58,6 +58,16 @@ int main() {
         }));
     };
 
+    "fixed skip lines"_test = [&] {
+        struct Args : in2csv_args {
+            Args() { file = "testfixed_skip_lines"; schema = "testfixed_schema.csv"; skip_lines = 3; }
+        } args;
+        expect(nothrow([&] {
+            CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
+            assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+        }));
+    };
+
 }
 
 namespace in2csv::detail::xlsx { void impl::convert() {} }
