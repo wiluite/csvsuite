@@ -1,8 +1,8 @@
 #pragma once
 
 #include "converter_client.h"
-#include <memory>
-#include <filesystem>
+#include "csv_co/reader.hpp"
+#include "reader-bridge-impl.hpp"
 
 namespace in2csv::detail {
 
@@ -18,12 +18,65 @@ namespace in2csv::detail {
         };
 
         struct impl {
-            impl(impl_args a) : a(std::move(a)) {}
+            explicit impl(impl_args a) : a(std::move(a)) {}
+
             void convert();
+
         private:
             impl_args a;
         };
+
         static std::shared_ptr<impl> pimpl;
+
+        template <typename RT, typename AT>
+        struct schema_decoder {
+            schema_decoder(RT & reader, AT & args) : reader(reader), args(args) {
+                static std::locale loc("C");
+                elem_type::imbue_num_locale(loc);
+                reader.run_rows(
+                        [&](auto rowspan) {
+                            for (auto e : rowspan)
+                                columns.push_back(e.operator csv_co::unquoted_cell_string());
+                        }
+                        ,[&](auto rowspan) {
+                            unsigned col = 0;
+                            for (auto e : rowspan) {
+                                auto et {elem_type{e}};
+                                if (et.is_num())
+                                    all[columns[col]].emplace_back(static_cast<unsigned>(et.num()));
+                                else if (et.is_str())
+                                    all[columns[col]].push_back(et.operator csv_co::unquoted_cell_string());
+                                else
+                                    throw std::runtime_error("A value of unsupported type or a null value is in the schema file.");
+                                ++col;
+                            }
+                        }
+                );
+                if (all.find("column") == all.end())
+                    throw std::runtime_error("ValueError: A column named \"column\" must exist in the schema file.");
+                if (all.find("start") == all.end())
+                    throw std::runtime_error("ValueError: A column named \"start\" must exist in the schema file.");
+                if (all.find("length") == all.end())
+                    throw std::runtime_error("ValueError: A column named \"length\" must exist in the schema file.");
+#if 0
+                auto & names_ = all["column"];
+                auto & starts_ = all["start"];
+                auto & lengths_ = all["length"];
+                assert(names_.size() == starts_.size());
+                assert(names_.size() == lengths_.size());
+#endif
+            }
+            auto & names() {return all["column"]; }
+            auto & starts() {return all["start"]; }
+            auto & lengths() {return all["length"]; }
+        private:
+            RT & reader;
+            AT & args;
+
+            using elem_type = typename std::decay_t<RT>::template typed_span<csv_co::unquoted>;
+            std::vector<std::string> columns;
+            std::unordered_map<std::string, std::vector<std::variant<std::string, unsigned>>> all;
+        };
     }
 
     template <class Args2>
