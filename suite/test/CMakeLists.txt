@@ -858,6 +858,11 @@ add_custom_command(
           COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_SOURCE_DIR}/suite/test/examples/testfixed_skip_lines
           ${CMAKE_CURRENT_BINARY_DIR}/testfixed_skip_lines)
+add_custom_command(
+          TARGET in2csv_fixed_format_test POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_SOURCE_DIR}/suite/test/examples/testfixed_schema_no_inference.csv
+          ${CMAKE_CURRENT_BINARY_DIR}/testfixed_schema_no_inference.csv)
 
 target_link_libraries(in2csv_fixed_format_test libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
 add_test(in2csv_fixed_format_test in2csv_fixed_format_test)

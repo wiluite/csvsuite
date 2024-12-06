@@ -9,6 +9,7 @@
 #include "../in2csv.cpp"
 #include "common_args.h"
 #include "strm_redir.h"
+#include "stdin_subst.h"
 
 #define CALL_TEST_AND_REDIRECT_TO_COUT(call)    \
     std::stringstream cout_buffer;              \
@@ -65,6 +66,19 @@ int main() {
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
             assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+        }));
+    };
+
+    "fixed no inference"_test = [&] {
+        struct Args : in2csv_args {
+            Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
+        } args;
+        expect(nothrow([&] {
+            std::istringstream iss("     1   2 3");
+            stdin_subst new_cin(iss);
+
+            CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
+            expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
     };
 
