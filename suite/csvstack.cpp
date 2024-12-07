@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvstack.cpp
+/// \file   utils/csvsuite/csvstack.cpp
 /// \author wiluite
 /// \brief  Stack up the rows from multiple CSV files.
 
@@ -7,7 +7,7 @@
 #include <printer_concepts.h>
 #include <deque>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvstack::detail {
     struct Args final : ARGS_positional_files {
@@ -51,7 +51,7 @@ namespace csvstack::detail {
             } else {
             }
         }
-        using ts_n_blanks_type = std::tuple<std::vector<::csvkit::cli::column_type>, std::vector<bool>>;
+        using ts_n_blanks_type = std::tuple<std::vector<::csvsuite::cli::column_type>, std::vector<bool>>;
         template <typename T>
         void write(T&& printable, auto && types_n_blanks, auto && args)
         requires (!CsvKitCellSpanTableConcept<T>

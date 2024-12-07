@@ -7,8 +7,8 @@
 #include <functional>
 #include "header_printer.h"
 
-using namespace ::csvkit::cli;
-using namespace ::csvkit::cli::encoding;
+using namespace ::csvsuite::cli;
+using namespace ::csvsuite::cli::encoding;
 
 //TODO: do type-aware printing
 //TODO: RAII

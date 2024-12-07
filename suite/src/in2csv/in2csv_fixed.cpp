@@ -1,8 +1,8 @@
 #include "../../include/in2csv/in2csv_fixed.h"
 #include <cli.h>
 
-using namespace ::csvkit::cli;
-using namespace ::csvkit::cli::encoding;
+using namespace ::csvsuite::cli;
+using namespace ::csvsuite::cli::encoding;
 
 namespace in2csv::detail::fixed {
     void convert_impl(auto & reader, auto & args) {

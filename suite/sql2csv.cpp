@@ -11,7 +11,7 @@ using namespace ocilib;
 #include <sql_utils/rowset-query-impl.h>
 #include <sql_utils/local-sqlite3-dep.h>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace sql2csv::detail {
     struct Args : argparse::Args {
@@ -90,7 +90,7 @@ namespace sql2csv::detail {
             session = std::make_unique<soci::session>(this->args.db);
         }
         void querying() override {
-            csvkit::cli::sql::rowset_query(*session, args, query_impl(args));
+            csvsuite::cli::sql::rowset_query(*session, args, query_impl(args));
         }
         static std::shared_ptr<dbms_client> create(Args2 & args) {
             return std::make_shared<soci_client>(args);
@@ -125,7 +125,7 @@ namespace sql2csv::detail {
         }
 
         void querying() override {
-            csvkit::cli::sql::rowset_query(*con, args, query_impl(args));
+            csvsuite::cli::sql::rowset_query(*con, args, query_impl(args));
         }
         static std::shared_ptr<dbms_client> create(Args2 & args) {
             return std::make_shared<ocilib_client>(args);

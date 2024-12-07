@@ -1,12 +1,12 @@
 ///
-/// \file   utils/csvkit/csvclean.cpp
+/// \file   utils/csvsuite/csvclean.cpp
 /// \author wiluite
 /// \brief  Produce CSV freed from common errors.
 
 #include <fstream>
 #include <cli.h>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 #define TRY_TRANSFORM_UTF8_TO_ACTIVE_CODE_PAGE 0
 namespace csvclean::detail {
@@ -45,7 +45,7 @@ namespace csvclean::detail {
     template <class T>
     struct base_header_printer {
         base_header_printer(char delim, auto & ostream, auto & header, auto const & args) : ostream_(ostream) {
-            // For options -H -l there will be difference with python's csvkit (this is very discussion question)
+            // For options -H -l there will be difference with python's csvsuite (this is very discussion question)
             if (args.no_header and !args.linenumbers)
                 static_cast<T&>(*this).no_header_specific_message(delim, header);
             else {
@@ -103,10 +103,10 @@ namespace csvclean::detail {
     }
 
     template <typename Reader, typename ARGS>
-    class specific_maxfieldsize_checker final : protected ::csvkit::cli::max_field_size_checker<Reader, ARGS> {
+    class specific_maxfieldsize_checker final : protected ::csvsuite::cli::max_field_size_checker<Reader, ARGS> {
         void increment_row() override {}
     public:
-        using base_class = ::csvkit::cli::max_field_size_checker<Reader, ARGS>;
+        using base_class = ::csvsuite::cli::max_field_size_checker<Reader, ARGS>;
         using base_class::check;
 
         specific_maxfieldsize_checker(Reader const & r, ARGS const & args, unsigned columns) 

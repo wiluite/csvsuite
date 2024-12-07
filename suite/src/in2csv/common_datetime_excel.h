@@ -10,7 +10,7 @@ namespace {
     static std::vector<unsigned> datetimes_ids;
 
     auto get_date_and_datetime_columns(auto && args, auto && header, use_date_datetime_excel use_d_dt) {
-        using namespace ::csvkit::cli;
+        using namespace ::csvsuite::cli;
         if (use_d_dt == use_date_datetime_excel::no)
             return;
 

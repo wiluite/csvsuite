@@ -1,6 +1,6 @@
 #pragma once
 
-namespace csvkit::cli::SOCI {
+namespace csvsuite::cli::SOCI {
     enum struct backend_id {
         PG,
         ORCL,
@@ -12,7 +12,7 @@ namespace csvkit::cli::SOCI {
 #if 0
 #include "dbms-backend-id.h"
 #endif
-namespace csvkit::cli::sql {
+namespace csvsuite::cli::sql {
 
     void rowset_query(soci::session & sql, auto const & args, std::string const & q_s) {
         using namespace soci;

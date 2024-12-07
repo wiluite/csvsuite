@@ -1,12 +1,12 @@
 ///
-/// \file   utils/csvkit/include/cli-compare.h
+/// \file   utils/csvsuite/include/cli-compare.h
 /// \author wiluite
 /// \brief  All possible comparison operations, type-aware and type-independent.
 
 #ifndef CSV_CO_CLI_COMPARE_H
 #define CSV_CO_CLI_COMPARE_H
 
-namespace csvkit::cli::compare::detail {
+namespace csvsuite::cli::compare::detail {
 
     template <class EType, class Native>
     class common_compare_impl : Native {

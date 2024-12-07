@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvlook.cpp
+/// \file   utils/csvsuite/csvlook.cpp
 /// \author wiluite
 /// \brief  Render a CSV file in the console.
 
@@ -10,7 +10,7 @@
 #include <tuple>
 #include <array>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvlook {
     struct Args final : ARGS_positional_1 {
@@ -85,7 +85,7 @@ namespace csvlook {
 
         std::vector<unsigned> max_sizes (header.size());
         std::transform (header.begin(), header.end(), max_sizes.begin(),[&](auto & elem) {
-            return std::min(args.max_column_width, static_cast<unsigned>(csv_co::csvkit::str_symbols(elem.operator csv_co::unquoted_cell_string())));
+            return std::min(args.max_column_width, static_cast<unsigned>(csv_co::csvsuite::str_symbols(elem.operator csv_co::unquoted_cell_string())));
         });
 
         using reader_type = std::decay_t<decltype(reader)>;
@@ -126,7 +126,7 @@ namespace csvlook {
 #endif
                                     num_stringstream ss(args.glob_locale);
                                     ostream_fixed_precision(ss, e, args.max_precision, args.precision_locally, args.no_number_ellipsis);
-                                    unsigned const size = csv_co::csvkit::str_symbols(ss.str());
+                                    unsigned const size = csv_co::csvsuite::str_symbols(ss.str());
 #ifndef _MSC_VER
                                     ss.str({});
 #endif
@@ -167,7 +167,7 @@ namespace csvlook {
         std::ostream & oss_ = args.asap ? std::cout : oss;
         auto print_func_impl = [&] (auto && elem_str, unsigned max_size, std::size_t row) {
             auto const refactor_elem = [&]() -> std::tuple<unsigned, unsigned, std::string> {
-                auto const str = csv_co::csvkit::to_basic_string_32(elem_str);
+                auto const str = csv_co::csvsuite::to_basic_string_32(elem_str);
                 if (str.size() <= max_size)
                     return std::tuple{str.size(), elem_str.size(), elem_str};
                 else {
@@ -177,7 +177,7 @@ namespace csvlook {
                         std::transform(newstr.cbegin() + offset, newstr.cbegin() + max_size, newstr.begin() + offset, [](auto &) { return '.'; });
                     }
                     assert(max_size==newstr.size());
-                    return std::tuple{max_size, elem_str.size(), csv_co::csvkit::from_basic_string_32(newstr)};
+                    return std::tuple{max_size, elem_str.size(), csv_co::csvsuite::from_basic_string_32(newstr)};
                 }
             };
             auto const [p,s,e] = refactor_elem();
@@ -399,13 +399,13 @@ namespace csvlook::detail {
             oss.precision(4);
             oss << 1000000.1000;
             try {
-                csv_co::csvkit::str_symbols_deep_check(oss.str());
+                csv_co::csvsuite::str_symbols_deep_check(oss.str());
             } catch (std::exception &) {
                 throw std::runtime_error("The current global locale contender is incompatible with the string length detection feature. Use -G=C for safe case.");
             }
         } catch (...) {
             std::cerr << "Locale: " << std::quoted(loc_name) << '\n';
-            throw std::runtime_error(::csvkit::cli::bad_locale_message);
+            throw std::runtime_error(::csvsuite::cli::bad_locale_message);
         }
     }
 

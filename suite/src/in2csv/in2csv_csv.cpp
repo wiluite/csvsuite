@@ -5,7 +5,7 @@
 #include "common_time_point.h"
 #include "header_printer.h"
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace in2csv::detail::csv {
     namespace detail {

@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvkit_core_test.cpp
+/// \file   test/csvsuite_core_test.cpp
 /// \author wiluite
-/// \brief  Small csv kit's core functionality tests.
+/// \brief  Core functionality tests.
 
 //TODO: Add tests for oll of cli.h
 #define BOOST_UT_DISABLE_MODULE
@@ -13,8 +13,8 @@
 int main() {
     using namespace boost::ut;
     using namespace csv_co;
-    using namespace ::csvkit::cli;
-    using namespace ::csvkit::test_facilities;
+    using namespace ::csvsuite::cli;
+    using namespace ::csvsuite::test_facilities;
     using namespace vince_csv;
 
 #if defined (WIN32)
@@ -120,7 +120,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         std::vector<cell_string> v;
         std::vector<cell_string> v2{"\rnine"};
 
-        reader<::csvkit::cli::trim_policy::crtrim> r("\rnine\r\n");
+        reader<::csvsuite::cli::trim_policy::crtrim> r("\rnine\r\n");
 
         r.run_spans<1>([&](auto &s) {
             v.emplace_back(s);
@@ -134,7 +134,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         std::vector<cell_string> v;
         std::vector<cell_string> v2{"nine"};
 
-        reader<::csvkit::cli::trim_policy::init_space_trim> r("   nine\r\n");
+        reader<::csvsuite::cli::trim_policy::init_space_trim> r("   nine\r\n");
 
         r.run_spans<1>([&](auto &s) {
             v.emplace_back(s);
@@ -160,10 +160,10 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         // reader<>::typed_span<quoted>::imbue(loc); <-- this is already imbued in the test above...
         reader<csv_co::trim_policy::alltrim>::typed_span<unquoted>::imbue_num_locale(loc);
         reader<csv_co::trim_policy::alltrim>::typed_span<quoted>::imbue_num_locale(loc);
-        reader<::csvkit::cli::trim_policy::crtrim>::typed_span<quoted>::imbue_num_locale(loc);
-        reader<::csvkit::cli::trim_policy::crtrim>::typed_span<unquoted>::imbue_num_locale(loc);
-        reader<::csvkit::cli::trim_policy::init_space_trim>::typed_span<quoted>::imbue_num_locale(loc);
-        reader<::csvkit::cli::trim_policy::init_space_trim>::typed_span<unquoted>::imbue_num_locale(loc);
+        reader<::csvsuite::cli::trim_policy::crtrim>::typed_span<quoted>::imbue_num_locale(loc);
+        reader<::csvsuite::cli::trim_policy::crtrim>::typed_span<unquoted>::imbue_num_locale(loc);
+        reader<::csvsuite::cli::trim_policy::init_space_trim>::typed_span<quoted>::imbue_num_locale(loc);
+        reader<::csvsuite::cli::trim_policy::init_space_trim>::typed_span<unquoted>::imbue_num_locale(loc);
 
         cell_string cs;
 
@@ -293,8 +293,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(reader<>::typed_span<unquoted>{reader<>::cell_span{cs}}.is_null());
             expect(reader<>::typed_span<unquoted>{reader<>::cell_span{cs}}.is_nil());
 
-            using cr_trim_pol = ::csvkit::cli::trim_policy::crtrim;
-            using init_space_trim_pol = ::csvkit::cli::trim_policy::init_space_trim;
+            using cr_trim_pol = ::csvsuite::cli::trim_policy::crtrim;
+            using init_space_trim_pol = ::csvsuite::cli::trim_policy::init_space_trim;
 
             cs = " N/a ";
             expect(reader<>::typed_span<quoted>{reader<>::cell_span{cs}}.is_null());
@@ -446,17 +446,17 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         csv_co::reader r("h1,h2,h3,h4\n");
         r.skip_rows(1); // no skip if eof
         expect(throws([&]() {
-            obtain_header_and_<::csvkit::cli::skip_header>(r, a);
+            obtain_header_and_<::csvsuite::cli::skip_header>(r, a);
         }));
         r.skip_rows(0); // no skip if 0.
         expect(nothrow([&]() {
-            auto h = obtain_header_and_<::csvkit::cli::no_skip_header>(r, a);
+            auto h = obtain_header_and_<::csvsuite::cli::no_skip_header>(r, a);
             expect(h[0] == "h1");
             expect(h[3] == "h4");
         }));
         a.no_header = true;
         expect(nothrow([&]() {
-            auto h = obtain_header_and_<::csvkit::cli::skip_header>(r, a);
+            auto h = obtain_header_and_<::csvsuite::cli::skip_header>(r, a);
             expect(h[0] == "a");
             expect(h[3] == "d");
         }));
@@ -533,61 +533,61 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             }
             cs = " \"-1.234.567,89 EUR  \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_DOUBLE);
-                expect(std::abs(csvkit_field.num() - -1234567.89) <= 0.000000001);
-                expect(std::round(csvkit_field.num()) == -1234568);
-                expect(csvkit_field.precision() == 2);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_DOUBLE);
+                expect(std::abs(span.num() - -1234567.89) <= 0.000000001);
+                expect(std::round(span.num()) == -1234568);
+                expect(span.precision() == 2);
             }
             // TODO: fix it
 #if 0
             cs = " \"-1.234.567,89 $  \"";
             {
-                reader_type::typed_span<unquoted> csvkit_field {reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_STRING);
+                reader_type::typed_span<unquoted> span {reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_STRING);
             }
 #endif
             cs = " \"-1.234.567,8 EUR  \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_STRING);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_STRING);
             }
             cs = " \"-1.234.5678 EUR  \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_STRING);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_STRING);
             }
 
             cs = " \"-1.234.555   \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_INT32);
-                expect(csvkit_field.num() == -1234555);
-                expect(csvkit_field.precision() == 0);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_INT32);
+                expect(span.num() == -1234555);
+                expect(span.precision() == 0);
             }
             cs = " \"-1.234.555,01 €  \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_DOUBLE);
-                expect(std::abs(csvkit_field.num() - -1234555.01) < 0.000000001);
-                expect(csvkit_field.precision() == 2);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_DOUBLE);
+                expect(std::abs(span.num() - -1234555.01) < 0.000000001);
+                expect(span.precision() == 2);
             }
             cs = " \"-1.234.555,00 €  \"";
             {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_DOUBLE);
-                expect(csvkit_field.num() == -1234555.00);
-                expect(csvkit_field.precision() == 0);
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_DOUBLE);
+                expect(span.num() == -1234555.00);
+                expect(span.precision() == 0);
             }
             cs = " NAN"; {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_DOUBLE);
-                expect(std::isnan(csvkit_field.num()));
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_DOUBLE);
+                expect(std::isnan(span.num()));
             }
             cs = " -infinity"; {
-                reader_type::typed_span <unquoted> csvkit_field{reader_type::cell_span{cs.begin(), cs.end()}};
-                expect(static_cast<DataType>(csvkit_field.type()) == DataType::CSV_DOUBLE);
-                expect(std::isinf(csvkit_field.num()));
+                reader_type::typed_span <unquoted> span{reader_type::cell_span{cs.begin(), cs.end()}};
+                expect(static_cast<DataType>(span.type()) == DataType::CSV_DOUBLE);
+                expect(std::isinf(span.num()));
             }
         };
     }
@@ -609,9 +609,9 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect (types[0] == column_type::text_t or types[0] == column_type::date_t);
             if (types[0] == column_type::date_t) {
                 r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                    notrimming_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
+                    notrimming_reader_type::typed_span<csv_co::unquoted> elem {e};
                     // please, smile ;o)
-                    expect(date_s(csvkitcell) == "0024-02-01" or date_s(csvkitcell) == "1924-02-01");
+                    expect(date_s(elem) == "0024-02-01" or date_s(elem) == "1924-02-01");
                 }});
             }
         }
@@ -641,8 +641,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types.size() == 1);
             expect (types[0] == column_type::date_t);
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                notrimming_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                auto const date_string = date_s(csvkitcell); 
+                notrimming_reader_type::typed_span<csv_co::unquoted> elem {e};
+                auto const date_string = date_s(elem);
                 expect(date_string.find("2039-04-14") != std::string::npos);                
             }});
         }
@@ -658,9 +658,9 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect (types[0] == column_type::date_t);
 
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                detect_date_and_datetime_types_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
+                detect_date_and_datetime_types_reader_type::typed_span<csv_co::unquoted> elem {e};
                 // please smile again : 1924-02-01 may be at linux
-                expect(date_s(csvkitcell) == "2024-02-01" or date_s(csvkitcell) == "1924-02-01");
+                expect(date_s(elem) == "2024-02-01" or date_s(elem) == "1924-02-01");
             }});
 #endif
         }
@@ -677,8 +677,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types.size() == 1);
             expect (types[0] == column_type::datetime_t);
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                notrimming_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                expect(datetime_s(csvkitcell).find("08:30:31") != std::string::npos);
+                notrimming_reader_type::typed_span<csv_co::unquoted> elem {e};
+                expect(datetime_s(elem).find("08:30:31") != std::string::npos);
             }});
         }
     };
@@ -690,7 +690,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         struct args : common_args, type_aware_args {} a;
 
         {
-            expect(a.date_lib_parser == true);
+            expect(a.date_lib_parser);
             a.datetime_fmt = R"(%d/%m/%EY %H:%M:%S)";
             a.date_fmt = R"(%d/%m/%Y)"; // We really can use %Y against 2-digit year.
             another_reader_type r("a\n01/02/24\n");
@@ -698,8 +698,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types.size() == 1);
             expect (types[0] == column_type::date_t);            
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                another_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                expect(date_s(csvkitcell) == "0024-02-01");                
+                another_reader_type::typed_span<csv_co::unquoted> elem {e};
+                expect(date_s(elem) == "0024-02-01");
             }});
         }
         {   // same date format and 4-digit year
@@ -721,8 +721,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types.size() == 1);
             expect (types[0] == column_type::date_t);
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                another_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                auto const date_string = date_s(csvkitcell); 
+                another_reader_type::typed_span<csv_co::unquoted> elem {e};
+                auto const date_string = date_s(elem);
                 expect(date_string.find("2039-04-14") != std::string::npos);                
             }});
         }
@@ -735,8 +735,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect (types[0] == column_type::date_t);
 
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                yet_one_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                auto const date_string = date_s(csvkitcell); 
+                yet_one_reader_type::typed_span<csv_co::unquoted> elem {e};
+                auto const date_string = date_s(elem);
                 expect(date_string == "2024-02-01");  
             }});
         }
@@ -753,8 +753,8 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types.size() == 1);
             expect (types[0] == column_type::datetime_t);
             r.run_rows ([](auto){}, [&](auto & span) { for (auto & e : span) {
-                yet_one_reader_type::typed_span<csv_co::unquoted> csvkitcell {e};
-                expect(datetime_s(csvkitcell).find("20:30:31") != std::string::npos);
+                yet_one_reader_type::typed_span<csv_co::unquoted> elem {e};
+                expect(datetime_s(elem).find("20:30:31") != std::string::npos);
             }});
         }
 

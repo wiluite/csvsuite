@@ -17,7 +17,7 @@ int main() {
     cfg < override > = {.colors={.none="", .pass="", .fail=""}};
 #endif
     "changes character encoding"_test = [] () mutable {
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "test_latin1.csv"; maxfieldsize = max_unsigned_limit;} // TODO: Why does it requires max_unsigned_limit for test to pass?
             bool dry_run {false};
         } args;
@@ -26,9 +26,9 @@ int main() {
         // TODO: It should be done inside assertCleaned. -e latin1 is needed simply to parse and also to use transformation
         csvclean::clean(r, args);
         expect(nothrow([&](){
-            using namespace csvkit::cli;
+            using namespace csvsuite::cli;
             std::u8string u8str = u8"4,5,©";
-            csvkit::test_facilities::assertCleaned ("test_latin1", {"a,b,c","1,2,3", encoding::iconv("latin1", "utf-8", std::string(u8str.begin(), u8str.end()))}, {});
+            csvsuite::test_facilities::assertCleaned ("test_latin1", {"a,b,c", "1,2,3", encoding::iconv("latin1", "utf-8", std::string(u8str.begin(), u8str.end()))}, {});
         }));
     };
 

@@ -18,7 +18,7 @@ int main() {
 #endif
 
     "no header row"_test = [] () mutable {
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "no_header_row.csv"; }
             bool dry_run {false};
         } args;
@@ -26,7 +26,7 @@ int main() {
         notrimming_reader_type r (args.file);
         csvclean::clean(r, args);
         expect(nothrow([&](){
-            csvkit::test_facilities::assertCleaned ("no_header_row",{"1,2,3"},{});
+            csvsuite::test_facilities::assertCleaned ("no_header_row", {"1,2,3"}, {});
         }));
     };
 

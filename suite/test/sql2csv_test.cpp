@@ -169,7 +169,7 @@ int main() {
     };
 
     auto csvsql = [&](db_file & dbfile, char const * const csv_file) {
-        namespace tf = csvkit::test_facilities;
+        namespace tf = csvsuite::test_facilities;
         struct csvsql_specific_args {
             std::vector<std::string> files;
             std::string dialect;

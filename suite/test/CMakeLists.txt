@@ -12,9 +12,9 @@ else()
     endif()
 endif()
 
-add_executable(csvkit_core_test csvkit_core_test.cpp)
-target_link_libraries(csvkit_core_test libcppp-reiconv.static  -lpthread )
-add_test(csvkit_core_test csvkit_core_test)
+add_executable(csvsuite_core_test csvsuite_core_test.cpp)
+target_link_libraries(csvsuite_core_test libcppp-reiconv.static  -lpthread )
+add_test(csvsuite_core_test csvsuite_core_test)
 
 add_executable(encoding_test encoding_test.cpp)
 target_link_libraries(encoding_test libcppp-reiconv.static simdutf bz2_connector)

@@ -320,7 +320,7 @@ namespace ocilib_client_ns {
                     stmt.Execute(elem);
                 });
 
-                csvkit::cli::sql::rowset_query(con, args, q_array.back());
+                csvsuite::cli::sql::rowset_query(con, args, q_array.back());
             }
         }
     };

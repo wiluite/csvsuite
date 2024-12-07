@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace csvkit::test_facilities {
+namespace csvsuite::test_facilities {
     struct single_file_arg {
         std::filesystem::path file;
         bool check_integrity = {true};

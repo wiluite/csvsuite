@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvjson.cpp
+/// \file   utils/csvsuite/csvjson.cpp
 /// \author wiluite
 /// \brief  Convert a CSV file into JSON (or GeoJSON).
 
@@ -7,7 +7,7 @@
 #include <set>
 #include <iomanip>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvjson {
 

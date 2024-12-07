@@ -59,4 +59,4 @@ ENTRYPOINT service postgresql start && service mysql start && service firebird s
 
 # Inside the docker container, build and test:
 # cd src && mkdir build && cd build && cmake .. && make -j 4 all
-# cd utils/csvkit/test && ctest -j 8
+# cd suite/test && ctest -j 8

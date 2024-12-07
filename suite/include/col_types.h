@@ -1,11 +1,11 @@
 ///
-/// \file   utils/csvkit/include/col_types.h
+/// \file   utils/csvsuite/include/col_types.h
 /// \author wiluite
 /// \brief  Mostly , all possible column types supported.
 
 #pragma once
 
-namespace csvkit::cli {
+namespace csvsuite::cli {
     enum struct column_type {
         unknown_t,
         bool_t,

@@ -1,12 +1,12 @@
 ///
-/// \file   utils/csvkit/include/printer_concepts.h
+/// \file   utils/csvsuite/include/printer_concepts.h
 /// \author wiluite
 /// \brief  Concepts to distinquish how to print a generated csv.
 
 #ifndef CSV_CO_PRINTER_CONCEPTS_H
 #define CSV_CO_PRINTER_CONCEPTS_H
 
-namespace csvkit::cli {
+namespace csvsuite::cli {
     template <class T>
     concept CsvKitCellSpanTableConcept = requires (T t) {
         { ((*t.begin()).at(0)).operator csv_co::cell_string() };

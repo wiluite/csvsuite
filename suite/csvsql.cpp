@@ -16,7 +16,7 @@ using namespace ocilib;
 //  2. get rid of blanks calculations in typify() for csvsql  (--no-constraints mode)
 //  3. implement null_value (while printing results?) (see how this is done in original utility)
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvsql::detail {
     struct Args final : ARGS_positional_files {

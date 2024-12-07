@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvgrep.cpp
+/// \file   utils/csvsuite/csvgrep.cpp
 /// \author wiluite
 /// \brief  Search CSV files.
 
@@ -7,7 +7,7 @@
 #include <regex>
 #include <printer_concepts.h>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvgrep {
     struct Args final : ARGS_positional_1 {

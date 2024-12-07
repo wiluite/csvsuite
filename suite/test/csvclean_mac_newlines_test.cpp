@@ -4,7 +4,7 @@
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
-//TODO: rename this file to python csvkit test
+//TODO: rename this file to python csvsuite test
 #include "../csvclean.cpp"
 #include "common_args.h"
 
@@ -22,7 +22,7 @@ int main() {
         // native line-breaking.
 #if !defined (__APPLE__)
 
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "mac_newlines.csv"; }
             bool dry_run {false};
         } args;

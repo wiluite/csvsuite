@@ -18,7 +18,7 @@ namespace {
         can_be_number.push_back(1);
 
         std::ostringstream header_cell;
-        csvkit::cli::tune_format(header_cell, "%.16g");
+        csvsuite::cli::tune_format(header_cell, "%.16g");
 
         header_cell << number;
         get_header().push_back(header_cell.str());
@@ -64,7 +64,7 @@ namespace {
         std::vector<std::string> letter_names (length);
         unsigned i = 0;
         std::generate(letter_names.begin(), letter_names.end(), [&i] {
-            return csvkit::cli::letter_name(i++);
+            return csvsuite::cli::letter_name(i++);
         });
 
         return letter_names;
@@ -81,7 +81,7 @@ namespace {
     }
 
     void print_func (auto && elem, std::size_t col, auto && types_n_blanks, auto const & args, std::ostream & os) {
-        using namespace csvkit::cli;
+        using namespace csvsuite::cli;
         if (elem.is_null_value()) {
             os << "";
             return;
@@ -144,7 +144,7 @@ namespace {
     }
 
     void transform_csv(auto & args, std::ostringstream & from, std::ostream & to) {
-        using namespace csvkit::cli;
+        using namespace csvsuite::cli;
         args.skip_lines = 0;
         args.no_header = false;
         std::variant<std::monostate, notrimming_reader_type, skipinitspace_reader_type> variants;

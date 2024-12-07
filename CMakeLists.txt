@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.16.2 FATAL_ERROR)
 
-project(csv_co)
+project(csvsuite)
 
 if (CMAKE_SIZEOF_VOID_P EQUAL 4)
     message(FATAL_ERROR, "You must use a 64-bit environment")

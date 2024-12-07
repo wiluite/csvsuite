@@ -395,7 +395,7 @@ namespace soci_client_ns {
                     sql.commit();
                 });
 
-                csvkit::cli::sql::rowset_query(sql, args, q_array.back());
+                csvsuite::cli::sql::rowset_query(sql, args, q_array.back());
             }
         }
     };

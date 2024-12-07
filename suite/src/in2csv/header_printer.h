@@ -5,7 +5,7 @@ namespace {
     auto string_header(auto const & header) {
         std::vector<std::string> result(header.size());
         std::transform(header.cbegin(), header.cend(), result.begin(), [&](auto & elem) {
-            return csvkit::cli::optional_quote(elem);
+            return csvsuite::cli::optional_quote(elem);
         });
         return result;
     }

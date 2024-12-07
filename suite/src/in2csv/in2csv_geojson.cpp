@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace args_ns {
     extern bool no_inference;

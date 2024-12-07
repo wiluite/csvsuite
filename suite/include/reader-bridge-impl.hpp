@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/include/reader-bridge-impl.h
+/// \file   utils/csvsuite/include/reader-bridge-impl.h
 /// \author wiluite
 /// \brief  Definitions of the typed_span template methods.
 
@@ -14,7 +14,7 @@
 #include <codecvt>
 #include "../external/Alphabet-AB/UtfConv.c"
 
-namespace csv_co::csvkit {
+namespace csv_co::csvsuite {
     constexpr auto to_basic_string_32(auto && str) {
         return std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>().from_bytes(str);
     }
@@ -370,7 +370,7 @@ namespace csv_co {
     template<bool Unquoted>
     constexpr unsigned reader<T, Q, D, L, M, E>::typed_span<Unquoted>::unsafe_str_size_in_symbols() const {
         assert(static_cast<DataType>(type_) != DataType::UNKNOWN);
-        return csvkit::str_symbols(str());
+        return csvsuite::str_symbols(str());
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>

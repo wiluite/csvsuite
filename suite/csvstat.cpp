@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvstat.cpp
+/// \file   utils/csvsuite/csvstat.cpp
 /// \author wiluite
 /// \brief  Print descriptive statistics for each column in a CSV file.
 
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cli.h>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 using namespace csv_co;
 
 namespace csvstat {

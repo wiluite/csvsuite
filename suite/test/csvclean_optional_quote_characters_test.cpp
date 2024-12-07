@@ -17,7 +17,7 @@ int main() {
     cfg < override > = {.colors={.none="", .pass="", .fail=""}};
 #endif
     "optional quote characters"_test = [] () mutable {
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "optional_quote_characters.csv"; maxfieldsize = max_unsigned_limit; }
             bool dry_run {false};
         } args;
@@ -25,7 +25,7 @@ int main() {
         notrimming_reader_type r (args.file);
         csvclean::clean(r, args);
         expect(nothrow([&](){
-            csvkit::test_facilities::assertCleaned ("optional_quote_characters",{"a,b,c","1,2,3"},{});
+            csvsuite::test_facilities::assertCleaned ("optional_quote_characters", {"a,b,c", "1,2,3"}, {});
         }));
     };
 

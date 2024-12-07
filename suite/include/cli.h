@@ -1,11 +1,10 @@
 ///
-/// \file   utils/csvkit/include/cli.h
+/// \file   utils/csvsuite/include/cli.h
 /// \author wiluite
 /// \brief  Common small csv kit facilities.
 
-#ifndef CSV_CO_CLI_H
-#define CSV_CO_CLI_H
-//TODO: All piping between utils and text encoding application should be redone or finally implemented.
+#pragma once
+
 #include "col_types.h"
 #include "../external/argparse/argparse.hpp"
 #include "../external/transwarp/transwarp.h"
@@ -24,12 +23,12 @@
   #define isatty _isatty
 #endif
 
-namespace csvkit::cli {
+namespace csvsuite::cli {
     /// Returns zero-based index of a column by name or by order depending on the offset value 
     unsigned match_column_identifier (auto const & column_names, char const * c, auto column_offset);
 }
 
-namespace csvkit::cli::detail{
+namespace csvsuite::cli::detail{
     /// Strongly typed class template, borrowed from J Boccara
     template <typename T, typename Parameter>
     class NamedType {
@@ -134,7 +133,7 @@ namespace csvkit::cli::detail{
 
 } /// namespace
 
-namespace csvkit::cli {
+namespace csvsuite::cli {
 
     using namespace detail;
     constexpr const unsigned max_unsigned_limit = std::numeric_limits<unsigned>::max();
@@ -528,8 +527,8 @@ namespace csvkit::cli {
         using init_space_trim = trimming_init_space<init_space_chars, crchar>;
     }
 
-    using notrimming_reader_type = csv_co::reader<csvkit::cli::trim_policy::crtrim>;
-    using skipinitspace_reader_type = csv_co::reader<csvkit::cli::trim_policy::init_space_trim>;
+    using notrimming_reader_type = csv_co::reader<csvsuite::cli::trim_policy::crtrim>;
+    using skipinitspace_reader_type = csv_co::reader<csvsuite::cli::trim_policy::init_space_trim>;
 
     /// Recodes a csv source text endcoding to UTF-8, if needed 
     void recode_source(auto & reader, auto const & args) {
@@ -633,7 +632,7 @@ namespace csvkit::cli {
         template <typename T>
         void check_tmpl(T const & o) {
             if constexpr(std::is_same_v<T, std::string>)
-                throw_if_exceeds(csv_co::csvkit::str_symbols(o));
+                throw_if_exceeds(csv_co::csvsuite::str_symbols(o));
             else
                 throw_if_exceeds(o.str_size_in_symbols());
         }
@@ -1142,13 +1141,13 @@ namespace csvkit::cli {
         return ss.str();
     }
 
-    static auto datetime_s(auto const & elem) { // get string from csvkit cell span
+    static auto datetime_s(auto const & elem) { // get string from csvsuite cell span
         auto const tp = std::get<1>(elem.datetime());
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>); 
         return datetime_s(tp);
     }
 
-    static auto datetime_s_json(auto const & elem) { // get string from csvkit cell span
+    static auto datetime_s_json(auto const & elem) { // get string from csvsuite cell span
         auto const tp = std::get<1>(elem.datetime());
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>);
         return datetime_s_json(tp);
@@ -1342,4 +1341,3 @@ namespace csvkit::cli {
 #endif
 
 }
-#endif //CSV_CO_CLI_H

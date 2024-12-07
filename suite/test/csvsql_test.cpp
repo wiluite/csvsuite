@@ -25,7 +25,7 @@
 
 
 using namespace boost::ut;
-namespace tf = csvkit::test_facilities;
+namespace tf = csvsuite::test_facilities;
 
 class SQL2CSV {
 public:

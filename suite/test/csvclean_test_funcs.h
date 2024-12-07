@@ -16,7 +16,7 @@
 
 using namespace boost::ut;
 
-namespace csvkit::test_facilities {
+namespace csvsuite::test_facilities {
 
 static auto assertCleaned = [](std::string const & basename, std::vector<std::string> const & output_lines, std::vector<std::string> const & error_lines) {
     auto const output_file = basename + "_out.csv";

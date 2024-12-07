@@ -5,7 +5,7 @@
 #include <jsoncons_ext/csv/csv.hpp>
 #include "header_printer.h"
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace in2csv::detail::json {
 

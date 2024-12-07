@@ -33,7 +33,7 @@ expect(nothrow ([&] { csvstat::stat(r, args, "en_US"); }));     \
 
 int main() {
     using namespace boost::ut;
-    namespace tf = ::csvkit::test_facilities;
+    namespace tf = ::csvsuite::test_facilities;
 
 #if defined (WIN32)
     cfg < override > = {.colors={.none="", .pass="", .fail=""}};

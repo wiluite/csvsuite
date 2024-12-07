@@ -19,7 +19,7 @@ int main() {
     cfg < override > = {.colors={.none="", .pass="", .fail=""}};
 #endif
     "dry_run"_test = [] () mutable {
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "bad.csv"; }
             bool dry_run {true};
         } args;
@@ -45,7 +45,7 @@ int main() {
     };
 
     "max field size"_test = [&] () mutable {
-        struct Args : csvkit::test_facilities::single_file_arg, csvkit::test_facilities::common_args {
+        struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "test_field_size_limit.csv";}
             bool dry_run {false};
         } args;

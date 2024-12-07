@@ -6,7 +6,7 @@
 #include "common_time_point.h"
 #include "common_excel.h"
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace in2csv::detail::xlsx {
 

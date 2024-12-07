@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvcut.cpp
+/// \file   utils/csvsuite/csvcut.cpp
 /// \author wiluite
 /// \brief  Filter and truncate a CSV source.
 
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <deque>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvcut {
 

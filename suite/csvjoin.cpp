@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvjoin.cpp
+/// \file   utils/csvsuite/csvjoin.cpp
 /// \author wiluite
 /// \brief  Execute a SQL-like join to merge CSV files.
 
@@ -8,7 +8,7 @@
 #include "type_name.h"
 #include <printer_concepts.h>
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvjoin {
     struct Args final : ARGS_positional_files {
@@ -188,8 +188,8 @@ namespace csvjoin::detail::typify {
 namespace csvjoin::detail {
 
     template<typename Reader, typename ElemType=std::string>
-    struct reader_fake : ::csvkit::cli::fixed_array_2d_replacement<ElemType> {
-        using parent_class = ::csvkit::cli::fixed_array_2d_replacement<ElemType>;
+    struct reader_fake : ::csvsuite::cli::fixed_array_2d_replacement<ElemType> {
+        using parent_class = ::csvsuite::cli::fixed_array_2d_replacement<ElemType>;
         using parent_class::table_impl;
         using reader_type = Reader;
         struct cell_span {
@@ -302,7 +302,7 @@ namespace csvjoin::detail {
         }
 
         // Pure single file in input
-        using ts_n_blanks_type = std::tuple<std::vector<::csvkit::cli::column_type>, std::vector<unsigned char>>;
+        using ts_n_blanks_type = std::tuple<std::vector<::csvsuite::cli::column_type>, std::vector<unsigned char>>;
         template<CsvReaderConcept R>
         void write(R && r, auto && types_n_blanks, auto && args)  {
             r.run_rows([&](auto & span) {
@@ -365,7 +365,7 @@ namespace csvjoin::detail {
                         static std::ostringstream ss;
                         ss.str({});
 
-                        // Surprisingly, csvkit represents a number from file without distortion:
+                        // Surprisingly, csvsuite represents a number from file without distortion:
                         // knowing, that it is a valid number in any locale, it simply removes
                         // the thousands separators and replaces the decimal point with its
                         // C-locale equivalent. Thus, the number actually written to the file
@@ -415,7 +415,7 @@ namespace csvjoin::detail {
 
                 auto quick_check = [&r, &args]() {
                     skip_lines(std::get<0>(r), args);
-                    ::csvkit::cli::quick_check(std::get<0>(r), args);
+                    ::csvsuite::cli::quick_check(std::get<0>(r), args);
                 };
 
                 //TODO: FIXME --- THIS SHOULD REALLY WORK (and works in GCC10.2, MSVC, CLANG 16)
@@ -586,7 +586,7 @@ namespace csvjoin::detail {
                 };
 
                 if (can_compare()) {
-                    using namespace ::csvkit::cli::compare::detail; 
+                    using namespace ::csvsuite::cli::compare::detail;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
@@ -667,7 +667,7 @@ namespace csvjoin::detail {
                 bool recalculate_types_blanks = false;
                 (void)recalculate_types_blanks; // it is really used (Clang bug!)
                 if (can_compare()) {
-                    using namespace ::csvkit::cli::compare::detail;
+                    using namespace ::csvsuite::cli::compare::detail;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
@@ -770,7 +770,7 @@ namespace csvjoin::detail {
 
                 bool recalculate_types_blanks = false;
                 if (can_compare()) {
-                    using namespace ::csvkit::cli::compare::detail; 
+                    using namespace ::csvsuite::cli::compare::detail;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}

@@ -11,7 +11,7 @@
 #include "include/in2csv/in2csv_json.h"
 #include "include/in2csv/in2csv_ndjson.h"
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace in2csv::detail {
 

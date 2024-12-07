@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/include/enconding.h
+/// \file   utils/csvsuite/include/enconding.h
 /// \author wiluite
 /// \brief  Means for converting text from one encoding to another.
 
@@ -12,7 +12,7 @@
 using namespace simdutf;
 using namespace cppp::base::reiconv;
 
-namespace csvkit::cli::encoding::detail {
+namespace csvsuite::cli::encoding::detail {
     static std::string& acp_string() {
         static std::string acp;
         return acp;
@@ -61,9 +61,9 @@ namespace csvkit::cli::encoding::detail {
     assert(l == to_words);                                                                          \
     return new_rep;
 
-namespace csvkit::cli::encoding {
+namespace csvsuite::cli::encoding {
     auto is_source_utf8(auto & source) {
-        // NOTE: ISO-2022-JP detected as UTF-8 (otherwise impossible (python csvkit as well))
+        // NOTE: ISO-2022-JP detected as UTF-8 (otherwise impossible (python csvsuite as well))
         return validate_utf8_with_errors(source.data(), source.size());
     }
 

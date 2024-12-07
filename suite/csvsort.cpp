@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvkit/csvsort.cpp
+/// \file   utils/csvsuite/csvsort.cpp
 /// \author wiluite
 /// \brief  Sort CSV files.
 
@@ -8,7 +8,7 @@
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
 
-using namespace ::csvkit::cli;
+using namespace ::csvsuite::cli;
 
 namespace csvsort {
 
@@ -122,7 +122,7 @@ namespace csvsort {
                             static std::ostringstream ss;
                             ss.str({});
 
-                            // Surprisingly, csvkit represents a number from file without distortion:
+                            // Surprisingly, csvsuite represents a number from file without distortion:
                             // knowing, that it is a valid number in a locale, it simply removes
                             // the thousands separators and replaces the decimal point with its
                             // C-locale equivalent. Thus, the number actually written to the file
@@ -273,7 +273,7 @@ namespace csvsort {
             // It is sufficient to have csv_co::quoted cell_spans in it, because comparison is quite sophisticated and takes it into account
             compromise_table_MxN table(reader, args);
 
-            auto cfa = ::csvkit::cli::compare::detail::obtain_compare_functionality<std::decay_t<decltype(table[0][0])>>(ids, types_blanks, args);
+            auto cfa = ::csvsuite::cli::compare::detail::obtain_compare_functionality<std::decay_t<decltype(table[0][0])>>(ids, types_blanks, args);
             if (args.r) {
                 if (args.parallel_sort)
                     std::sort(poolstl::par, table.begin(), table.end(), sort_comparator(std::move(cfa), std::greater<>()));

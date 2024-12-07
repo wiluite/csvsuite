@@ -11,7 +11,7 @@
 int main() {
     using namespace boost::ut;
     using namespace csv_co;
-    using namespace ::csvkit::cli::encoding;
+    using namespace ::csvsuite::cli::encoding;
 
 #if defined (WIN32)
     cfg<override> ={.colors={.none="", .pass="", .fail=""}};
