@@ -71,6 +71,18 @@ int main() {
         }));
     };
 
+    "fixed too many skip lines"_test = [&] {
+        struct Args : in2csv_args {
+            Args() { file = "testfixed_skip_lines"; schema = "testfixed_schema.csv"; skip_lines = 30; }
+        } args;
+        try {
+            CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
+            assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+        } catch(std::exception const & ex) {
+            expect(std::string(ex.what()) == "ValueError: Too many lines to skip.");
+        }
+    };
+
     "fixed no inference"_test = [&] {
         struct Args : in2csv_args {
             Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
@@ -84,41 +96,78 @@ int main() {
         }));
     };
 
-    "next test"_test = [&] {
+    "schema decoder bad cases"_test = [&] {
         struct Args : in2csv_args {
             Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
         } args;
 
         try {
             test_reader_r1 r1("foo column\n 0");
-            in2csv::detail::fixed::schema_decoder dec(r1, args);
+            in2csv::detail::fixed::schema_decoder dec(r1);
         } catch (std::exception const & e) {
             expect(std::string(e.what()) == R"(ValueError: A column named "column" must exist in the schema file.)");
         }
         try {
             test_reader_r1 r1("column\n 0");
-            in2csv::detail::fixed::schema_decoder dec(r1, args);
+            in2csv::detail::fixed::schema_decoder dec(r1);
         } catch (std::exception const & e) {
             expect(std::string(e.what()) == R"(ValueError: A column named "start" must exist in the schema file.)");
         }
         try {
             test_reader_r1 r1("start,column\n 1, name");
-            in2csv::detail::fixed::schema_decoder dec(r1, args);
+            in2csv::detail::fixed::schema_decoder dec(r1);
         } catch (std::exception const & e) {
             expect(std::string(e.what()) == R"(ValueError: A column named "length" must exist in the schema file.)");
         }
-        expect(nothrow([&] {
-            test_reader_r1 r1("length,start,column, another information\n 6, 0, name, ###");
-            in2csv::detail::fixed::schema_decoder dec(r1, args);
-        }));
-
         try {
             test_reader_r1 r1("length,start,column, another information\n bad_len, 0, name, ###");
-            in2csv::detail::fixed::schema_decoder dec(r1, args);
+            in2csv::detail::fixed::schema_decoder dec(r1);
         } catch (std::exception const & e) {
             expect(std::string(e.what()) == R"(A value of unsupported type ' bad_len' for length.)");
         }
+        try {
+            test_reader_r1 r1(" another information,length,start,column\n ###, 1,bad_start, name");
+            in2csv::detail::fixed::schema_decoder dec(r1);
+        } catch (std::exception const & e) {
+            expect(std::string(e.what()) == R"(A value of unsupported type 'bad_start' for start.)");
+        }
+    };
 
+    "zero-based schema decoder"_test = [&] {
+        expect(nothrow([&] {
+            test_reader_r1 r1(R"(length,start,column,comment
+ 1, 0,column_name,This is a comment
+ 5, 1,column_name2,This is another comment
+ 14,9,column_name3,yet another comment  )");
+            in2csv::detail::fixed::schema_decoder dec(r1);
+            expect(dec.names().size() == 3);
+            expect(dec.names()[0] == "column_name");
+            expect(dec.names()[1] == "column_name2");
+            expect(dec.names()[2] == "column_name3");
+            expect(dec.starts()[0] == 0);
+            expect(dec.starts()[1] == 1);
+            expect(dec.starts()[2] == 9);
+            expect(dec.lengths()[0] == 1);
+            expect(dec.lengths()[1] == 5);
+            expect(dec.lengths()[2] == 14);
+        }));
+    };
+
+    "one-based schema decoder"_test = [&] {
+        expect(nothrow([&] {
+            test_reader_r1 r1(R"(length,start,column
+ 5, 1,LABEL
+ 15, 6,LABEL2
+)");
+            in2csv::detail::fixed::schema_decoder dec(r1);
+            expect(dec.names().size() == 2);
+            expect(dec.names()[0] == "LABEL");
+            expect(dec.names()[1] == "LABEL2");
+            expect(dec.starts()[0] == 0);
+            expect(dec.starts()[1] == 5);
+            expect(dec.lengths()[0] == 5);
+            expect(dec.lengths()[1] == 15);
+        }));
     };
 
 }

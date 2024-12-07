@@ -16,7 +16,7 @@ namespace in2csv::detail::fixed {
         skip_lines(reader, args); // args uses neither "file" nor "schema", so that's fine.
         quick_check(reader, args); // args uses neither "file" nor "schema", so that's fine again.
 
-        schema_decoder s_dec(reader, args);
+        schema_decoder s_dec(reader);
 
         auto bytes_from = [](std::string const & str, unsigned byte_offset, unsigned symbols) {
             unsigned bytes = 0;
@@ -42,7 +42,7 @@ namespace in2csv::detail::fixed {
             if (args.linenumbers)
                 std::cout << "line_number,";
             for (auto const & e : s_dec.names())
-                std::cout << std::get<0>(e) << (std::addressof(s_dec.names().back()) != std::addressof(e) ? "," : "");
+                std::cout << e << (std::addressof(s_dec.names().back()) != std::addressof(e) ? "," : "");
             std::cout << '\n';
         };
         print_header();
@@ -51,7 +51,8 @@ namespace in2csv::detail::fixed {
             std::string ln;
             // TODO: process getline result below.
             while (skip_lns--)
-                std::getline(istrm, ln, '\n');
+                if (!std::getline(istrm, ln, '\n'))
+                    throw std::runtime_error("ValueError: Too many lines to skip.");
 
             // ln.clear() to calm down the clang analyzer about we are using ln after moving it right underneath.
             for (;  ln.clear(), std::getline(istrm, ln, '\n');) {
@@ -62,8 +63,8 @@ namespace in2csv::detail::fixed {
                 // TODO: fixme. If recode_source() is called not once - be sure to reconsider encodings names again.
                 auto _ = recode_source(std::move(ln), args);
                 for (auto i = 0u; i < s_dec.names().size(); i++) {
-                    auto b = bytes_from(_, 0, std::get<1>(s_dec.starts()[i]));
-                    auto e = bytes_from(_, b, std::get<1>(s_dec.lengths()[i]));
+                    auto b = bytes_from(_, 0, s_dec.starts()[i]);
+                    auto e = bytes_from(_, b, s_dec.lengths()[i]);
                     auto piece = std::string(_.begin() + b, _.begin() + e + b);
                     piece.erase(0, piece.find_first_not_of(' '));
                     piece.erase(piece.find_last_not_of(' ') + 1);
@@ -71,7 +72,6 @@ namespace in2csv::detail::fixed {
                 }
                 std::cout << '\n';
             }
-
         };
 
         if (args.file.empty() or args.file == "_") {

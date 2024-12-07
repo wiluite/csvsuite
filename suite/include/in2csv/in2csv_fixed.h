@@ -28,9 +28,9 @@ namespace in2csv::detail {
 
         static std::shared_ptr<impl> pimpl;
 
-        template <typename RT, typename AT>
+        template <typename RT>
         struct schema_decoder {
-            schema_decoder(RT & reader, AT & args) : reader(reader), args(args) {
+            explicit schema_decoder(RT & reader) : reader(reader) {
                 static std::locale loc("C");
                 elem_type::imbue_num_locale(loc);
                 reader.run_rows(
@@ -76,14 +76,37 @@ namespace in2csv::detail {
                 assert(names_.size() == starts_.size());
                 assert(names_.size() == lengths_.size());
 #endif
+                auto & nms = all["column"];
+                for (auto & nm : nms)
+                    names_.push_back(std::get<0>(nm));
+
+                auto & strts = all["start"];
+                for (auto & e : strts)
+                    starts_.push_back(std::get<1>(e));
+
+                if (!starts_.empty() and starts_[0] == 1)
+                    for (auto & e : starts_)
+                        --e;
+
+                auto & lngths = all["length"];
+                for (auto & e : lngths)
+                    lengths_.push_back(std::get<1>(e));
+
             }
-            auto & names() {return all["column"]; }
-            auto & starts() {return all["start"]; }
-            auto & lengths() {return all["length"]; }
+            auto & names() const {
+                return names_;
+            }
+            auto & starts() const {
+                return starts_;
+            }
+            auto & lengths() const {
+                return lengths_;
+            }
         private:
             RT & reader;
-            AT & args;
-
+            std::vector<std::string> names_;
+            std::vector<unsigned> starts_;
+            std::vector<unsigned> lengths_;
             using elem_type = typename std::decay_t<RT>::template typed_span<csv_co::unquoted>;
             std::vector<std::string> columns;
             std::unordered_map<std::string, std::vector<std::variant<std::string, unsigned>>> all;
