@@ -323,18 +323,16 @@ namespace vince_csv {
                         else
                             integral_part = (integral_part * 10) + digit;
                     }
-                    else {
+                    else
                         return DataType::CSV_STRING;
-                    }
                 }
             }
 
             // No non-numeric/non-whitespace characters found
             if (has_digit) {
                 long double number = integral_part + decimal_part;
-                if (out) {
+                if (out)
                     *out = neg_allowed ? number : -number;
-                }
 
                 return prob_float ? DataType::CSV_DOUBLE : _determine_integral_type(number);
             }
@@ -349,34 +347,22 @@ namespace vince_csv {
             std::size_t start_pos = 0;
             auto const finish_pos = in.size();
 
-            bool neg_allowed = true, dot_allowed = true, has_digit = false, prob_float = false;
+            bool neg_allowed = true, has_digit = false;
 
-            unsigned places_after_decimal = 0;
             long double integral_part = 0, decimal_part = 0;
 
             for (size_t i = start_pos, ilen = finish_pos; i < ilen; i++) {
                 const char& current = in[i];
 
                 switch (current) {
-
                     case ' ':
                         return DataType::CSV_STRING;
 
                     case '-':
-                        if (!neg_allowed) {
-                            // Ex: '510-123-4567'
+                        if (!neg_allowed)
                             return DataType::CSV_STRING;
-                        }
 
                         neg_allowed = false;
-                        break;
-                    case '.':
-                        if (!dot_allowed) {
-                            return DataType::CSV_STRING;
-                        }
-
-                        dot_allowed = false;
-                        prob_float = true;
                         break;
                     case 'e':
                     case 'E':
@@ -387,25 +373,20 @@ namespace vince_csv {
                             // Process digit
                             has_digit = true;
                             // Build current number
-                            if (prob_float)
-                                decimal_part += digit / pow10(++places_after_decimal);
-                            else
-                                integral_part = (integral_part * 10) + digit;
+                            integral_part = (integral_part * 10) + digit;
                         }
-                        else {
+                        else
                             return DataType::CSV_STRING;
-                        }
                 }
             }
 
             // No non-numeric/non-whitespace characters found
             if (has_digit) {
                 long double number = integral_part + decimal_part;
-                if (out) {
+                if (out)
                     *out = neg_allowed ? number : -number;
-                }
 
-                return prob_float ? DataType::CSV_DOUBLE : _determine_integral_type(number);
+                return _determine_integral_type(number);
             }
 
             // Just whitespace
