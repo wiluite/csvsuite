@@ -1,6 +1,8 @@
 /** @file
  *  @brief Implements data type parsing functionality
  */
+//(c) Vince
+//(c) wiluite 2024
 
 #pragma once
 
@@ -90,6 +92,7 @@ namespace vince_csv {
         template<> inline DataType type_num<std::string>() { return DataType::CSV_STRING; }
 
         constexpr DataType data_type(std::string_view in, long double* /*const*/ out = nullptr);
+        constexpr DataType data_type_for_exponent(std::string_view in, long double* /*const*/ out = nullptr);
 #endif
 
         /** Given a byte size, return the largest number than can be stored in
@@ -191,7 +194,7 @@ namespace vince_csv {
             const long double& coeff,
             long double * const out) {
             long double exponent = 0;
-            auto result = data_type(exponential_part, &exponent);
+            auto result = data_type_for_exponent(exponential_part, &exponent);
 
             // Exponents in scientific notation should not be decimal numbers
             if (result >= DataType::CSV_INT8 && result < DataType::CSV_DOUBLE) {
@@ -254,37 +257,25 @@ namespace vince_csv {
             if ((start_pos = in.find_first_not_of(' ')) == std::string::npos)
                 return DataType::CSV_NULL;
 
-            bool ws_allowed = true,
-                neg_allowed = true,
+            bool neg_allowed = true,
                 dot_allowed = true,
-                digit_allowed = true,
                 has_digit = false,
                 prob_float = false;
 
             unsigned places_after_decimal = 0;
             long double integral_part = 0, decimal_part = 0;
             start_pos = in.find_first_not_of('+', start_pos);
-            if (start_pos == std::string::npos) {
-                // there we only +++
+            if (start_pos == std::string::npos) //there we only ++...
                 return DataType::CSV_STRING;
-            }
 
-            for (size_t i = start_pos, ilen = in.size(); i < ilen; i++) {
+            auto const finish_pos = in.find_last_not_of(" \t\r");
+            if (finish_pos == std::string::npos)
+                return DataType::CSV_STRING;
+
+            for (size_t i = start_pos, ilen = finish_pos + 1; i < ilen; i++) {
                 const char& current = in[i];
 
                 switch (current) {
-                case ' ':
-                    if (!ws_allowed) {
-                        if (isdigit(in[i - 1])) {
-                            digit_allowed = false;
-                            ws_allowed = true;
-                        }
-                        else {
-                            // Ex: '510 123 4567'
-                            return DataType::CSV_STRING;
-                        }
-                    }
-                    break;
                 case '-':
                     if (!neg_allowed) {
                         // Ex: '510-123-4567'
@@ -306,33 +297,26 @@ namespace vince_csv {
                     // Process scientific notation
                     if (prob_float || (i && i + 1 < ilen && isdigit(in[i - 1]))) {
                         size_t exponent_start_idx = i + 1;
-                        prob_float = true;
 
                         // Strip out plus sign
-                        if (in[i + 1] == '+') {
-                            exponent_start_idx++;
+                        if (in[exponent_start_idx] == '+') {
+                            if (++exponent_start_idx >= ilen)
+                                return DataType::CSV_STRING;
                         }
-
                         return _process_potential_exponential(
-                            in.substr(exponent_start_idx),
+                            in.substr(exponent_start_idx, ilen - exponent_start_idx),
                             neg_allowed ? integral_part + decimal_part : -(integral_part + decimal_part),
                             out
                         );
                     }
 
                     return DataType::CSV_STRING;
-                    break;
+
                 default:
                     auto const digit = static_cast<short>(current - '0');
                     if (digit >= 0 && digit <= 9) {
                         // Process digit
                         has_digit = true;
-
-                        if (!digit_allowed)
-                            return DataType::CSV_STRING;
-                        else if (ws_allowed) // Ex: '510 456'
-                            ws_allowed = false;
-
                         // Build current number
                         if (prob_float)
                             decimal_part += digit / pow10(++places_after_decimal);
@@ -358,5 +342,75 @@ namespace vince_csv {
             // Just whitespace
             return DataType::CSV_NULL;
         }
+
+        constexpr
+        DataType data_type_for_exponent(std::string_view in, long double* const out) {
+            // Empty string --> NULL
+            std::size_t start_pos = 0;
+            auto const finish_pos = in.size();
+
+            bool neg_allowed = true, dot_allowed = true, has_digit = false, prob_float = false;
+
+            unsigned places_after_decimal = 0;
+            long double integral_part = 0, decimal_part = 0;
+
+            for (size_t i = start_pos, ilen = finish_pos; i < ilen; i++) {
+                const char& current = in[i];
+
+                switch (current) {
+
+                    case ' ':
+                        return DataType::CSV_STRING;
+
+                    case '-':
+                        if (!neg_allowed) {
+                            // Ex: '510-123-4567'
+                            return DataType::CSV_STRING;
+                        }
+
+                        neg_allowed = false;
+                        break;
+                    case '.':
+                        if (!dot_allowed) {
+                            return DataType::CSV_STRING;
+                        }
+
+                        dot_allowed = false;
+                        prob_float = true;
+                        break;
+                    case 'e':
+                    case 'E':
+                        return DataType::CSV_STRING;
+                    default:
+                        auto const digit = static_cast<short>(current - '0');
+                        if (digit >= 0 && digit <= 9) {
+                            // Process digit
+                            has_digit = true;
+                            // Build current number
+                            if (prob_float)
+                                decimal_part += digit / pow10(++places_after_decimal);
+                            else
+                                integral_part = (integral_part * 10) + digit;
+                        }
+                        else {
+                            return DataType::CSV_STRING;
+                        }
+                }
+            }
+
+            // No non-numeric/non-whitespace characters found
+            if (has_digit) {
+                long double number = integral_part + decimal_part;
+                if (out) {
+                    *out = neg_allowed ? number : -number;
+                }
+
+                return prob_float ? DataType::CSV_DOUBLE : _determine_integral_type(number);
+            }
+
+            // Just whitespace
+            return DataType::CSV_NULL;
+        }
+
     }
 }

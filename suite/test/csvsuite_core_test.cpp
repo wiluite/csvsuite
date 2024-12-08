@@ -264,13 +264,15 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                     expect(float_span.num() >= 1234567.8 and float_span.num() < 1234567.9);
                     expect(float_span.precision() == 1);
                 }
-                cs = " \"+1e-  1  \"  ";  //strange string rep. Considered as number.
+                cs = " \"+1e- 1  \"  "; // not number
                 {
-                    reader<>::typed_span<unquoted> float_span{reader<>::cell_span{cs}};
-                    expect(float_span.is_num());
-                    expect(float_span.is_float());
-                    expect(float_span.num() >= 0.1 and float_span.num() < 0.2);
-                    expect(float_span.precision() == 1);
+                    reader<>::typed_span<unquoted> non_float_span{reader<>::cell_span{cs}};
+                    expect(non_float_span.is_str());
+                }
+                cs = " \"+1e -1\"";  // not number
+                {
+                    reader<>::typed_span<unquoted> non_float_span{reader<>::cell_span{cs}};
+                    expect(non_float_span.is_str());
                 }
             }
 
