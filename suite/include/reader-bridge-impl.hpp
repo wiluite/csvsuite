@@ -5,14 +5,20 @@
 
 #pragma once
 
+#define USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS
+
 #include <csv_co/reader.hpp>
 #include <../external/vince-csv-parser/data_type.h>
 #include <unordered_set>
-#include <boost/multiprecision/cpp_dec_float.hpp>
 #include <deque>
 #include "../external/date/date.h"
 #include <codecvt>
 #include "../external/Alphabet-AB/UtfConv.c"
+
+#if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
+    #include <boost/multiprecision/cpp_dec_float.hpp>
+#endif
+
 
 namespace csv_co::csvsuite {
     constexpr auto to_basic_string_32(auto && str) {
@@ -68,7 +74,6 @@ namespace csv_co {
                     fun_impl = [&] (std::string & rep) -> unsigned char {
                         rep.erase(0, rep.find_first_not_of(' '));
                         rep.erase(rep.find_last_not_of(" \t\r") + 1);
-                        std::erase(rep, ' ');
                         boost::multiprecision::cpp_dec_float_50 val(abs(boost::multiprecision::cpp_dec_float_50(rep)));
                         if (boost::multiprecision::trunc(val) == val )
                             return 0;
