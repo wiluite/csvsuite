@@ -5,7 +5,7 @@
 
 #pragma once
 
-#define USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS
+//#define USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS
 
 #include <csv_co/reader.hpp>
 #include <../external/vince-csv-parser/data_type.h>
@@ -18,7 +18,6 @@
 #if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
     #include <boost/multiprecision/cpp_dec_float.hpp>
 #endif
-
 
 namespace csv_co::csvsuite {
     constexpr auto to_basic_string_32(auto && str) {
@@ -63,6 +62,7 @@ namespace csv_co {
         return true;
     }
 
+#if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     inline unsigned char reader<T, Q, D, L, M, E>::typed_span<Unquoted>::get_precision(std::string & rep) const {
@@ -93,6 +93,31 @@ namespace csv_co {
 
         return calculator.calc(rep);
     }
+#else
+    template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
+    template<bool Unquoted>
+    inline unsigned char reader<T, Q, D, L, M, E>::typed_span<Unquoted>::get_precision() const {
+        // https://stackoverflow.com/a/3019027
+#if defined(_MSC_VER)
+        static_assert(std::numeric_limits<decltype(this->value)>::digits10 == 15);
+        static auto max_digits = std::numeric_limits<long double>::digits10 - 1;
+#else
+        static_assert(std::numeric_limits<decltype(this->value)>::digits10 == 18);
+        static auto max_digits = 14;
+#endif
+        auto int_part = std::trunc(std::abs(double(this->value)));
+        unsigned long long magnitude = (int_part == 0) ? 1 : static_cast<unsigned long long>(std::trunc(std::log10(int_part)) + 1);
+        if (magnitude >= (unsigned)max_digits)
+            return 0;
+        auto frac_part = std::abs(double(this->value)) - int_part;
+        auto multiplier = pow(10.0, static_cast<double>(max_digits) - static_cast<double>(magnitude));
+        unsigned long long frac_digits = multiplier + std::trunc(multiplier * frac_part + 0.5);
+        while (frac_digits % 10 == 0)
+            frac_digits /= 10;
+        auto scale = static_cast<int>(std::log10(frac_digits));
+        return scale;
+    }
+#endif
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
@@ -100,7 +125,6 @@ namespace csv_co {
         // if no money thing is present in this locale, just exit;
         if (std::use_facet<std::moneypunct<char>>(num_locale()).curr_symbol().empty())
             return false;
-//#if defined(_MSC_VER)
         auto const fix_possibly_wrong_money_locale = [&] {
             unsigned char min_cnt = 0;
             return std::any_of(s.cbegin(), s.cend(), [&min_cnt](char x) {
@@ -110,7 +134,6 @@ namespace csv_co {
         };
         if (fix_possibly_wrong_money_locale())
             return false;
-//#endif
         return true;
     }
 
@@ -129,14 +152,22 @@ namespace csv_co {
             std::from_chars_result r{};
             r = std::from_chars(double_rep.data(), double_rep.data()+double_rep.size(), value, std::chars_format::general);
             if (static_cast<int>(r.ec) == 0) {
+#if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
                 prec = get_precision(double_rep);
+#else
+                prec = !no_maxprec_ ? get_precision() : 0;
+#endif
                 type_ = static_cast<signed char>(DataType::CSV_DOUBLE);
             }
 #else
             std::stringstream in2(double_rep);
             in2.imbue(std::locale("C"));
             in2 >> value;
+#if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
             prec = get_precision(double_rep);
+#else
+            prec = !no_maxprec_ ? get_precision() : 0;
+#endif
             type_ = static_cast<signed char>(DataType::CSV_DOUBLE);
 #endif
         }
@@ -188,7 +219,11 @@ namespace csv_co {
 
         auto detect_num_type = [&] {
             if ((type_ = static_cast<signed char>(data_type(s_, &value))) > static_cast<signed char>(DataType::CSV_STRING)) {
-                prec = (static_cast<DataType>(type_) == DataType::CSV_DOUBLE) ? get_precision(s_) : 0;
+#if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
+                prec = static_cast<DataType>(type_) == DataType::CSV_DOUBLE and !no_maxprec_ ? get_precision(s_) : 0;
+#else
+                prec = static_cast<DataType>(type_) == DataType::CSV_DOUBLE and !no_maxprec_ ? get_precision() : 0;
+#endif
                 postprocess_num();
                 return true;
             }
