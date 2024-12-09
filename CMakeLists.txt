@@ -17,6 +17,8 @@ include(CMakeLists.csv_co.obligate.dependency.in)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/config.h)
 
+add_definitions(-DCSVSUITE)
+
 message(${CMAKE_SYSTEM_PROCESSOR})
 option (_SANITY_CHECK "Build all with Clang sanitizers" OFF)
 option (_STDLIB_LIBCPP "Build all with Clang STL (if Clang)" OFF)
