@@ -6,7 +6,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvjson.cpp"
+#include "../csvJson.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include "rapidjson/document.h"

@@ -330,7 +330,7 @@ namespace csvlook {
                         oss_ << "| ";
                         line_numbers_print(i);
                         oss_ << "... |\n";
-                    }  
+                    }
                     if (rows > args.max_rows) {
                         oss_ << "| ";
                         line_numbers_dotted_print();

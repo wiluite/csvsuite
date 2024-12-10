@@ -231,6 +231,16 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_latin1.csv
         ${CMAKE_CURRENT_BINARY_DIR}/test_latin1.csv)
+add_custom_command(
+        TARGET csvstat_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/dummy.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/dummy.csv)
+add_custom_command(
+        TARGET csvstat_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/no_header_row.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/no_header_row.csv)
 
 target_link_libraries(csvstat_test libcppp-reiconv.static simdutf bz2_connector -lpthread)
 add_test(csvstat_test csvstat_test)

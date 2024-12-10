@@ -5,7 +5,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvclean.cpp"
+#include "../csvClean.cpp"
 #include "csvclean_test_funcs.h"
 #include "common_args.h"
 

@@ -5,7 +5,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvclean.cpp"
+#include "../csvClean.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include "test_reader_macros.h"

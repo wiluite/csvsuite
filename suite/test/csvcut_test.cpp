@@ -6,7 +6,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvcut.cpp"
+#include "../csvCut.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include "test_reader_macros.h"

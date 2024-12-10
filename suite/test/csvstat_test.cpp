@@ -6,7 +6,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvstat.cpp"
+#include "../csvStat.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include <regex>

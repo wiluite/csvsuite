@@ -71,7 +71,7 @@ namespace csvsort {
             }
         }
 
-        // Used by write(Table&& table, auto && types_n_blanks, auto && args) above. 
+        // Used by write(Table&& table, auto && types_n_blanks, auto && args) above.
         template<typename Container/*, typename CellString = cell_string*/>
         void write(Container const & row, auto const & types_blanks, auto const & args) requires CsvKitCellSpanRowConcept<Container> {
             // typify and compromise_table_MxN filler can work with different cells (quoted and unquoted in same session)
@@ -87,7 +87,7 @@ namespace csvsort {
             auto & blanks = std::get<1>(types_blanks);
 #endif
             auto print_func_impl = [&] (auto && elem_str) {
-                os << elem_str; 
+                os << elem_str;
             };
 
             auto print_func = [&](auto && elem, std::size_t col) {
@@ -163,7 +163,7 @@ namespace csvsort {
             unsigned col = 0;
             std::for_each(row.begin(), row.end() - 1, [&](auto & elem) {
                 print_func(elem, col++);
-                os << ',';   
+                os << ',';
             });
             print_func(row.back(), col);
         }
@@ -216,7 +216,7 @@ namespace csvsort {
 
             reader.run_rows([&] (auto & row_span) {
                 unsigned i = 0;
-                for (auto & elem : row_span)                                        
+                for (auto & elem : row_span)
                     impl_ref[row][i++] = elem;
                 row++;
             });

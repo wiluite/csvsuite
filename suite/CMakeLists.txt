@@ -67,56 +67,56 @@ if (NOT _SANITY_CHECK)
         set(ORACLE_INCLUDE_DIR "")
     endif()
 
-    add_executable(csvsql csvsql.cpp)
-    target_include_directories(csvsql
+    add_executable(csvSql csvSql.cpp)
+    target_include_directories(csvSql
         PRIVATE
         ${CMAKE_BINARY_DIR}/external/soci/include ${SQLITE3_INCLUDE_DIR} ${POSTGRESQL_INCLUDE_DIR} ${MARIADB_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${FIREBIRD_INCLUDE_DIR} ${ORACLE_INCLUDE_DIR} external/ocilib/include
     )
-    target_link_libraries(csvsql PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
+    target_link_libraries(csvSql PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
     if (UNIX)
     else()
         if (MSVC)
             add_custom_command(
-                    TARGET csvsql POST_BUILD
+                    TARGET csvSql POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/soci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/soci_core_4_1.dll)
             add_custom_command(
-                    TARGET csvsql POST_BUILD
+                    TARGET csvSql POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_CURRENT_BINARY_DIR}/external/ocilib/ociliba.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/ociliba.dll)
         else()
             add_custom_command(
-                    TARGET csvsql POST_BUILD
+                    TARGET csvSql POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/libsoci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/libsoci_core_4_1.dll)
             add_custom_command(
-                    TARGET csvsql POST_BUILD
+                    TARGET csvSql POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_CURRENT_BINARY_DIR}/external/ocilib/libociliba.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/libociliba.dll)
         endif()
     endif()
 
-    add_executable(sql2csv sql2csv.cpp)
-    target_include_directories(sql2csv
+    add_executable(Sql2csv Sql2csv.cpp)
+    target_include_directories(Sql2csv
         PRIVATE
         ${CMAKE_BINARY_DIR}/external/soci/include ${SQLITE3_INCLUDE_DIR} ${POSTGRESQL_INCLUDE_DIR} ${MARIADB_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${FIREBIRD_INCLUDE_DIR} ${ORACLE_INCLUDE_DIR} external/ocilib/include
     )
-    target_link_libraries(sql2csv PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
+    target_link_libraries(Sql2csv PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
     if (UNIX)
     else()
         if (MSVC)
             add_custom_command(
-                    TARGET sql2csv POST_BUILD
+                    TARGET Sql2csv POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/soci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/soci_core_4_1.dll)
         else()
             add_custom_command(
-                    TARGET sql2csv POST_BUILD
+                    TARGET Sql2csv POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/libsoci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/libsoci_core_4_1.dll)
@@ -129,11 +129,11 @@ add_subdirectory(external/libxls)
 add_subdirectory(external/dbf_lib)
 add_subdirectory(external/lib_geojson)
 add_subdirectory(external/OpenXLSX)
-add_executable(in2csv in2csv.cpp src/in2csv/in2csv_fixed.cpp src/in2csv/in2csv_dbf.cpp src/in2csv/in2csv_xls.cpp
+add_executable(In2csv In2csv.cpp src/in2csv/in2csv_fixed.cpp src/in2csv/in2csv_dbf.cpp src/in2csv/in2csv_xls.cpp
         src/in2csv/in2csv_geojson.cpp src/in2csv/in2csv_csv.cpp src/in2csv/in2csv_xlsx.cpp src/in2csv/in2csv_json.cpp
         src/in2csv/in2csv_ndjson.cpp)
-target_link_libraries(in2csv libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
-target_include_directories(in2csv
+target_link_libraries(In2csv libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
+target_include_directories(In2csv
         PRIVATE
         external/jsoncons/include
 )
@@ -141,30 +141,30 @@ target_include_directories(in2csv
 endif()
 
 add_subdirectory(test)
-add_executable(csvclean csvclean.cpp)
-target_link_libraries(csvclean libcppp-reiconv.static simdutf bz2_connector)
+add_executable(csvClean csvClean.cpp)
+target_link_libraries(csvClean libcppp-reiconv.static simdutf bz2_connector)
 
-add_executable(csvcut csvcut.cpp)
-target_link_libraries(csvcut libcppp-reiconv.static simdutf bz2_connector)
+add_executable(csvCut csvCut.cpp)
+target_link_libraries(csvCut libcppp-reiconv.static simdutf bz2_connector)
 
-add_executable(csvlook csvlook.cpp)
-target_link_libraries(csvlook libcppp-reiconv.static simdutf bz2_connector -lpthread)
+add_executable(csvLook csvLook.cpp)
+target_link_libraries(csvLook libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
-add_executable(csvstat csvstat.cpp)
-target_link_libraries(csvstat libcppp-reiconv.static simdutf bz2_connector -lpthread)
+add_executable(csvStat csvStat.cpp)
+target_link_libraries(csvStat libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
-add_executable(csvsort csvsort.cpp)
-target_link_libraries(csvsort libcppp-reiconv.static simdutf bz2_connector -lpthread)
+add_executable(csvSort csvSort.cpp)
+target_link_libraries(csvSort libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
-add_executable(csvjson csvjson.cpp)
-target_link_libraries(csvjson libcppp-reiconv.static simdutf bz2_connector -lpthread)
+add_executable(csvJson csvJson.cpp)
+target_link_libraries(csvJson libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
-add_executable(csvjoin csvjoin.cpp)
-target_link_libraries(csvjoin libcppp-reiconv.static simdutf bz2_connector -lpthread)
+add_executable(csvJoin csvJoin.cpp)
+target_link_libraries(csvJoin libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
-add_executable(csvstack csvstack.cpp)
-target_link_libraries(csvstack libcppp-reiconv.static simdutf bz2_connector)
+add_executable(csvStack csvStack.cpp)
+target_link_libraries(csvStack libcppp-reiconv.static simdutf bz2_connector)
 
-add_executable(csvgrep csvgrep.cpp)
-target_link_libraries(csvgrep libcppp-reiconv.static simdutf bz2_connector)
+add_executable(csvGrep csvGrep.cpp)
+target_link_libraries(csvGrep libcppp-reiconv.static simdutf bz2_connector)
 

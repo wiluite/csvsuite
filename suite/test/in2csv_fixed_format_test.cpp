@@ -6,7 +6,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../in2csv.cpp"
+#include "../In2csv.cpp"
 #include "common_args.h"
 #include "strm_redir.h"
 #include "stdin_subst.h"

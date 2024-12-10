@@ -8,8 +8,8 @@
 
 #include "ut.hpp"
 
-#include "../csvsql.cpp"
-#include "../sql2csv.cpp"
+#include "../csvSql.cpp"
+#include "../Sql2csv.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include "stdin_subst.h"

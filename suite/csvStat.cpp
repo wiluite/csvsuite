@@ -332,7 +332,7 @@ namespace csvstat {
             print_header(std::cout, header, args);
             return;
         }
-        
+
         setup_global_locale(default_global_locale);
 
         auto const body_rows = reader.rows();
@@ -616,7 +616,7 @@ int main(int argc, char * argv[]) {
 }
 #endif
 
-namespace csvstat { 
+namespace csvstat {
 
     static auto is_operation(auto const &args) -> bool {
 
@@ -790,14 +790,14 @@ namespace csvstat {
             mean(output_lines);
         else if (args_.get().median)
             median(output_lines);
-        else if (args_.get().stdev) 
+        else if (args_.get().stdev)
             stdev(output_lines);
         else if (args_.get().len)
             len(output_lines);
         else if (args_.get().max_precision)
             max_precision(output_lines);
         else if (args_.get().freq)
-            freq(output_lines);        
+            freq(output_lines);
     }
 
     template<class TabularType, class ArgsType>
@@ -859,13 +859,13 @@ namespace csvstat {
                 auto const element_value = elem.num();
                 sum += element_value;
                 //TODO: probably 'if' would be faster
-                max_ = std::max(element_value, max_); 
+                max_ = std::max(element_value, max_);
                 min_ = std::min(element_value, min_);
                 common_lambda(element_value);
                 mcv_map_[element_value]++;
                 ++B::non_nulls();
                 mdp = mdp_calc(elem);
-            } else 
+            } else
                 null_number++;
         }
 
@@ -1411,7 +1411,7 @@ namespace csvstat {
             if (!B::blanks() or !elem.is_null(also_match_null_value_option))
                 mcv_map_[elem.str()]++;
             else
-                null_num++;                
+                null_num++;
         }
 
         B::complete(null_num, mcv_map_, mcv_vec_);
@@ -1440,16 +1440,16 @@ namespace csvstat {
         for (auto const & elem : slice) {
             assert(std::get<0>(elem.date()) || elem.is_null(also_match_null_value_option));
             if (!elem.is_null(also_match_null_value_option)) {
-                auto const elem_value = date_time_point(elem); 
-                auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);   
+                auto const elem_value = date_time_point(elem);
+                auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
                     max_ = e_time_t;
                     max_value = elem_value;
-                } 
+                }
                 if (min_ >= e_time_t) {
                     min_ = e_time_t;
                     min_value = elem_value;
-                } 
+                }
                 mcv_map_[elem_value]++;
                 ++B::non_nulls();
             } else
@@ -1485,7 +1485,7 @@ namespace csvstat {
         date::sys_seconds min_value;
         for (auto const & elem : slice) {
             if (!elem.is_null(also_match_null_value_option)) {
-                auto const elem_value = date_time_point(elem);   
+                auto const elem_value = date_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (min_ >= e_time_t) {
                     min_ = e_time_t;
@@ -1503,7 +1503,7 @@ namespace csvstat {
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
             if (!elem.is_null(also_match_null_value_option)) {
-                auto const elem_value = date_time_point(elem);   
+                auto const elem_value = date_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
                     max_ = e_time_t;
@@ -1560,15 +1560,15 @@ namespace csvstat {
             assert(std::get<0>(elem.datetime()) || elem.is_null(also_match_null_value_option));
             if (!elem.is_null(also_match_null_value_option)) {
                 auto const elem_value = datetime_time_point(elem);
-                auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);   
+                auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
                     max_ = e_time_t;
                     max_value = elem_value;
-                } 
+                }
                 if (min_ >= e_time_t) {
                     min_ = e_time_t;
                     min_value = elem_value;
-                } 
+                }
                 mcv_map_[elem_value]++;
                 ++B::non_nulls();
             } else
@@ -1606,7 +1606,7 @@ namespace csvstat {
         date::sys_seconds min_value;
         for (auto const & elem : slice) {
             if (!elem.is_null(also_match_null_value_option)) {
-                auto const elem_value = datetime_time_point(elem);   
+                auto const elem_value = datetime_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (min_ >= e_time_t) {
                     min_ = e_time_t;
@@ -1624,7 +1624,7 @@ namespace csvstat {
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
             if (!elem.is_null(also_match_null_value_option)) {
-                auto const elem_value = datetime_time_point(elem);   
+                auto const elem_value = datetime_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
                     max_ = e_time_t;
@@ -1639,9 +1639,9 @@ namespace csvstat {
     void datetime_class<B>::freq(std::size_t output_lines) {
         static struct {
             using visitor_type = void;
-            auto to_strm(std::ostringstream & oss, std::pair<date::sys_seconds, std::size_t> const & elem, datetime_class<B> const &) const {    
+            auto to_strm(std::ostringstream & oss, std::pair<date::sys_seconds, std::size_t> const & elem, datetime_class<B> const &) const {
                 oss.imbue(std::locale("C"));
-                oss << std::quoted(datetime_s(elem.first)) << ": " << elem.second; 
+                oss << std::quoted(datetime_s(elem.first)) << ": " << elem.second;
             }
         } value_caller;
 
@@ -1854,19 +1854,19 @@ namespace csvstat {
 #if 0
                 oss << std::quoted(elem.first,'"','"');
 #endif
-                oss << std::quoted(elem.first); 
+                oss << std::quoted(elem.first);
             }
             else
                 oss << elem.first;
         }
 
         template <class T>
-        auto to_strm(std::ostringstream & oss, auto const & elem, date_class<T> const &) const { 
+        auto to_strm(std::ostringstream & oss, auto const & elem, date_class<T> const &) const {
             oss << date_s(elem.first);
         }
 
         template <class T>
-        auto to_strm(std::ostringstream & oss, auto const & elem, datetime_class<T> const &) const { 
+        auto to_strm(std::ostringstream & oss, auto const & elem, datetime_class<T> const &) const {
             oss << datetime_s(elem.first);
         }
 
@@ -1893,7 +1893,7 @@ namespace csvstat {
 
     auto csv_space_print = [](std::ostringstream & os, auto & first_printed) {
         os << (first_printed++ ? ", " : "");
-    };                                           
+    };
 
     template<class T>
     void csv_print_visitor::operator()(number_class<T> const & o) const {
@@ -2130,7 +2130,7 @@ namespace csvstat {
     json_print_visitor::json_print_visitor(auto const & args, std::size_t col_num, unsigned dec_prec, bool is_first_col) : prep{std::make_shared<rep>()} {
         prep->col_num = col_num;
         prep->decimal_precision = dec_prec;
-        prep->indenter = std::move(std::make_unique<json_indenter>(args.indent)); 
+        prep->indenter = std::move(std::make_unique<json_indenter>(args.indent));
         static struct call_once {
             explicit call_once(unsigned dec_prec) {
                 std::cout.imbue(std::locale("C"));

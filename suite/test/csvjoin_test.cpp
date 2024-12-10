@@ -6,7 +6,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../csvjoin.cpp"
+#include "../csvJoin.cpp"
 #include "strm_redir.h"
 #include "common_args.h"
 #include "test_max_field_size_macros.h"

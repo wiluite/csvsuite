@@ -109,12 +109,12 @@ namespace csvclean::detail {
         using base_class = ::csvsuite::cli::max_field_size_checker<Reader, ARGS>;
         using base_class::check;
 
-        specific_maxfieldsize_checker(Reader const & r, ARGS const & args, unsigned columns) 
+        specific_maxfieldsize_checker(Reader const & r, ARGS const & args, unsigned columns)
             : base_class(r, args, columns, init_row{1}) {}
 
         void reset_current_row(auto row) noexcept {
             base_class::current_row = row;
-            base_class::current_column = 0;   
+            base_class::current_column = 0;
         }
         void move_row() {
             base_class::current_row++;
@@ -158,7 +158,7 @@ namespace csvclean {
         for (auto const & e : header)
             sz_checker.check(e.operator csv_co::unquoted_cell_string());
         sz_checker.reset_current_row((args.no_header ? 1 : 2));
-        
+
         std::shared_ptr<std::ofstream> err_closer, out_closer;
 
         reader.run_spans([&](auto s) {

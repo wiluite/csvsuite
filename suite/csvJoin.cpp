@@ -212,7 +212,7 @@ namespace csvjoin::detail {
 
         void run_rows(value_row_span_cb_t v) {
             for (auto &&elem: table_impl)
-                v(std::span<ElemType>(elem));            
+                v(std::span<ElemType>(elem));
         }
 
         void skip_rows(auto /*rows*/) {}
@@ -259,7 +259,7 @@ namespace csvjoin::detail {
     public:
         explicit printer(OS &os = std::cout) : os(os) {}
         template <typename T>
-        void write(T&& printable, auto && types_n_blanks, auto && args) 
+        void write(T&& printable, auto && types_n_blanks, auto && args)
         requires (!CsvKitCellSpanTableConcept<T> && !CsvKitCellSpanRowConcept<T> && !CellSpanRowConcept<T> && !CsvReaderConcept<T>) {
             if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<T>>) { // print header
                 if (args.linenumbers)
@@ -311,7 +311,7 @@ namespace csvjoin::detail {
                     os << ++line_nums << ',';
                 }
                 auto col = 0u;
-                using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;   
+                using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;
                 std::for_each(span.begin(), span.end()-1, [&](auto const & e) {
                     if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>) {
                         print_func(elem_type{e}, col++, types_n_blanks, args);
@@ -427,7 +427,7 @@ namespace csvjoin::detail {
                         ts_n_blanks.push_back(std::get<1>(typify::typify(arg, args, typify_option::typify_without_precisions)));
                     }
 #else
-                if (!std::holds_alternative<reader_fake<reader_type>>(r)) {                    
+                if (!std::holds_alternative<reader_fake<reader_type>>(r)) {
                     quick_check();
                     ts_n_blanks.push_back(std::get<1>(typify::typify(std::get<0>(r), args, typify_option::typify_without_precisions)));
                 }
@@ -442,7 +442,7 @@ namespace csvjoin::detail {
                     check_max_size(header_to_strings<unquoted>(header), size_checker);
 
                     auto const q_header = header_to_strings<quoted>(header);
-                                        
+
                     headers.push_back(q_header);
                     if (!join_column_names.empty())
                         c_ids.push_back(match_column_identifier(q_header, join_column_names[idx++].c_str(), get_column_offset(args)));
@@ -490,7 +490,7 @@ namespace csvjoin::detail {
             );
             if (excl_v_idx != static_cast<unsigned>(-1))
                 headers[0].erase(headers[0].begin() + h0_size + excl_v_idx);
-        }; 
+        };
 
         auto concat_ts_n_blanks = [&ts_n_blanks](unsigned excl_idx = static_cast<unsigned>(-1)) {
             unsigned const size_0 = std::get<0>(ts_n_blanks[0]).size();
@@ -507,16 +507,16 @@ namespace csvjoin::detail {
 
         enum class exclude_c_column {
             yes,
-            no 
+            no
         }; 
         enum class union_join {
             yes,
-            no 
+            no
         }; 
 
         auto cycle_cleanup = [&](exclude_c_column is_c_excluded = exclude_c_column::yes, union_join is_union_join = union_join::no) {
             deq.pop_front();
-            deq.pop_front();                
+            deq.pop_front();
             concat_headers(is_c_excluded == exclude_c_column::yes ? c_ids[1] : static_cast<unsigned>(-1));
             headers.erase(headers.begin() + 1);
             concat_ts_n_blanks(is_c_excluded == exclude_c_column::yes ? c_ids[1] : static_cast<unsigned>(-1));
@@ -537,7 +537,7 @@ namespace csvjoin::detail {
                     }, r);
                 });
 
-                reader_fake<reader_type> impl{rows, cols}; 
+                reader_fake<reader_type> impl{rows, cols};
 
                 auto col_ofs = 0;
                 std::for_each(deq.begin(), deq.begin() + 2, [&](auto &r) {
@@ -626,7 +626,7 @@ namespace csvjoin::detail {
                                         }
                                     }, fun);
                                 });
-                            }, second_source); 
+                            }, second_source);
                         });
                     }, first_source);
                 }
@@ -698,7 +698,7 @@ namespace csvjoin::detail {
                                     if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span1[0])>, std::string>)
                                         check_max_size(span1, s_size_checker);
 
-                                    std::visit([&](auto &&cmp) { 
+                                    std::visit([&](auto &&cmp) {
                                         if (!cmp(elem_t{span[c_ids[0]]}, elem_t{span1[c_ids[1]]})) {
                                             std::vector<std::string> join_vec;
                                             assert(types1.size() == span1.size());
@@ -869,7 +869,7 @@ namespace csvjoin::detail {
                         , args.date_fmt
                         , args.no_leading_zeroes
                         , args.blanks
-                        , args.null_value  
+                        , args.null_value
                         , args.no_inference
                         , args.date_lib_parser
                         , args.maxfieldsize
@@ -884,7 +884,7 @@ namespace csvjoin::detail {
         };
 #endif
 
-        if (deq.empty()) 
+        if (deq.empty())
             return;
 
         bool const join = deq.size() > 1;

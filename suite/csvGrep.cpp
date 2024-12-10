@@ -76,7 +76,7 @@ namespace csvgrep {
 
         args.columns = args.columns == "none" ? "" : args.columns;
 
-        if (args.columns.empty()) 
+        if (args.columns.empty())
             throw std::runtime_error("You must specify at least one column to search using the -c option.");
 
         if (args.regex.empty() and args.f.empty() and args.match.empty())

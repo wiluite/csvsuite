@@ -42,7 +42,7 @@ namespace csvjson {
 
         using namespace csv_co;
 
-        auto const geojson = (!args.lat.empty() or !args.lon.empty() or !args.type.empty() or !args.geometry.empty() or !args.crs.empty() or args.no_bbox); 
+        auto const geojson = (!args.lat.empty() or !args.lon.empty() or !args.type.empty() or !args.geometry.empty() or !args.crs.empty() or args.no_bbox);
         if (!args.lat.empty() and args.lon.empty())
             throw std::runtime_error("csvjson: error: --lon is required whenever --lat is specified.");
 
@@ -83,13 +83,13 @@ namespace csvjson {
         if (!geojson and !args.key.empty()) {
             auto const key_iter = std::find(std::begin(header), std::end(header), args.key);
             if (key_iter == std::end(header)) {
-                std::string err = "KeyError: '" + args.key + '\''; 
+                std::string err = "KeyError: '" + args.key + '\'';
                 throw std::runtime_error(err.c_str());
             }
             key_idx = key_iter - begin(header);
 
             static auto check_dup_func_impl = [&]( auto const & elem, auto get_val_func, auto print_func) {
-                static std::set<decltype(get_val_func())> dups;   
+                static std::set<decltype(get_val_func())> dups;
                 static auto nulls = 0u;
                 if (elem.is_null()) {
                     if (++nulls > 1)
@@ -205,7 +205,7 @@ namespace csvjson {
                 , [] (auto & elem) { return carefully_adjusted_number<0>(elem); }
                 , [] (auto & elem) { return datetime_s_json(elem); }
                 , [] (auto & elem) { return date_s(elem); }
-                , [] (auto & elem) { 
+                , [] (auto & elem) {
                     typename elem_type::template rebind<unquoted>::other const & another_rep = elem;
                     return std::get<1>(another_rep.timedelta_tuple());
                 }
@@ -333,7 +333,7 @@ namespace csvjson {
             };
 
             struct not_stream_printer {
-                not_stream_printer(json_indenter const & indenter, not_stream_args const & n_s_args) 
+                not_stream_printer(json_indenter const & indenter, not_stream_args const & n_s_args)
                     : indenter(indenter), args(n_s_args.args) {
                     if (!args.stream) {
                         oss << '{';
@@ -376,7 +376,7 @@ namespace csvjson {
                 }
             private:
                 json_indenter const & indenter;
-                args_type const & args;                    
+                args_type const & args;
             };
 
             static not_stream_args nsargs {args, min_lon_elem, min_lat_elem, max_lon_elem, max_lat_elem};
@@ -426,9 +426,9 @@ namespace csvjson {
                 using row_span_type = decltype(row_span);
 
                 struct properties_printer {
-                    properties_printer(json_indenter const & indenter, row_span_type && row_span, props_args const & pa) : indenter(indenter) { 
+                    properties_printer(json_indenter const & indenter, row_span_type && row_span, props_args const & pa) : indenter(indenter) {
                         to_stream(oss, indenter.add_indent(), R"("properties": {)");
-                        indenter.inc_indent(); 
+                        indenter.inc_indent();
                         auto i = 0u;
                         bool at_least_one_prop{};
                         for (auto & e : row_span) {

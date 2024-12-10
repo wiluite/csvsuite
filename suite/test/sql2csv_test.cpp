@@ -6,8 +6,8 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 
-#include "../sql2csv.cpp"
-#include "../csvsql.cpp"
+#include "../Sql2csv.cpp"
+#include "../csvSql.cpp"
 #include "common_args.h"
 #include "strm_redir.h"
 #include "stdin_subst.h"

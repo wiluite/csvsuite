@@ -83,8 +83,8 @@ namespace csvcut {
                     if (args.linenumbers)
                         os << "line_number" << delim;
                 }
-            };           
-            
+            };
+
             if (args.no_header) {
                 check_max_size(reader, args, header, init_row{1});
                 static say_ln ln (args, os);

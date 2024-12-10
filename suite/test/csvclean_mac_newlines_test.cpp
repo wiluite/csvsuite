@@ -5,7 +5,7 @@
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
 //TODO: rename this file to python csvsuite test
-#include "../csvclean.cpp"
+#include "../csvClean.cpp"
 #include "common_args.h"
 
 int main() {

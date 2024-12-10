@@ -59,7 +59,7 @@ namespace csvstack::detail {
                   && !CellSpanRowConcept<T>
                   && !CsvReaderConcept<T>) {
             if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<T>>) { // print header
-                if (args.linenumbers) 
+                if (args.linenumbers)
                     os << "line_number,";
 
                 std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
@@ -82,7 +82,7 @@ namespace csvstack::detail {
                             static_assert(std::is_same_v<std::decay_t<decltype(e)>, std::string>);
                             print_func(elem_type{e}, col++, types_n_blanks, args);
                             os << ',';
-                        } else 
+                        } else
                             os << e << ',';
                     });
                     if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>) {
@@ -263,7 +263,7 @@ int main(int argc, char * argv[]) {
     OutputCodePage65001 ocp65001;
 
     try {
-        if (!args.skip_init_space) 
+        if (!args.skip_init_space)
             csvstack::stack<notrimming_reader_type>(args);
         else
             csvstack::stack<skipinitspace_reader_type>(args);
@@ -275,4 +275,4 @@ int main(int argc, char * argv[]) {
         std::cout << "Unknown exception.\n";
     }
 }
-#endif                                                	
+#endif

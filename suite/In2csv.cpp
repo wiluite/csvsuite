@@ -21,7 +21,7 @@ namespace in2csv::detail {
         std::vector<std::string> & null_value = kwarg("null-value", "Convert this value to NULL. --null-value can be specified multiple times.").multi_argument().set_default(std::vector<std::string>{});
         std::string & date_fmt = kwarg("date-format","Specify an strptime date format string like \"%m/%d/%Y\".").set_default(R"(%m/%d/%Y)");
         std::string & datetime_fmt = kwarg("datetime-format","Specify an strptime datetime format string like \"%m/%d/%Y %I:%M %p\".").set_default(R"(%m/%d/%Y %I:%M %p)");
-        bool & no_leading_zeroes = flag("no-leading-zeroes", "Do not convert a numeric value with leading zeroes to a number.");        
+        bool & no_leading_zeroes = flag("no-leading-zeroes", "Do not convert a numeric value with leading zeroes to a number.");
         std::string & format = kwarg("f,format","The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type.").set_default(std::string{});
         std::string & schema = kwarg("s,schema","Specify a CSV-formatted schema file for converting fixed-width files. See in2csv_test as example.").set_default(std::string{});
         std::string & key = kwarg("k,key","Specify a top-level key to look within for a list of objects to be converted when processing JSON.").set_default(std::string{});
