@@ -252,8 +252,8 @@ namespace csvsql::detail {
                 }
             }
 
-            void direct(auto&, typify_without_precisions_result const & value, std::string const & dialect, auto const & header) {
-                auto [types, blanks] = value;
+            void direct(auto&, typify_without_precisions_and_blanks_result const & value, std::string const & dialect, auto const & header) {
+                auto [types] = value;
                 auto index = 0ull;
                 for (auto e : types) {
                     printer_map[dialect]->print_name(header[index].operator csv_co::cell_string());
@@ -264,6 +264,9 @@ namespace csvsql::detail {
                     stream << (index != types.size() ? ",\n\t" : (unique_constraint.empty() ? "\n" : (",\n\tUNIQUE (" + unique_constraint + ")\n")));
                 }
             }
+
+            void direct(auto&, typify_without_precisions_result const &, std::string const &, auto const &) {}
+
             static std::string table() {
                 return stream.str();
             }
@@ -310,7 +313,7 @@ namespace csvsql::detail {
     public:
         create_table_composer(auto & reader, auto const & args, std::vector<std::string> const & table_names) {
 
-            auto const info = typify(reader, args, !args.no_constraints ? typify_option::typify_with_precisions : typify_option::typify_without_precisions);
+            auto const info = typify(reader, args, !args.no_constraints ? typify_option::typify_with_precisions : typify_option::typify_without_precisions_and_blanks);
             skip_lines(reader, args);
             auto const header = obtain_header_and_<skip_header>(reader, args);
             header_ = header_to_strings<csv_co::unquoted>(header);
@@ -318,7 +321,8 @@ namespace csvsql::detail {
             print_director print_director_(args, table_names);
             std::visit([&](auto & arg) {
                 types_ = std::get<0>(arg);
-                blanks_ = std::get<1>(arg);
+                if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, typify_with_precisions_result>)
+                    blanks_ = std::get<1>(arg);
                 print_director_.direct(reader, arg, dialect(args), header);
             }, info);
 

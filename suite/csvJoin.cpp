@@ -34,6 +34,11 @@ namespace csvjoin {
     };
 }
 namespace csvjoin::detail::typify {
+    enum class csvjoin_source_option {
+        csvjoin_file_source,
+        csvjoin_string_source
+    };
+
     template <typename Reader, typename Args>
     auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
 
@@ -931,6 +936,7 @@ namespace csvjoin::detail {
 } // namespace csvjoin::detail
 
 namespace csvjoin {
+    using namespace detail::typify;
     void join_wrapper(auto const & args, csvjoin_source_option source_type = csvjoin_source_option::csvjoin_file_source) {
         using namespace csvjoin::detail;
 

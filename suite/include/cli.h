@@ -869,14 +869,10 @@ namespace csvsuite::cli {
         typify_without_precisions_and_blanks
     };
 
-    enum class csvjoin_source_option {
-        csvjoin_file_source,
-        csvjoin_string_source
-    };
-
     using typify_with_precisions_result = std::tuple<std::vector<column_type>, std::vector<unsigned char>, std::vector<unsigned>>;
     using typify_without_precisions_result = std::tuple<std::vector<column_type>, std::vector<unsigned char>>;
-    using typify_result = std::variant<typify_with_precisions_result, typify_without_precisions_result>;
+    using typify_without_precisions_and_blanks_result = std::tuple<std::vector<column_type>>;
+    using typify_result = std::variant<typify_with_precisions_result, typify_without_precisions_result, typify_without_precisions_and_blanks_result>;
 
     template <typename Reader, typename Args>
     auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
@@ -940,10 +936,10 @@ namespace csvsuite::cli {
         imbue_numeric_locale(reader, args);
         [&option] {
             using unquoted_elem_type = typename Reader::template typed_span<csv_co::unquoted>;
-            unquoted_elem_type::no_maxprecision(option == typify_option::typify_without_precisions);
+            unquoted_elem_type::no_maxprecision(option != typify_option::typify_with_precisions);
 
             using quoted_elem_type = typename Reader::template typed_span<csv_co::quoted>;
-            unquoted_elem_type::no_maxprecision(option == typify_option::typify_without_precisions);
+            unquoted_elem_type::no_maxprecision(option != typify_option::typify_with_precisions);
         }();
 
         setup_date_parser_backend(reader, args);
@@ -951,42 +947,53 @@ namespace csvsuite::cli {
 
         //TODO: for now e.is_null() calling first is obligate. Can we do better?
 
-        #define SETUP_BLANKS auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks; \
-                             if (!blanks[c] && n)                                                            \
-                                 blanks[c] = 1;
+        std::function<void(unsigned, bool)> setup_blanks;
+
+        if (option != typify_option::typify_without_precisions_and_blanks)
+            setup_blanks = [&](unsigned c, bool n) {
+                if (!blanks[c] && n)
+                    blanks[c] = 1;
+            };
+        else
+            setup_blanks = std::function<void(unsigned, bool)>();
 
         auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
-            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e)  {
-                SETUP_BLANKS
+            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e)  {
+                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                setup_blanks(c, n);
                 return n || (!args.no_inference && e.is_boolean());
             })) {
                 task_vec[c] = column_type::bool_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_BLANKS
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
+                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
             })) {
                 task_vec[c] = column_type::timedelta_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto & e) {
-                SETUP_BLANKS
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto & e) {
+                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
             })) {
                 task_vec[c] = column_type::datetime_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_BLANKS
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
+                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
             })) {
                 task_vec[c] = column_type::date_t;
                 return;
             }
             if (option == typify_option::typify_with_precisions) {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions](auto & e) {
-                    SETUP_BLANKS
+                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions, &setup_blanks](auto & e) {
+                    auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                    setup_blanks(c, n);
                     auto const result = n || (!args.no_inference && e.is_num());
                     if (result and !n) {
                         if (precisions[c] < e.precision())
@@ -998,8 +1005,9 @@ namespace csvsuite::cli {
                     return;
                 }
             } else {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
-                    SETUP_BLANKS
+                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e) {
+                    auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                    setup_blanks(c, n);
                     return n || (!args.no_inference && e.is_num());
                 })) {
                     task_vec[c] = column_type::number_t;
@@ -1008,16 +1016,14 @@ namespace csvsuite::cli {
             }
             // Text type: check ALL rows for an absent.
             if (std::all_of(table[c].begin(), table[c].end(), [&](auto &e) {
-                if (e.is_null(csv_co::also_match_null_value_option) && !blanks[c] && !args.blanks)
-                    blanks[c] = true;
+                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                setup_blanks(c, n);
                 return true;
             })) {
                 task_vec[c] = column_type::text_t;
                 return;
             }
         });
-
-        #undef SETUP_BLANKS
 
         task->wait();
 
@@ -1031,7 +1037,10 @@ namespace csvsuite::cli {
         if (option == typify_option::typify_with_precisions)
             return std::tuple{task_vec, blanks, precisions};
         else
+        if (option == typify_option::typify_without_precisions)
             return std::tuple{task_vec, blanks};
+        else
+            return std::tuple{task_vec};
     }
 
     auto parse_column_identifiers(auto && ids, auto && column_names, auto && column_offset, auto && excl)->std::vector<unsigned> {
