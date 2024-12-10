@@ -184,12 +184,12 @@ int main() {
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
- 
+
 //      a,b,c
 //      5,1,7
 //      1,2,3
 //      4,,6
-        
+
         expect(cout_buffer.str() == "a,b,c\n5,1,7\n1,2,3\n4,,6\n");
 
         notrimming_reader_type new_reader (cout_buffer.str());

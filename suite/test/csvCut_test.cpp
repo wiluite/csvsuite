@@ -133,7 +133,7 @@ int main() {
 
     "include and exclude"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args {
-            Args() { file = "dummy.csv"; columns = "1,3"; not_columns = "3"; } 
+            Args() { file = "dummy.csv"; columns = "1,3"; not_columns = "3"; }
             bool x_ {false};
         } args;
 
@@ -146,7 +146,7 @@ int main() {
 
     "no header row"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args {
-            Args() { file = "no_header_row.csv"; columns = "2"; no_header = true; } 
+            Args() { file = "no_header_row.csv"; columns = "2"; no_header = true; }
             bool x_ {false};
         } args;
 
@@ -159,7 +159,7 @@ int main() {
 
     "names with skip lines"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args {
-            Args() { file = "test_skip_lines.csv"; skip_lines = 3; names=true;  } 
+            Args() { file = "test_skip_lines.csv"; skip_lines = 3; names=true; }
             bool x_ {false};
         } args;
 

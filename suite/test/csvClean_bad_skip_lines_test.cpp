@@ -6,7 +6,7 @@
 #include "ut.hpp"
 
 #include "../csvClean.cpp"
-#include "csvclean_test_funcs.h"
+#include "csvClean_test_funcs.h"
 #include "common_args.h"
 
 int main() {

@@ -855,7 +855,7 @@ try {
         std::string db_conn = get_db_conn("SOCI_DB_ORACLE");
         if (!db_conn.empty()) {
             args.db = db_conn;
-            std::istringstream iss("a,b,c,d,e\n04/14/1955 08:08:08,,,,\n,1072-01-01,,,\n,,3.14,,\n,,,str 1,\n1075-01-01T09:09:09,,,,\n,,,,1h 1.5sec\n"); 
+            std::istringstream iss("a,b,c,d,e\n04/14/1955 08:08:08,,,,\n,1072-01-01,,,\n,,3.14,,\n,,,str 1,\n1075-01-01T09:09:09,,,,\n,,,,1h 1.5sec\n");
 
             stdin_subst new_cin(iss);
             table_dropper<dbms_client::OCILIB> td {db_conn, "stdin"};

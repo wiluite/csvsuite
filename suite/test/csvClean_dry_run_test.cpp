@@ -25,7 +25,7 @@ int main() {
         } args;
 
         notrimming_reader_type r (args.file);
-       
+
         std::stringstream cerr_buffer;
         {
             redirect(cerr)
@@ -36,7 +36,7 @@ int main() {
         expect(nothrow([&] {
               expect(!std::filesystem::exists(std::filesystem::path{"bad_err.csv"}));
               expect(!std::filesystem::exists(std::filesystem::path{"bad_out.csv"}));
-              std::string temp; 
+              std::string temp;
               std::getline(cerr_buffer, temp);
               expect(temp.substr(0,6) == "Line 1");
               std::getline(cerr_buffer, temp);

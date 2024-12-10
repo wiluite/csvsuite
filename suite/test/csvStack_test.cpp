@@ -132,7 +132,7 @@ int main() {
 //      a,b,c,d
 //      1,2,3,
 //      1,2,3,4
-        
+
         expect("a,b,c,d\n1,2,3,\n1,2,3,4\n" == cout_buffer.str());
     };
 
@@ -190,7 +190,7 @@ int main() {
 //      foo,a,b,c
 //      asd,1,2,3
 //      sdf,1,2,3
-        
+
         expect("foo,a,b,c\nasd,1,2,3\nsdf,1,2,3\n" == cout_buffer.str());
     };
 
@@ -210,7 +210,7 @@ int main() {
 //      path,a,b,c
 //      dummy.csv,1,2,3
 //      dummy2.csv,1,2,3
-        
+
         expect("path,a,b,c\ndummy.csv,1,2,3\ndummy2.csv,1,2,3\n" == cout_buffer.str());
     };
 
@@ -229,7 +229,7 @@ int main() {
 //      a,b,c
 //      1,2,3
 //      4,5,6
-        
+
         expect("a,b,c\n1,2,3\n4,5,6\n" == cout_buffer.str());
     };
 
@@ -278,7 +278,7 @@ int main() {
             Args() {
                 no_header = true;
                 groups = "foo,bar";
-                group_name = "hey"; 
+                group_name = "hey";
             }
         } args;
 
@@ -293,7 +293,7 @@ int main() {
 //      bar,a,b,c
 //      bar,1,2,3
 //      bar,1,4,5
-        
+
         expect("hey,a,b,c\nfoo,a,b,c\nfoo,1,2,3\nbar,a,b,c\nbar,1,2,3\nbar,1,4,5\n" == cout_buffer.str());
     };
 
@@ -313,7 +313,7 @@ int main() {
 //      group,a,b,c
 //      no_header_row.csv,1,2,3
 //      no_header_row2.csv,4,5,6
-        
+
         expect("group,a,b,c\nno_header_row.csv,1,2,3\nno_header_row2.csv,4,5,6\n" == cout_buffer.str());
     };
 
@@ -334,7 +334,7 @@ int main() {
 //      hello,a,b,c
 //      no_header_row.csv,1,2,3
 //      no_header_row2.csv,4,5,6
-        
+
         expect("hello,a,b,c\nno_header_row.csv,1,2,3\nno_header_row2.csv,4,5,6\n" == cout_buffer.str());
     };
 

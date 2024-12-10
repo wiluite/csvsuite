@@ -37,7 +37,7 @@ int main() {
         std::string encoding_xls = "UTF-8";
         std::string d_excel = "none";
         std::string dt_excel = "none";
-        bool is1904;
+        bool is1904 = false;
     };
 
     struct in2csv_args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::output_args, in2csv_specific_args {};

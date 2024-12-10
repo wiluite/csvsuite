@@ -124,7 +124,7 @@ int main() {
         "right"_test = [&] {
             auto args_copy = args;
             args_copy.columns = "a";
-            args_copy.right_join = true;  
+            args_copy.right_join = true;
             args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
@@ -185,7 +185,7 @@ int main() {
         "outer"_test = [&] {
             auto args_copy = args;
             args_copy.columns = "a";
-            args_copy.outer_join = true;  
+            args_copy.outer_join = true;
             args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
@@ -212,8 +212,8 @@ int main() {
 #endif
 
         "single"_test = [&] {
-            auto args_copy = args;            
-            args_copy.no_inference = true;  
+            auto args_copy = args;
+            args_copy.no_inference = true;
             args_copy.files = std::vector<std::string>{"dummy.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
@@ -224,7 +224,7 @@ int main() {
         };
 
         "no blanks"_test = [&] {
-            auto args_copy = args;            
+            auto args_copy = args;
             args_copy.files = std::vector<std::string>{"blanks.csv", "blanks.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
@@ -236,7 +236,7 @@ int main() {
 
         "blanks"_test = [&] {
             auto args_copy = args;
-            args_copy.blanks = true;            
+            args_copy.blanks = true;
             args_copy.files = std::vector<std::string>{"blanks.csv", "blanks.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 

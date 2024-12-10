@@ -1,4 +1,5 @@
-/// \file   test/csvclean_changes_character_encoding_test.cpp
+///
+/// \file   test/csvclean_removes_bom_test.cpp
 /// \author wiluite
 /// \brief  One of the tests for the csvclean utility.
 
@@ -6,7 +7,7 @@
 #include "ut.hpp"
 
 #include "../csvClean.cpp"
-#include "csvclean_test_funcs.h"
+#include "csvClean_test_funcs.h"
 #include "common_args.h"
 
 int main() {
@@ -16,19 +17,17 @@ int main() {
 #if defined (WIN32)
     cfg < override > = {.colors={.none="", .pass="", .fail=""}};
 #endif
-    "changes character encoding"_test = [] () mutable {
+    "removes bom"_test = [] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "test_latin1.csv"; maxfieldsize = max_unsigned_limit;} // TODO: Why does it requires max_unsigned_limit for test to pass?
+            Args() { file = "test_utf8_bom.csv"; maxfieldsize = max_unsigned_limit; }
             bool dry_run {false};
         } args;
 
         notrimming_reader_type r (args.file);
-        // TODO: It should be done inside assertCleaned. -e latin1 is needed simply to parse and also to use transformation
         csvclean::clean(r, args);
         expect(nothrow([&](){
             using namespace csvsuite::cli;
-            std::u8string u8str = u8"4,5,©";
-            csvsuite::test_facilities::assertCleaned ("test_latin1", {"a,b,c", "1,2,3", encoding::iconv("latin1", "utf-8", std::string(u8str.begin(), u8str.end()))}, {});
+            csvsuite::test_facilities::assertCleaned ("test_utf8_bom", {"foo,bar,baz", "1,2,3", "4,5,ʤ"}, {});
         }));
     };
 
