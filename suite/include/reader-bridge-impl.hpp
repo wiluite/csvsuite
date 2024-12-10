@@ -5,7 +5,9 @@
 
 #pragma once
 
-//#define USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS
+#if 0
+#define USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS
+#endif
 
 #include <csv_co/reader.hpp>
 #include <../external/vince-csv-parser/data_type.h>
@@ -66,32 +68,16 @@ namespace csv_co {
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     inline unsigned char reader<T, Q, D, L, M, E>::typed_span<Unquoted>::get_precision(std::string & rep) const {
-        class precision_calculator {
-            std::function<unsigned char(std::string &)> fun_impl;
-        public:
-            precision_calculator() {
-                if (!no_maxprec_) {
-                    fun_impl = [&] (std::string & rep) -> unsigned char {
-                        rep.erase(0, rep.find_first_not_of(' '));
-                        rep.erase(rep.find_last_not_of(" \t\r") + 1);
-                        boost::multiprecision::cpp_dec_float_50 val(abs(boost::multiprecision::cpp_dec_float_50(rep)));
-                        if (boost::multiprecision::trunc(val) == val )
-                            return 0;
-                        auto const ss_prec = std::numeric_limits<boost::multiprecision::cpp_dec_float_50>::digits10;
-                        boost::multiprecision::cpp_dec_float_50 tmp;
-                        auto const zero_pos = boost::multiprecision::modf(val, &tmp).str(ss_prec, std::ios::fixed).find_last_not_of('0') + 1;
-                        assert(zero_pos > 1);
-                        return zero_pos == 2 ? ss_prec : zero_pos - 2;
-                    };
-                } else
-                    fun_impl = [](std::string &) -> unsigned char { return 0; };
-            }
-            unsigned char calc(std::string & s) {
-                return fun_impl(s);
-            }
-        } calculator;
-
-        return calculator.calc(rep);
+        rep.erase(0, rep.find_first_not_of(' '));
+        rep.erase(rep.find_last_not_of(" \t\r") + 1);
+        boost::multiprecision::cpp_dec_float_50 val(abs(boost::multiprecision::cpp_dec_float_50(rep)));
+        if (boost::multiprecision::trunc(val) == val )
+            return 0;
+        auto const ss_prec = std::numeric_limits<boost::multiprecision::cpp_dec_float_50>::digits10;
+        boost::multiprecision::cpp_dec_float_50 tmp;
+        auto const zero_pos = boost::multiprecision::modf(val, &tmp).str(ss_prec, std::ios::fixed).find_last_not_of('0') + 1;
+        assert(zero_pos > 1);
+        return zero_pos == 2 ? ss_prec : zero_pos - 2;
     }
 #else
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
@@ -153,18 +139,18 @@ namespace csv_co {
             r = std::from_chars(double_rep.data(), double_rep.data()+double_rep.size(), value, std::chars_format::general);
             if (static_cast<int>(r.ec) == 0) {
 #if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
-                prec = get_precision(double_rep);
+                prec = !no_maxprec_ ? get_precision(double_rep) : 0;
 #else
                 prec = !no_maxprec_ ? get_precision() : 0;
 #endif
                 type_ = static_cast<signed char>(DataType::CSV_DOUBLE);
             }
-#else
+#else //_MSC_VER
             std::stringstream in2(double_rep);
             in2.imbue(std::locale("C"));
             in2 >> value;
 #if defined(USE_BOOST_MULTIPRECISION_FOR_DECIMAL_PLACES_CALCULATIONS)
-            prec = get_precision(double_rep);
+            prec = !no_maxprec_ ? get_precision(double_rep) : 0;
 #else
             prec = !no_maxprec_ ? get_precision() : 0;
 #endif
