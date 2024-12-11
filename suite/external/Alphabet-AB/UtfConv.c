@@ -63,7 +63,7 @@ static Utf16Char* Utf8ToUtf16(const Utf8Char* pUtf8);
 static Utf8Char* Utf8StrMakeUprUtf8Str(const Utf8Char* pUtf8);
 static Utf8Char* Utf8StrMakeLwrUtf8Str(const Utf8Char* pUtf8);
 static int StrnCiCmpUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2, size_t ztCount);
-static int StrCiCmpUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2);
+static int StrCiCmpUtf8(const void* pUtf8s1, const void* pUtf8s2);
 static Utf8Char* StrCiStrUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2);
 
 /*******************************************************************************************
@@ -8755,9 +8755,9 @@ int StrnCiCmpUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2, size_t ztCou
 	}
 	return (-1); // calloc() failure
 }
-int StrCiCmpUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2)
+int StrCiCmpUtf8(const void* pUtf8s1, const void* pUtf8s2)
 {
-	return StrnCiCmpUtf8(pUtf8s1, pUtf8s2, (size_t)(-1));
+	return StrnCiCmpUtf8(reinterpret_cast<const unsigned char*>(pUtf8s1), reinterpret_cast<const unsigned char*>(pUtf8s2), (size_t)(-1));
 }
 Utf8Char* StrCiStrUtf8(const Utf8Char* pUtf8s1, const Utf8Char* pUtf8s2)
 {
