@@ -958,7 +958,7 @@ namespace csvsuite::cli {
             setup_blanks = std::function<void(unsigned, bool)>();
 
         auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
-            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e)  {
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto & e)  {
                 auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && e.is_boolean());
@@ -966,7 +966,7 @@ namespace csvsuite::cli {
                 task_vec[c] = column_type::bool_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto &e) {
                 auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
@@ -974,7 +974,7 @@ namespace csvsuite::cli {
                 task_vec[c] = column_type::timedelta_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto & e) {
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto & e) {
                 auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
@@ -982,7 +982,7 @@ namespace csvsuite::cli {
                 task_vec[c] = column_type::datetime_t;
                 return;
             }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
+            if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto &e) {
                 auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
@@ -991,7 +991,7 @@ namespace csvsuite::cli {
                 return;
             }
             if (option == typify_option::typify_with_precisions) {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions, &setup_blanks](auto & e) {
+                if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &precisions, &setup_blanks](auto & e) {
                     auto const n = e.is_null_or_null_value() && !args.blanks;
                     setup_blanks(c, n);
                     auto const result = n || (!args.no_inference && e.is_num());
@@ -1005,7 +1005,7 @@ namespace csvsuite::cli {
                     return;
                 }
             } else {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e) {
+                if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto & e) {
                     auto const n = e.is_null_or_null_value() && !args.blanks;
                     setup_blanks(c, n);
                     return n || (!args.no_inference && e.is_num());
