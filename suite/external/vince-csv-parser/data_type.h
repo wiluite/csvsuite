@@ -268,7 +268,7 @@ namespace vince_csv {
             if (start_pos == std::string::npos) //there we only ++...
                 return DataType::CSV_STRING;
 
-            auto const finish_pos = in.find_last_not_of(" \t\r");
+            auto const finish_pos = in.find_last_not_of(" \t");
             if (finish_pos == std::string::npos)
                 return DataType::CSV_STRING;
 

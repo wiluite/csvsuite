@@ -257,11 +257,16 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 expect(span.num() == +123456789);
                 expect(span.precision() == 0);
 
-                cs = " \"+12345678e-1  \"         ";
+                cs = " \"+12345678e-1  \"         \t\r";
                 {
-                    reader<>::typed_span<unquoted> float_span{reader<>::cell_span{cs}};
+                    reader<>::typed_span<unquoted> str_span{reader<>::cell_span{cs}};
+                    expect(str_span.is_str());
+                }
+                {
+                    using cr_trim_pol = ::csvsuite::cli::trim_policy::crtrim;
+                    reader<cr_trim_pol>::typed_span<unquoted> float_span{reader<cr_trim_pol>::cell_span{cs}};
                     expect(float_span.is_float());
-                    expect(float_span.num() >= 1234567.8 and float_span.num() < 1234567.9);
+                    expect(float_span.num() >= 1234567.8 and float_span.num() < 1234567.801);
                     expect(float_span.precision() == 1);
                 }
                 cs = " \"+1e- 1  \"  "; // not number
