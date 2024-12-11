@@ -959,7 +959,7 @@ namespace csvsuite::cli {
 
         auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
             if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e)  {
-                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && e.is_boolean());
             })) {
@@ -967,7 +967,7 @@ namespace csvsuite::cli {
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
-                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
             })) {
@@ -975,7 +975,7 @@ namespace csvsuite::cli {
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto & e) {
-                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
             })) {
@@ -983,7 +983,7 @@ namespace csvsuite::cli {
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c, &setup_blanks](auto &e) {
-                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
             })) {
@@ -992,7 +992,7 @@ namespace csvsuite::cli {
             }
             if (option == typify_option::typify_with_precisions) {
                 if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions, &setup_blanks](auto & e) {
-                    auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                    auto const n = e.is_null_or_null_value() && !args.blanks;
                     setup_blanks(c, n);
                     auto const result = n || (!args.no_inference && e.is_num());
                     if (result and !n) {
@@ -1006,7 +1006,7 @@ namespace csvsuite::cli {
                 }
             } else {
                 if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &setup_blanks](auto & e) {
-                    auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                    auto const n = e.is_null_or_null_value() && !args.blanks;
                     setup_blanks(c, n);
                     return n || (!args.no_inference && e.is_num());
                 })) {
@@ -1016,7 +1016,7 @@ namespace csvsuite::cli {
             }
             // Text type: check ALL rows for an absent.
             if (std::all_of(table[c].begin(), table[c].end(), [&](auto &e) {
-                auto const n = e.is_null(csv_co::also_match_null_value_option) && !args.blanks;
+                auto const n = e.is_null_or_null_value() && !args.blanks;
                 setup_blanks(c, n);
                 return true;
             })) {

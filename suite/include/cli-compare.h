@@ -25,16 +25,16 @@ namespace csvsuite::cli::compare::detail {
         template <class ElemType>
         static inline int compare_no_blanks_no_I_when_blanks (ElemType const & elem1, ElemType const & elem2) {
             using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
-            auto const e1_is_null = elem1.operator UElemType const &().is_null(csv_co::also_match_null_value_option);
-            auto const e2_is_null = elem2.operator UElemType const &().is_null(csv_co::also_match_null_value_option);
+            auto const e1_is_null = elem1.operator UElemType const &().is_null_or_null_value();
+            auto const e2_is_null = elem2.operator UElemType const &().is_null_or_null_value();
             return (e1_is_null && e2_is_null) ? 0 : (e1_is_null ? 1 : (e2_is_null ? -1 : Native::native_compare(elem1, elem2)));
         }
 
         template <class ElemType>
         static int compare_no_blanks_I_when_blanks (ElemType const & elem1, ElemType const & elem2) {
             using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
-            auto const e1_is_null = elem1.operator UElemType const &().is_null(csv_co::also_match_null_value_option);
-            auto const e2_is_null = elem2.operator UElemType const &().is_null(csv_co::also_match_null_value_option);
+            auto const e1_is_null = elem1.operator UElemType const &().is_null_or_null_value();
+            auto const e2_is_null = elem2.operator UElemType const &().is_null_or_null_value();
             return e1_is_null && e2_is_null ? 0 : (e1_is_null ? 1 : (e2_is_null ? -1 : compare_blanks_no_I_when_blanks(elem1, elem2)));
         }
 

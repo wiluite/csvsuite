@@ -304,18 +304,12 @@ namespace csv_co {
         return default_none_set;
     }
 
-    constexpr const bool also_match_null_value_option = true;
-
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
-    bool reader<T, Q, D, L, M, E>::typed_span<Unquoted>::is_null(bool match_null_value_option) const {
-        auto already_null = is_nil();
-        if (!already_null) {
-            if (static_cast<DataType>(type_) == DataType::CSV_STRING)
-                already_null = (get_none_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_none_set().end());
-            return !already_null and match_null_value_option ? is_null_value() : already_null;
-        } else
+    bool reader<T, Q, D, L, M, E>::typed_span<Unquoted>::is_null() const {
+        if (is_nil())
             return true;
+        return static_cast<DataType>(type_) == DataType::CSV_STRING and get_none_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_none_set().end();
     }
 
     inline auto & get_null_value_set() {
@@ -326,7 +320,20 @@ namespace csv_co {
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     bool reader<T, Q, D, L, M, E>::typed_span<Unquoted>::is_null_value() const {
-        return (get_null_value_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_null_value_set().end());
+        if (is_nil())
+            return false;
+        return static_cast<DataType>(type_) == DataType::CSV_STRING and get_null_value_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_null_value_set().end();
+    }
+
+    template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
+    template<bool Unquoted>
+    bool reader<T, Q, D, L, M, E>::typed_span<Unquoted>::is_null_or_null_value() const {
+        if (is_nil())
+            return true;
+        if (static_cast<DataType>(type_) != DataType::CSV_STRING)
+            return false;
+        return get_none_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_none_set().end() or
+               get_null_value_set().find(toupper_cell_string<T, Unquoted>(*this)) != get_null_value_set().end();
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>

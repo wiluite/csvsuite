@@ -414,8 +414,8 @@ namespace csvstat {
                     setup_leading_zeroes_processing(reader, args);
 
                     //TODO: for now e.is_null() calling first is obligate. Can we do better?
-                    #define SETUP_BLANKS auto const n = e.is_null(also_match_null_value_option) && !args.blanks; \
-                                         if (!blanks[c] && n)                                                    \
+                    #define SETUP_BLANKS auto const n = e.is_null_or_null_value() && !args.blanks; \
+                                         if (!blanks[c] && n)                                      \
                                              blanks[c] = true;
 
                     auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
@@ -456,7 +456,7 @@ namespace csvstat {
                         }
                         // Text type: check ALL rows for an absent.
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&](auto &e) {
-                            if (e.is_null(also_match_null_value_option) && !blanks[c] && !args.blanks)
+                            if (e.is_null_or_null_value() && !blanks[c] && !args.blanks)
                                 blanks[c] = true;
                             return true;
                         })) {
@@ -674,7 +674,7 @@ namespace csvstat {
         auto &&slice = _2d_.get()[column_];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option)) {
+            if (elem.is_null_or_null_value()) {
                 null_num++;
                 break;
             }
@@ -686,7 +686,7 @@ namespace csvstat {
     void base<TabularType, ArgsType>::non_nulls(std::size_t output_lines) {
         auto &&slice = _2d_.get()[column_];
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 non_null_values_++;
         }
         compose_operation_result(output_lines, std::to_string(non_null_values_));
@@ -853,8 +853,8 @@ namespace csvstat {
             mdp_calc = [&](elem_t& elem) { return std::max(elem.precision(), mdp); };
 
         for (auto & elem : slice) {
-            assert(elem.is_num() || elem.is_null(also_match_null_value_option));
-            if (!elem.is_null(also_match_null_value_option)) {
+            assert(elem.is_num() || elem.is_null_or_null_value());
+            if (!elem.is_null_or_null_value()) {
                 current_n++;
                 auto const element_value = elem.num();
                 sum += element_value;
@@ -874,8 +874,8 @@ namespace csvstat {
         if (!null_number) {
             auto const mm = slice.begin() + slice.size() / 2;
             std::nth_element(slice.begin(), mm, slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
                 return left < right;
             });
 
@@ -891,8 +891,8 @@ namespace csvstat {
             auto const good_size = slice.size() - null_number;
 
             std::sort(slice.begin(), slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
                 return left < right;
             });
 
@@ -920,7 +920,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.num()]++;
@@ -933,7 +933,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         auto min_ = std::numeric_limits<long double>::max();
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 min_ = std::min(elem.num(), min_);
         }
         B::compose_operation_result(output_lines, min_);
@@ -944,7 +944,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         long double max_ = std::numeric_limits<long double>::lowest();
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 max_ = std::max(elem.num(), max_);
         }
         B::compose_operation_result(output_lines, max_);
@@ -955,7 +955,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         long double sum = 0;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 sum += elem.num();
         }
         B::compose_operation_result(output_lines, sum);
@@ -981,8 +981,8 @@ namespace csvstat {
         common_lambda = first_loop_lambda;
 
         for (auto const & elem : slice) {
-            assert(elem.is_num() || elem.is_null(also_match_null_value_option));
-            if (!elem.is_null(also_match_null_value_option)) {
+            assert(elem.is_num() || elem.is_null_or_null_value());
+            if (!elem.is_null_or_null_value()) {
                 current_n++;
                 common_lambda(elem.num());
             }
@@ -995,7 +995,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_number = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_number++;
         }
 
@@ -1004,8 +1004,8 @@ namespace csvstat {
         if (!null_number) {
             auto const mm = slice.begin() + slice.size() / 2;
             std::nth_element(slice.begin(), mm, slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
                 return left < right;
             });
 
@@ -1021,8 +1021,8 @@ namespace csvstat {
             auto const good_size = slice.size() - null_number;
 
             std::sort(slice.begin(), slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null(also_match_null_value_option) ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
                 return left < right;
             });
 
@@ -1054,7 +1054,7 @@ namespace csvstat {
         common_lambda = first_loop_lambda;
 
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 current_n++;
                 common_lambda(elem.num());
             }
@@ -1072,7 +1072,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         unsigned char max_prec = 0;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 max_prec = std::max(elem.precision(), max_prec);
         }
         B::compose_operation_result(output_lines, max_prec);
@@ -1100,7 +1100,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.num()]++;
@@ -1146,7 +1146,7 @@ namespace csvstat {
 
         std::size_t null_number = 0;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 current_n++;
                 auto const element_value = elem.timedelta_seconds();
                 sum += element_value;
@@ -1177,7 +1177,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const &elem: slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.timedelta_seconds()]++;
@@ -1190,7 +1190,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         auto min_ = std::numeric_limits<long double>::max();
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const current = elem.timedelta_seconds();
                 if (min_ >= current)
                     min_ = current;
@@ -1204,7 +1204,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         auto max_ = std::numeric_limits<long double>::lowest();
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const current = elem.timedelta_seconds();
                 if (max_ <= current)
                     max_ = current;
@@ -1218,7 +1218,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         long double sum = 0;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option))
+            if (!elem.is_null_or_null_value())
                 sum += elem.timedelta_seconds();
         }
         B::compose_operation_result(output_lines, csv_co::time_storage().str(sum));
@@ -1244,7 +1244,7 @@ namespace csvstat {
         common_lambda = first_loop_lambda;
 
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 current_n++;
                 common_lambda(elem.timedelta_seconds());
             }
@@ -1265,7 +1265,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.timedelta_seconds()]++;
@@ -1279,12 +1279,12 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_number = 0;
         for (auto const & e : slice) {
-            if (!e.is_null(also_match_null_value_option)) {
+            if (!e.is_null_or_null_value()) {
                 mcv_map_[e.unsafe_bool()]++;
                 ++B::non_nulls();
             } else
                 null_number++;
-            assert(e.is_boolean() || e.is_null(also_match_null_value_option));
+            assert(e.is_boolean() || e.is_null_or_null_value());
         }
 
         B::complete(null_number, mcv_map_, mcv_vec_);
@@ -1300,7 +1300,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.unsafe_bool()]++;
@@ -1321,7 +1321,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[elem.unsafe_bool()]++;
@@ -1347,14 +1347,14 @@ namespace csvstat {
         std::size_t longest_value = 0;
         std::size_t null_number = 0;
         for (auto const & e : slice) {
-            if (!B::blanks() or !e.is_null(also_match_null_value_option)) {
+            if (!B::blanks() or !e.is_null_or_null_value()) {
                 auto const size_in_symbols = e.unsafe_str_size_in_symbols();
                 longest_value = (size_in_symbols > longest_value) ? size_in_symbols : longest_value;
                 mcv_map_[e.str()]++;
                 ++B::non_nulls();
             } else
                 null_number++;
-            assert(e.is_str() || e.is_null(also_match_null_value_option) || e.is_boolean() || e.is_num());
+            assert(e.is_str() || e.is_null_or_null_value() || e.is_boolean() || e.is_num());
         }
         r->longest_value = longest_value;
         B::complete(null_number, mcv_map_, mcv_vec_);
@@ -1370,7 +1370,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (!B::blanks() or !elem.is_null(also_match_null_value_option))
+            if (!B::blanks() or !elem.is_null_or_null_value())
                 mcv_map_[elem.str()]++;
             else
                 null_num++;
@@ -1383,7 +1383,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t longest_value = 0;
         for (auto const & e : slice) {
-            if (!B::blanks() or !e.is_null(also_match_null_value_option)) {
+            if (!B::blanks() or !e.is_null_or_null_value()) {
                 auto const size_in_symbols = e.unsafe_str_size_in_symbols();
                 longest_value = (size_in_symbols > longest_value) ? size_in_symbols : longest_value;
             }
@@ -1408,7 +1408,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (!B::blanks() or !elem.is_null(also_match_null_value_option))
+            if (!B::blanks() or !elem.is_null_or_null_value())
                 mcv_map_[elem.str()]++;
             else
                 null_num++;
@@ -1438,8 +1438,8 @@ namespace csvstat {
         std::time_t max_ = std::numeric_limits<std::time_t>::min();
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
-            assert(std::get<0>(elem.date()) || elem.is_null(also_match_null_value_option));
-            if (!elem.is_null(also_match_null_value_option)) {
+            assert(std::get<0>(elem.date()) || elem.is_null_or_null_value());
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = date_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
@@ -1470,7 +1470,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[date_time_point(elem)]++;
@@ -1484,7 +1484,7 @@ namespace csvstat {
         auto min_ = std::numeric_limits<std::time_t>::max();
         date::sys_seconds min_value;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = date_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (min_ >= e_time_t) {
@@ -1502,7 +1502,7 @@ namespace csvstat {
         auto max_ = std::numeric_limits<std::time_t>::min();
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = date_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
@@ -1527,7 +1527,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[date_time_point(elem)]++;
@@ -1557,8 +1557,8 @@ namespace csvstat {
         std::time_t max_ = std::numeric_limits<std::time_t>::min();
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
-            assert(std::get<0>(elem.datetime()) || elem.is_null(also_match_null_value_option));
-            if (!elem.is_null(also_match_null_value_option)) {
+            assert(std::get<0>(elem.datetime()) || elem.is_null_or_null_value());
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = datetime_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
@@ -1591,7 +1591,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[datetime_time_point(elem)]++;
@@ -1605,7 +1605,7 @@ namespace csvstat {
         auto min_ = std::numeric_limits<std::time_t>::max();
         date::sys_seconds min_value;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = datetime_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (min_ >= e_time_t) {
@@ -1623,7 +1623,7 @@ namespace csvstat {
         auto max_ = std::numeric_limits<std::time_t>::min();
         date::sys_seconds max_value;
         for (auto const & elem : slice) {
-            if (!elem.is_null(also_match_null_value_option)) {
+            if (!elem.is_null_or_null_value()) {
                 auto const elem_value = datetime_time_point(elem);
                 auto e_time_t = std::chrono::system_clock::to_time_t(elem_value);
                 if (max_ <= e_time_t) {
@@ -1648,7 +1648,7 @@ namespace csvstat {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
         for (auto const & elem : slice) {
-            if (elem.is_null(also_match_null_value_option))
+            if (elem.is_null_or_null_value())
                 null_num++;
             else
                 mcv_map_[datetime_time_point(elem)]++;
