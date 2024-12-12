@@ -42,14 +42,33 @@ int main() {
         } args;
 
         "sequential"_test = [&] {
-            auto args_copy = args;
-            args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
-            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-
-            notrimming_reader_type new_reader (cout_buffer.str());
-            expect(4 == new_reader.rows());
-
+            {
+                auto args_copy = args;
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2
+1,b,c,1,b,c
+2,b,c,1,b,c
+3,b,c,4,b,c
+)");
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(4 == new_reader.rows());
+            }
+            {
+                // TEST FOR UBSAN (multiple (more than 2) sources)
+                auto args_copy = args;
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2,a_3,b_3,c_3
+1,b,c,1,b,c,1,b,c
+2,b,c,1,b,c,1,b,c
+3,b,c,4,b,c,4,b,c
+)");
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(4 == new_reader.rows());
+            }
             "max field size in this mode"_test = [&] {
+                auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"test_field_size_limit.csv", "test_field_size_limit.csv"};
                 using namespace z_test;
 #if 0
@@ -67,15 +86,35 @@ int main() {
         };
 
         "inner"_test = [&] {
-            auto args_copy = args;
-            args_copy.columns = "a";
-            args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
-            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-
-            notrimming_reader_type new_reader (cout_buffer.str());
-            expect(3 == new_reader.rows());
-
+            {
+                auto args_copy = args;
+                args_copy.columns = "a";
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2
+1,b,c,b,c
+1,b,c,b,c
+)");
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(3 == new_reader.rows());
+            }
+            {
+                // TEST FOR UBSAN (multiple (more than 2) sources)
+                auto args_copy = args;
+                args_copy.columns = "a";
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2,b_3,c_3
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+)");
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(5 == new_reader.rows());
+            }
             "max field size in this mode"_test = [&] {
+                auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"test_field_size_limit.csv", "test_field_size_limit.csv"};
                 args_copy.columns = "1";
                 using namespace z_test;
@@ -290,7 +329,7 @@ int main() {
             expect(throws([&] { csvjoin::join_wrapper(args_copy); }));
         };
 
-        "csvjoin union strings"_test = [&] {
+        "csvjoin sequential/union strings"_test = [&] {
             auto args_copy = args;
             args_copy.files = std::vector<std::string>{"h1\nabc","h2\nabc\ndef","h3\n\nghi"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
