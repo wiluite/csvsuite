@@ -763,7 +763,6 @@ namespace csvjoin::detail {
             }
         };
 
-#if !defined(_MSC_VER)
         auto outer_join = [&] {
             assert(!c_ids.empty());
             assert (!args.left_join and !args.right_join and args.outer_join);
@@ -914,7 +913,6 @@ namespace csvjoin::detail {
             }
 
         };
-#endif
 
         if (deq.empty())
             return;
@@ -927,13 +925,9 @@ namespace csvjoin::detail {
             pure_c_join();
         else if (args.left_join || args.right_join)
             left_or_right_join();
-        else {
-#if !defined(_MSC_VER)
+        else
             outer_join();
-#else
-            throw std::runtime_error("MSVC can't handle to compile the code for this operation!");
-#endif
-        }
+
         print_results(join);
     }
 } //  namespace csvjoin

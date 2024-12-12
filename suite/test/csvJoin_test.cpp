@@ -181,7 +181,6 @@ int main() {
 
         };
 
-#if !defined(_MSC_VER)
         "outer"_test = [&] {
             auto args_copy = args;
             args_copy.columns = "a";
@@ -209,7 +208,6 @@ int main() {
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_1, header::no_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
             };
         };
-#endif
 
         "single"_test = [&] {
             auto args_copy = args;
