@@ -713,8 +713,8 @@ namespace csvjoin::detail {
                     auto fun = std::get<1>(obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
                     , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
 #endif
-                    auto & first_source = *deq.begin();
-                    auto & second_source = *(deq.begin() + 1);
+                    auto & first_source = deq.front();
+                    auto & second_source = deq[1];
 
                     std::visit([&](auto &&arg) {
 
@@ -761,7 +761,7 @@ namespace csvjoin::detail {
                         arg.run_rows([&](auto &span) {
                             impl.add(std::move(compose_distinct_record(span)));
                         });
-                    }, *deq.begin());
+                    }, deq.front());
                     recalculate_types_blanks = true;
                 }
                 cycle_cleanup();
@@ -816,8 +816,8 @@ namespace csvjoin::detail {
                     auto fun = std::get<1>(obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
                     , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
 #endif
-                    auto & first_source = *deq.begin();
-                    auto & second_source = *(deq.begin() + 1);
+                    auto & first_source = deq.front();
+                    auto & second_source = deq[1];
 
                     std::visit([&](auto &&arg) {
                         max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
@@ -873,12 +873,12 @@ namespace csvjoin::detail {
                         arg.run_rows([&impl, &compose_distinct_left_part](auto &span) {
                             impl.add(std::move(compose_distinct_left_part(span)));
                         });
-                    }, *deq.begin());
+                    }, deq.front());
                     std::visit([&](auto &&arg) {
                         arg.run_rows([&impl, &compose_distinct_right_part](auto &span) {
                             impl.add(std::move(compose_distinct_right_part(span)));
                         });
-                    }, *(deq.begin() + 1));
+                    }, deq[1]);
                     recalculate_types_blanks = true;
                 }
 
