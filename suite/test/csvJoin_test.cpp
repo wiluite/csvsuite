@@ -133,18 +133,45 @@ int main() {
         };
 
         "left"_test = [&] {
-            auto args_copy = args;
-            args_copy.columns = "a";
-            args_copy.left_join = true;
-            args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
-            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+            {
+                auto args_copy = args;
+                args_copy.columns = "a";
+                args_copy.left_join = true;
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2
+1,b,c,b,c
+1,b,c,b,c
+2,b,c,,
+3,b,c,,
+)");
 
-            notrimming_reader_type new_reader (cout_buffer.str());
-            expect(5 == new_reader.rows());
-
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(5 == new_reader.rows());
+            }
+            {
+                // TEST FOR UBSAN (multiple (more than 2) sources)
+                auto args_copy = args;
+                args_copy.columns = "a";
+                args_copy.left_join = true;
+                args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2,b_3,c_3
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+1,b,c,b,c,b,c
+2,b,c,,,,
+3,b,c,,,,
+)");
+                notrimming_reader_type new_reader (cout_buffer.str());
+                expect(7 == new_reader.rows());
+            }
             "max field size in this mode"_test = [&] {
+                auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"test_field_size_limit.csv", "test_field_size_limit.csv"};
                 args_copy.columns = "1";
+                args_copy.left_join = true;
                 using namespace z_test;
 #if 0
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_0, header::has_header, 12, "FieldSizeLimitError: CSV contains a field longer than the maximum length of 12 characters on line 1.\n")

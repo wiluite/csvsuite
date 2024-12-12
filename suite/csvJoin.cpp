@@ -234,6 +234,21 @@ namespace csvjoin::detail {
         void add(auto &&vect) {
             table_impl.emplace_back(std::forward<decltype(vect)>(vect));
         }
+
+        struct row_span : public std::span<cell_span> {};
+
+        template <bool Unquoted = true>
+        struct typed_span : public cell_span {
+            using class_type = typed_span<Unquoted>;
+            using reader_type = reader_fake;
+
+            static std::locale & num_locale() {
+                static std::locale loc;
+                return loc;
+            }
+            [[nodiscard]] constexpr unsigned str_size_in_symbols() const {return 0;}
+        };
+
     };
 
     using notrimming_reader_or_fake_type = std::variant<notrimming_reader_type, reader_fake<notrimming_reader_type>>;
@@ -454,7 +469,7 @@ namespace csvjoin::detail {
                     skip_lines(arg, args);
                     auto const header = obtain_header_and_<skip_header>(arg, args);
 
-                    max_field_size_checker size_checker(*std::get_if<0>(&r), args, header.size(), init_row{1});
+                    max_field_size_checker size_checker(arg, args, header.size(), init_row{1});
                     // TODO: it is very hard to optimize this place (get rid of premature transformation - try it out)
                     //  but it is vain to do, due to no many resources spending.
                     check_max_size(header_to_strings<unquoted>(header), size_checker);
@@ -564,35 +579,22 @@ namespace csvjoin::detail {
                         std::size_t row = 0;
                         auto const total_cols = arg.cols();
                         // TODO: for multiple (more than 2) joins do the same!
-                        if (!std::holds_alternative<reader_fake<reader_type>>(r)) {
+                        max_field_size_checker size_checker(arg, args, total_cols, init_row{args.no_header ? 1u : 2u});
 
-                            max_field_size_checker size_checker(std::get<0>(r), args, total_cols, init_row{args.no_header ? 1u : 2u});
-
-                            arg.run_rows([&](auto &row_span) {
+                        arg.run_rows([&](auto &row_span) {
+                            // Do not check max size if it is fake reader.
+                            if constexpr (!std::is_same_v<std::remove_reference_t<decltype(row_span[0])>, std::string>)
                                 check_max_size(row_span, size_checker);
-                                unsigned col = 0;
-                                for (auto &elem: row_span) {
-                                    if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
-                                        impl[row][col_ofs + col++] = std::move(elem);
-                                    else
-                                        impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
-                                }
-                                ++row;
-                            });
-                            col_ofs += total_cols;
-                        } else {
-                            arg.run_rows([&](auto &row_span) {
-                                unsigned col = 0;
-                                for (auto &elem: row_span) {
-                                    if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
-                                        impl[row][col_ofs + col++] = std::move(elem);
-                                    else
-                                        impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
-                                }
-                                ++row;
-                            });
-                            col_ofs += total_cols;
-                        }
+                            unsigned col = 0;
+                            for (auto &elem: row_span) {
+                                if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
+                                    impl[row][col_ofs + col++] = std::move(elem);
+                                else
+                                    impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
+                            }
+                            ++row;
+                        });
+                        col_ofs += total_cols;
                     }, r);
                 });
 
@@ -634,7 +636,7 @@ namespace csvjoin::detail {
                     auto & second_source = deq[1];
                     std::visit([&](auto &&arg) {
 
-                        max_field_size_checker f_size_checker(*std::get_if<0>(&first_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                        max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
                         arg.run_rows([&](auto &span) {
                             if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
@@ -642,7 +644,7 @@ namespace csvjoin::detail {
 
                             std::visit([&](auto &&arg) {
 
-                                max_field_size_checker s_size_checker(*std::get_if<0>(&second_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                                max_field_size_checker s_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
                                 arg.run_rows([&](auto &span1) {
 
@@ -716,7 +718,7 @@ namespace csvjoin::detail {
 
                     std::visit([&](auto &&arg) {
 
-                        max_field_size_checker f_size_checker(*std::get_if<0>(&first_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                        max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
                         arg.run_rows([&](auto &span) {
 
@@ -726,7 +728,8 @@ namespace csvjoin::detail {
                             std::visit([&](auto &&arg) {
 
                                 bool were_joins = false;
-                                max_field_size_checker s_size_checker(*std::get_if<0>(&second_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+
+                                max_field_size_checker s_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
                                 arg.run_rows([&](auto &span1) {
 
@@ -817,14 +820,14 @@ namespace csvjoin::detail {
                     auto & second_source = *(deq.begin() + 1);
 
                     std::visit([&](auto &&arg) {
-                        max_field_size_checker f_size_checker(*std::get_if<0>(&first_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                        max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
                         arg.run_rows([&](auto &span) {
                             if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
                                 check_max_size(span, f_size_checker);
 
                             std::visit([&](auto &&arg) {
                                 bool were_joins = false;
-                                max_field_size_checker s_size_checker(*std::get_if<0>(&second_source), args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                                max_field_size_checker s_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
                                 arg.run_rows([&](auto &span1) {
                                     if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span1[0])>, std::string>)
                                         check_max_size(span1, s_size_checker);
