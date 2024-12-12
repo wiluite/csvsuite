@@ -1,6 +1,8 @@
-//
-// Created by wiluite on 7/30/24.
-//
+///
+/// \file   utils/csvsuite/Sql2csv.cpp
+/// \author wiluite
+/// \brief  Execute an SQL query on a database and output the result to a CSV file.
+
 #include <soci/soci.h>
 
 #include <ocilib.hpp>

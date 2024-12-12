@@ -1,6 +1,7 @@
-//
-// Created by wiluite on 7/30/24.
-//
+///
+/// \file   utils/csvsuite/csvSql.cpp
+/// \author wiluite
+/// \brief  Generate SQL statements for one or more CSV files, or execute those statements directly on a database, and execute one or more SQL queries.
 
 #include <soci/soci.h>
 
@@ -13,7 +14,6 @@ using namespace ocilib;
 #include <sql_utils/local-sqlite3-dep.h>
 
 // TODO:
-//  2. get rid of blanks calculations in typify() for csvsql  (--no-constraints mode)
 //  3. implement null_value (while printing results?) (see how this is done in original utility)
 
 using namespace ::csvsuite::cli;

@@ -1,7 +1,7 @@
 ///
-/// \file   test/in2csv_test.cpp
+/// \file   test/In2csv_test.cpp
 /// \author wiluite
-/// \brief  Tests for the in2csv utility.
+/// \brief  Tests for the In2csv utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

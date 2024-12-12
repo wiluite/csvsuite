@@ -1,6 +1,6 @@
-/// \file   test/csvclean_changes_character_encoding_test.cpp
+/// \file   test/csvClean_changes_character_encoding_test.cpp
 /// \author wiluite
-/// \brief  One of the tests for the csvclean utility.
+/// \brief  One of the tests for the csvClean utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

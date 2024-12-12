@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvsql_test.cpp
+/// \file   test/csvSql_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvsql utility.
+/// \brief  Tests for the csvSql utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include <utility>

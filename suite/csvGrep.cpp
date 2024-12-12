@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvgrep.cpp
+/// \file   utils/csvsuite/csvGrep.cpp
 /// \author wiluite
 /// \brief  Search CSV files.
 

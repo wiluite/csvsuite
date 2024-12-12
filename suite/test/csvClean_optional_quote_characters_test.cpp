@@ -1,6 +1,6 @@
-/// \file   test/csvclean_optional_quote_characters_test.cpp
+/// \file   test/csvClean_optional_quote_characters_test.cpp
 /// \author wiluite
-/// \brief  One of the tests for the csvclean utility.
+/// \brief  One of the tests for the csvClean utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

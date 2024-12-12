@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvcut.cpp
+/// \file   utils/csvsuite/csvCut.cpp
 /// \author wiluite
 /// \brief  Filter and truncate a CSV source.
 

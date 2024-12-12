@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvclean.cpp
+/// \file   utils/csvsuite/csvClean.cpp
 /// \author wiluite
 /// \brief  Produce CSV freed from common errors.
 

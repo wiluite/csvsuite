@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvgrep_test.cpp
+/// \file   test/csvGrep_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvgrep utility.
+/// \brief  Tests for the csvGrep utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

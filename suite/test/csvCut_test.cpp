@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvcut_test.cpp
+/// \file   test/csvCut_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvcut utility.
+/// \brief  Tests for the csvCut utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

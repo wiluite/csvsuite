@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvstack_test.cpp
+/// \file   test/csvStack_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvstack utility.
+/// \brief  Tests for the csvStack utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

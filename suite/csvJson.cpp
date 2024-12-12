@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvjson.cpp
+/// \file   utils/csvsuite/csvJson.cpp
 /// \author wiluite
 /// \brief  Convert a CSV file into JSON (or GeoJSON).
 

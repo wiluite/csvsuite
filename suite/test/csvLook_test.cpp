@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvlook_test.cpp
+/// \file   test/csvLook_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvlook utility.
+/// \brief  Tests for the csvLook utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

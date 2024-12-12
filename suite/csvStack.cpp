@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvstack.cpp
+/// \file   utils/csvsuite/csvStack.cpp
 /// \author wiluite
 /// \brief  Stack up the rows from multiple CSV files.
 

@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvjson_test.cpp
+/// \file   test/csvJson_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvjson utility.
+/// \brief  Tests for the csvJson utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

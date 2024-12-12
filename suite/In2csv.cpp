@@ -1,6 +1,8 @@
-//
-// Created by wiluite on 10/6/24.
-//
+///
+/// \file   utils/csvsuite/In2csv.cpp
+/// \author wiluite
+/// \brief  Convert common, but less awesome, tabular data formats to CSV.
+
 #include <cli.h>
 #include "include/in2csv/in2csv_fixed.h"
 #include "include/in2csv/in2csv_dbf.h"

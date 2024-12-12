@@ -190,6 +190,3 @@ _Or run a particular test (still staying in the test directory):_
 ```bash
 Release/test.exe
 ```
-NOTE! The code for the **csvjoin** and the **csvjson** utilities is currently very problematic for
-the Microsoft Compilers of certain versions. So, for now, those utilities are made not fully
-functional here. ;-(

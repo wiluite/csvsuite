@@ -1,7 +1,7 @@
 ///
-/// \file   test/sql2csv_test.cpp
+/// \file   test/Sql2csv_test.cpp
 /// \author wiluite
-/// \brief  Tests for the sql2csv utility.
+/// \brief  Tests for the Sql2csv utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

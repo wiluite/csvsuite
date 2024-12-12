@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvclean_test_funcs.h
+/// \file   test/csvClean_test_funcs.h
 /// \author wiluite
-/// \brief  Several test functions used in the csvclean utility tests.
+/// \brief  Several test functions used in the csvClean utility tests.
 
 #ifndef CSV_CO_CSVCLEAN_TEST_FUNCS_H
 #define CSV_CO_CSVCLEAN_TEST_FUNCS_H

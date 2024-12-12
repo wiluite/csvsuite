@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvsort_test.cpp
+/// \file   test/csvSort_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvsort utility.
+/// \brief  Tests for the csvSort utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

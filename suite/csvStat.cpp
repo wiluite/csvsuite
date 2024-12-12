@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvstat.cpp
+/// \file   utils/csvsuite/csvStat.cpp
 /// \author wiluite
 /// \brief  Print descriptive statistics for each column in a CSV file.
 

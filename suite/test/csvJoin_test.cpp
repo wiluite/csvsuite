@@ -1,7 +1,7 @@
 ///
-/// \file   test/csvjoin_test.cpp
+/// \file   test/csvJoin_test.cpp
 /// \author wiluite
-/// \brief  Tests for the csvjoin utility.
+/// \brief  Tests for the csvJoin utility.
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"

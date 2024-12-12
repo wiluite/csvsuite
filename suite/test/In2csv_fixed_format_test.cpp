@@ -1,7 +1,7 @@
 ///
-/// \file   test/in2csv_fixed_format_test.cpp
+/// \file   test/In2csv_fixed_format_test.cpp
 /// \author wiluite
-/// \brief  Additional tests for the in2csv utility (fixed format tests).
+/// \brief  Additional tests for the In2csv utility (fixed format tests).
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
