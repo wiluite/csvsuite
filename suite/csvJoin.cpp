@@ -549,21 +549,34 @@ namespace csvjoin::detail {
                     std::visit([&](auto &&arg) {
                         std::size_t row = 0;
                         auto const total_cols = arg.cols();
-                        max_field_size_checker size_checker(*std::get_if<0>(&r), args, total_cols, init_row{args.no_header ? 1u : 2u});
-                        arg.run_rows([&](auto &row_span) {
-                            if constexpr (!std::is_same_v<std::remove_reference_t<decltype(row_span[0])>, std::string>)
+                        // TODO: for multiple (more than 2) joins to the same!
+                        if (!std::holds_alternative<reader_fake<reader_type>>(r)) {
+                            max_field_size_checker size_checker(*std::get_if<0>(&r), args, total_cols, init_row{args.no_header ? 1u : 2u});
+                            arg.run_rows([&](auto &row_span) {
                                 check_max_size(row_span, size_checker);
-
-                            unsigned col = 0;
-                            for (auto &elem: row_span) {
-                                if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
-                                    impl[row][col_ofs + col++] = std::move(elem);
-                                else
-                                    impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
-                            }
-                            ++row;
-                        });
-                        col_ofs += total_cols;
+                                unsigned col = 0;
+                                for (auto &elem: row_span) {
+                                    if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
+                                        impl[row][col_ofs + col++] = std::move(elem);
+                                    else
+                                        impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
+                                }
+                                ++row;
+                            });
+                            col_ofs += total_cols;
+                        } else {
+                            arg.run_rows([&](auto &row_span) {
+                                unsigned col = 0;
+                                for (auto &elem: row_span) {
+                                    if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
+                                        impl[row][col_ofs + col++] = std::move(elem);
+                                    else
+                                        impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
+                                }
+                                ++row;
+                            });
+                            col_ofs += total_cols;
+                        }
                     }, r);
                 });
 
@@ -860,7 +873,7 @@ namespace csvjoin::detail {
                         std::string num_locale;
                         std::string datetime_fmt;
                         std::string date_fmt;
-                        bool no_leading_zeroes;
+                        bool no_leading_zeroes{};
                         bool blanks{};
                         mutable std::vector<std::string> null_value;
                         bool no_inference{};
