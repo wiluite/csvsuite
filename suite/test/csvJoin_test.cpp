@@ -38,6 +38,8 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvjoin_specific_args {
             Args() {
                 columns.clear();
+                date_fmt = "%d/%m/%Y";
+                datetime_fmt = "%H:%M:%S"; 
             }
         } args;
 
@@ -292,16 +294,23 @@ int main() {
             {
                 // TEST FOR UBSAN (multiple (more than 2) sources)
                 // TODO: fixme till NY.
-#if 0
                 auto args_copy = args;
                 args_copy.columns = "a";
                 args_copy.outer_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                std::cerr << cout_buffer.str() << std::endl;
+                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2,a_3,b_3,c_3
+1,b,c,1,b,c,1,b,c
+1,b,c,1,b,c,1,b,c
+1,b,c,1,b,c,1,b,c
+1,b,c,1,b,c,1,b,c
+2,b,c,,,,,,
+3,b,c,,,,,,
+,,,4,b,c,,,
+,,,,,,4,b,c
+)");
                 notrimming_reader_type new_reader (cout_buffer.str());
                 expect(9 == new_reader.rows());
-#endif
             }
             "max field size in this mode"_test = [&] {
                 auto args_copy = args;

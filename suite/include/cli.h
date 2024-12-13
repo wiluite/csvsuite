@@ -612,11 +612,19 @@ namespace csvsuite::cli {
     auto generate_column_names(auto & reader) {
         using cell_span_type = typename std::decay_t<decltype(reader)>::cell_span;
         auto const col_num = reader.cols();
+
         std::vector<cell_span_type> column_cells;
         column_cells.reserve(col_num);
+
         static std::vector<std::string> letter_names (col_num);
-        if (col_num > letter_names.size())
-            throw std::runtime_error("generate_column_names(): You would better not to call this function twice.");
+
+        if (col_num > letter_names.size()) {
+#if 0
+            std::cerr << "generate_column_names(): You would better not to call this function twice.\n";
+#endif
+        }
+        letter_names.resize(col_num);
+
         unsigned i = 0;
         std::generate(letter_names.begin(), letter_names.end(), [&i] { 
             return letter_name(i++); 

@@ -701,8 +701,10 @@ namespace csvjoin::detail {
                     return join_vec;
                 };
 
+#if 0
                 bool recalculate_types_blanks = false;
                 (void)recalculate_types_blanks; // it is really used (Clang bug!)
+#endif
                 if (can_compare()) {
                     using namespace ::csvsuite::cli::compare::detail;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
@@ -745,13 +747,16 @@ namespace csvjoin::detail {
                                             join_vec.insert(join_vec.end(), span1.begin(), span1.begin() + c_ids[1]);
                                             join_vec.insert(join_vec.end(), span1.begin() + c_ids[1] + 1, span1.end());
                                             impl.add(std::move(join_vec));
-                                            were_joins = true;
+                                            if (!were_joins)
+                                                were_joins = true;
                                         }
                                     }, fun);
                                 });
                                 if (!were_joins) {
                                     impl.add(std::move(compose_distinct_record(span)));
+#if 0
                                     recalculate_types_blanks = true;
+#endif
                                 }
                             }, second_source);
                         });
@@ -762,7 +767,9 @@ namespace csvjoin::detail {
                             impl.add(std::move(compose_distinct_record(span)));
                         });
                     }, deq.front());
+#if 0
                     recalculate_types_blanks = true;
+#endif
                 }
                 cycle_cleanup();
                 deq.push_front(std::move(impl));
@@ -840,7 +847,8 @@ namespace csvjoin::detail {
                                             join_vec.assign(span.begin(), span.end());
                                             join_vec.insert(join_vec.end(), span1.begin(), span1.end());
                                             impl.add(std::move(join_vec));
-                                            were_joins = true;
+                                            if (!were_joins)
+                                                were_joins = true;
                                         }
                                     }, fun);
                                 });
