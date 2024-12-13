@@ -108,32 +108,32 @@ namespace csvjoin::detail::typify {
 
         //TODO: for now e.is_null() calling first is obligate. Can we do better?
 
-        #define SETUP_BLANKS auto const n = e.is_null() && !args.blanks; if (!blanks[c] && n) blanks[c] = 1;
+        #define SETUP_NULLS_AND_BLANKS auto const n = e.is_null_or_null_value() && !args.blanks; if (!blanks[c] && n) blanks[c] = 1;
 
         auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
             if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e)  {
-                SETUP_BLANKS
+                SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && e.is_boolean());
             })) {
                 task_vec[c] = column_type::bool_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_BLANKS
+                SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
             })) {
                 task_vec[c] = column_type::timedelta_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto & e) {
-                SETUP_BLANKS
+                SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
             })) {
                 task_vec[c] = column_type::datetime_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_BLANKS
+                SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
             })) {
                 task_vec[c] = column_type::date_t;
@@ -141,7 +141,7 @@ namespace csvjoin::detail::typify {
             }
             if (option == typify_option::typify_with_precisions) {
                 if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions](auto & e) {
-                    SETUP_BLANKS
+                    SETUP_NULLS_AND_BLANKS
                     auto const result = n || (!args.no_inference && e.is_num());
                     if (result and !n) {
                         if (precisions[c] < e.precision())
@@ -154,7 +154,7 @@ namespace csvjoin::detail::typify {
                 }
             } else {
                 if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
-                    SETUP_BLANKS
+                    SETUP_NULLS_AND_BLANKS
                     return n || (!args.no_inference && e.is_num());
                 })) {
                     task_vec[c] = column_type::number_t;
@@ -172,7 +172,7 @@ namespace csvjoin::detail::typify {
             }
         });
 
-        #undef SETUP_BLANKS
+        #undef SETUP_NULLS_AND_BLANKS
 
         task->wait();
 

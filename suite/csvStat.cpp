@@ -414,41 +414,39 @@ namespace csvstat {
                     setup_leading_zeroes_processing(reader, args);
 
                     //TODO: for now e.is_null() calling first is obligate. Can we do better?
-                    #define SETUP_BLANKS auto const n = e.is_null_or_null_value() && !args.blanks; \
-                                         if (!blanks[c] && n)                                      \
-                                             blanks[c] = true;
+                    #define SETUP_NULLS_AND_BLANKS auto const n = e.is_null_or_null_value() && !args.blanks; if (!blanks[c] && n) blanks[c] = true;
 
                     auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&blanks, &c, &args](auto & e) {
-                            SETUP_BLANKS
+                            SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && e.is_boolean());
                         })) {
                             task_vec[c] = column_type::bool_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto &e) {
-                            SETUP_BLANKS
+                            SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
                         })) {
                             task_vec[c] = column_type::timedelta_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto & e) {
-                            SETUP_BLANKS
+                            SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
                         })) {
                             task_vec[c] = column_type::datetime_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto &e) {
-                            SETUP_BLANKS
+                            SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
                         })) {
                             task_vec[c] = column_type::date_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&blanks, &c, &args](auto & e) {
-                            SETUP_BLANKS
+                            SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && e.is_num());
                         })) {
                             task_vec[c] = column_type::number_t;
@@ -465,7 +463,7 @@ namespace csvstat {
                         }
                     });
                     task->wait();
-                    #undef SETUP_BLANKS
+                    #undef SETUP_NULLS_AND_BLANKS
 
                     for (auto & elem : task_vec) {
                         assert(elem != column_type::unknown_t);
