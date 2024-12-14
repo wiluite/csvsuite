@@ -20,6 +20,7 @@ namespace csvjoin {
         bool & no_leading_zeroes = flag("no-leading-zeroes", "Do not convert a numeric value with leading zeroes to a number.");
         std::string &columns = kwarg("c,columns", "The column name(s) on which to join. Should be either one name (or index) or a comma-separated list with one name (or index) for each file, in the same order that the files were specified. May also be left unspecified, in which case the two files will be joined sequentially without performing any matching.").set_default("");
         bool &outer_join = flag("outer", "Perform a full outer join, rather than the default inner join.");
+        bool &honest_outer_join = flag("honest-outer", "Typify outer joins result before printing.");
         bool &left_join = flag("left", "Perform a left outer join, rather than the default inner join. If more than two files are provided this will be executed as a sequence of left outer joins, starting at the left.");
         bool &right_join = flag("right", "Perform a right outer join, rather than the default inner join. If more than two files are provided this will be executed as a sequence of right outer joins, starting at the right.");
         bool &no_inference = flag("I,no-inference", "Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input.");
@@ -945,6 +946,9 @@ namespace csvjoin::detail {
 
         if ((args.left_join or args.right_join or args.outer_join) and args.columns.empty())
             throw std::runtime_error("You must provide join column names when performing an outer join.");
+
+        if (!args.outer_join and args.honest_outer_join)
+            throw std::runtime_error("You cannot provide houter flag without outer joins.");
     }
     auto get_join_column_names (auto const & args) {
         std::vector<std::string> join_column_names;

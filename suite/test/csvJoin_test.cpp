@@ -31,6 +31,7 @@ int main() {
         bool left_join {false};
         bool outer_join {false};
         bool check_integrity = {true};
+        bool honest_outer_join = {false};
     };
 
     "runs"_test = [] {
