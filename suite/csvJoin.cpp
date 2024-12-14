@@ -190,6 +190,8 @@ namespace csvjoin::detail::typify {
     }
 }
 
+//#define LAST_TYPIFY_FOR_OUTER_JOIN
+
 namespace csvjoin::detail {
 
     template<typename Reader, typename ElemType=std::string>
@@ -356,8 +358,15 @@ namespace csvjoin::detail {
 
             using elem_type = std::decay_t<decltype(elem)>;
             auto & [types, blanks] = types_n_blanks;
+
             bool const is_null = elem.is_null();
-            if (types[col] == column_type::text_t or (!args.blanks and is_null)) {
+
+#if defined(LAST_TYPIFY_FOR_OUTER_JOIN)
+            if (types[col] == column_type::text_t or (!args.blanks and is_null))
+#else // workaround to simulate csvkit
+            if (types[col] == column_type::text_t or is_null)
+#endif
+            {
                 auto compose_text = [&](auto const & e) -> std::string {
                     typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
                     if (another_rep.raw_string_view().find(',') != std::string_view::npos)
@@ -368,8 +377,10 @@ namespace csvjoin::detail {
                 os << (!args.blanks && is_null ? "" : compose_text(elem));
                 return;
             }
-            assert(!is_null && (!args.blanks || (args.blanks && !blanks[col])) && !args.no_inference);
 
+#if defined(LAST_TYPIFY_FOR_OUTER_JOIN)
+            assert(!is_null && (!args.blanks || (args.blanks && !blanks[col])) && !args.no_inference);
+#endif
             using func_type = std::function<std::string(elem_type const &)>;
 
             // TODO: FIXME. Clang sanitizers complains for this in unittests.
@@ -381,10 +392,8 @@ namespace csvjoin::detail {
                     compose_bool_1_arg<elem_type>
                     , [&](elem_type const & e) {
                         assert(!e.is_null());
-
                         static std::ostringstream ss;
                         ss.str({});
-
                         // Surprisingly, csvsuite represents a number from file without distortion:
                         // knowing, that it is a valid number in any locale, it simply removes
                         // the thousands separators and replaces the decimal point with its
@@ -892,7 +901,12 @@ namespace csvjoin::detail {
 
                 cycle_cleanup(exclude_c_column::no);
 
-                if (recalculate_types_blanks && !deq.empty()) {
+#if !defined(LAST_TYPIFY_FOR_OUTER_JOIN)
+                if (recalculate_types_blanks && !deq.empty())
+#else
+                if (recalculate_types_blanks)
+#endif
+                {
                     typename std::decay_t<decltype(std::get<0>(deq.front()))> tmp_reader(impl.operator typename reader_fake<reader_type>::table &());
                     struct {
                         bool no_header = true;

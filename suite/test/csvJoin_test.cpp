@@ -39,7 +39,7 @@ int main() {
             Args() {
                 columns.clear();
                 date_fmt = "%d/%m/%Y";
-                datetime_fmt = "%H:%M:%S"; 
+                datetime_fmt = "%d/%m/%Y %H:%M:%S";
             }
         } args;
 
@@ -418,6 +418,75 @@ int main() {
             args_copy.files = std::vector<std::string>{"h1\nabc","h2\nabc\ndef","h3\n\nghi"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
             expect(cout_buffer.str() == "h1,h2,3\r\nabc,abc,\r\n,def,ghi\r\n" || cout_buffer.str() == "h1,h2,h3\nabc,abc,\n,def,ghi\n");
+        };
+
+        "COMPLEX OUTER JOINS"_test = [&] {
+            using namespace csvjoin::detail::typify;
+
+            auto args_copy = args;
+            args_copy.outer_join = true;
+            args_copy.no_header = true;
+            {
+                args_copy.columns = "1,1,1";
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+2024-12-14,False,4,,2024-12-14,True,7,,0:00:02,,,,,
+2024-12-15,True,5,,2024-12-15,False,6,,0:00:01,2024-12-15,False,8,,0:00:03
+,,,,,,,,,2024-12-16,,9,,0:00:04
+)");
+            }
+            {
+                args_copy.columns = "1,1,1";
+                args_copy.no_inference = true;
+                args_copy.blanks = true;
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+14/12/2024,F,4,N/A,14/12/2024,T,7,N/A,2s,,,,,
+15/12/2024,T,5,N/A,15/12/2024,F,6,N/A,1s,15/12/2024,F,8,N/A,3s
+,,,,,,,,,16/12/2024,,9,N/A,4s
+)");
+            }
+            {
+                args_copy.columns = "1,1,1";
+                args_copy.no_inference = true;
+                args_copy.blanks = false;
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+//                std::cerr << cout_buffer.str();
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+14/12/2024,F,4,,14/12/2024,T,7,,2s,,,,,
+15/12/2024,T,5,,15/12/2024,F,6,,1s,15/12/2024,F,8,,3s
+,,,,,,,,,16/12/2024,,9,,4s
+)");
+            }
+            {
+                args_copy.columns = "1,1,1";
+                args_copy.no_inference = false;
+                args_copy.blanks = true;
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+2024-12-14,False,4,N/A,2024-12-14,True,7,N/A,0:00:02,,,,,
+2024-12-15,True,5,N/A,2024-12-15,False,6,N/A,0:00:01,2024-12-15,F,8,N/A,0:00:03
+,,,,,,,,,2024-12-16,,9,N/A,0:00:04
+)");
+            }
+            {
+                //still blanks
+                args_copy.columns = "1,1,2";
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+                //std::cerr << cout_buffer.str();
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+2024-12-14,False,4,N/A,2024-12-14,True,7,N/A,0:00:02,,,,,
+2024-12-15,True,5,N/A,2024-12-15,False,6,N/A,0:00:01,,,,,
+,,,,,,,,,2024-12-15,F,8,N/A,0:00:03
+,,,,,,,,,2024-12-16,,9,N/A,0:00:04
+)");
+            }
+
         };
     };
 

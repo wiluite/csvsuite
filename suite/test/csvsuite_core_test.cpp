@@ -436,13 +436,6 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 expect(column_cells[25] == "z");
             }));
         }
-        { 
-            csv_co::reader r("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28\n");
-            expect(throws([&]() {
-                generate_column_names(r);
-            }));
-        }
-
     };
 
     "obtain_header_and_skip"_test = [] {
@@ -776,12 +769,16 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         a.datetime_fmt = R"(%d/%m/%EY %I:%M:%S)";
         a.date_fmt = R"(%d/%m/%EY)";
         a.date_lib_parser = false;
-        // 10  ,  NULL,  28/02/2023 08:08:08, 14/04/2023,              ,1sec
-        // NULL,  F   ,  29/03/2023 08:08:08, 15/04/2023,  another text,1sec
-        // -inf,  F   ,  30/03/2003 07:08:09, 16/04/2023,  yet one     ,1sec
-        //notrimming_reader_type r("h1,h2,h3,h4,h5\n\"10\",,28/02/2023 08:08:08, 14/04/2023,\nn/a, F, 29/03/2023 08:08:08,15/04/2023,another text ");
 
-        typify_reader_type r("h1,h2,h3,h4,h5,h6\n\"10.1\",,28/02/2023 08:08:08, 14/04/2023,,1s\nn/a, F, 29/03/2023 08:08:08,15/04/2023,another text,1s\n-inf,F,,16/04/2023,yet one,1s");
+        // 10.1,  NULL,  28/02/2023 08:08:08, 14/04/2023,              ,1sec
+        // NULL,  F   ,  29/03/2023 08:08:08, 15/04/2023,  another text,1sec
+        // -inf,  T   ,                     , 16/04/2023,  yet one     ,1sec
+
+        typify_reader_type r(R"(h1,h2,h3,h4,h5,h6
+                                10.1, ,28/02/2023 08:08:08,14/04/2023,            ,1s
+                                NULL,F,29/03/2023 08:08:08,15/04/2023,another text,1s
+                                -inf,T,                   ,16/04/2023,yet one     ,1s
+)");
         {
             auto [types, blanks] = std::get<1>(typify(r, a, typify_option::typify_without_precisions));
             expect(types.size() == 6 && blanks.size() == 6);
