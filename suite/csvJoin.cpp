@@ -59,14 +59,11 @@ namespace csvjoin::detail::typify {
         if (!reader.cols()) // alternatively : if (!reader.rows())
             throw std::runtime_error("Typify(). Columns == 0. Vain to do next actions!"); // well, vain to do rest things
 
-        //check_max_size(reader, args, header, init_row{1});
-
         fixed_array_2d_replacement<typename Reader::template typed_span<csv_co::unquoted>> table(header.size(), reader.rows());
 
         auto c_row{0u};
         auto c_col{0u};
 
-        //auto const ir = init_row{args.no_header ? 1u : 2u};
         reader.run_rows([&] (auto & rowspan) {
             static struct tabular_checker {
                 using cell_span_t= typename Reader::cell_span;
@@ -75,7 +72,6 @@ namespace csvjoin::detail::typify {
                         throw typename Reader::exception("The number of header and data columns do not match. Use -K option to align.");
                 }
             } checker (header, rowspan);
-            //check_max_size(reader, args, rowspan, ir);
 
             for (auto & elem : rowspan)
                 table[c_col++][c_row] = elem;
@@ -139,27 +135,12 @@ namespace csvjoin::detail::typify {
                 task_vec[c] = column_type::date_t;
                 return;
             }
-            if (option == typify_option::typify_with_precisions) {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args, &precisions](auto & e) {
-                    SETUP_NULLS_AND_BLANKS
-                    auto const result = n || (!args.no_inference && e.is_num());
-                    if (result and !n) {
-                        if (precisions[c] < e.precision())
-                            precisions[c] = e.precision();
-                    }
-                    return result;
-                })) {
-                    task_vec[c] = column_type::number_t;
-                    return;
-                }
-            } else {
-                if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
-                    SETUP_NULLS_AND_BLANKS
-                    return n || (!args.no_inference && e.is_num());
-                })) {
-                    task_vec[c] = column_type::number_t;
-                    return;
-                }
+            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
+                SETUP_NULLS_AND_BLANKS
+                return n || (!args.no_inference && e.is_num());
+            })) {
+                task_vec[c] = column_type::number_t;
+                return;
             }
             // Text type: check ALL rows for an absent.
             if (std::all_of(table[c].begin(), table[c].end(), [&](auto &e) {
@@ -183,10 +164,7 @@ namespace csvjoin::detail::typify {
                 elem = column_type::text_t;           // force setting it to text
             }
         }
-        if (option == typify_option::typify_with_precisions)
-            return std::tuple{task_vec, blanks, precisions};
-        else
-            return std::tuple{task_vec, blanks};
+        return std::tuple{task_vec, blanks};
     }
 }
 
