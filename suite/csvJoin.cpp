@@ -340,12 +340,13 @@ namespace csvjoin::detail {
 
             bool const is_null = elem.is_null();
 
-#if defined(LAST_TYPIFY_FOR_OUTER_JOIN)
-            if (types[col] == column_type::text_t or (!args.blanks and is_null))
-#else // workaround to simulate csvkit
-            if (types[col] == column_type::text_t or is_null)
-#endif
-            {
+            bool text_or_null;
+            if (args.outer_join and !args.honest_outer_join)
+                text_or_null = types[col] == column_type::text_t or is_null;
+            else
+                text_or_null = types[col] == column_type::text_t or (!args.blanks and is_null);
+
+            if (text_or_null) {
                 auto compose_text = [&](auto const & e) -> std::string {
                     typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
                     if (another_rep.raw_string_view().find(',') != std::string_view::npos)
@@ -357,9 +358,9 @@ namespace csvjoin::detail {
                 return;
             }
 
-#if defined(LAST_TYPIFY_FOR_OUTER_JOIN)
-            assert(!is_null && (!args.blanks || (args.blanks && !blanks[col])) && !args.no_inference);
-#endif
+            if (!args.outer_join or args.honest_outer_join)
+                assert(!is_null && (!args.blanks || (args.blanks && !blanks[col])) && !args.no_inference);
+
             using func_type = std::function<std::string(elem_type const &)>;
 
             // TODO: FIXME. Clang sanitizers complains for this in unittests.
@@ -880,12 +881,14 @@ namespace csvjoin::detail {
 
                 cycle_cleanup(exclude_c_column::no);
 
-#if !defined(LAST_TYPIFY_FOR_OUTER_JOIN)
-                if (recalculate_types_blanks && !deq.empty())
-#else
-                if (recalculate_types_blanks)
-#endif
-                {
+                bool recalculate;
+                assert(args.outer_join);
+                if (args.honest_outer_join)
+                    recalculate = recalculate_types_blanks;
+                else
+                    recalculate = recalculate_types_blanks && !deq.empty();
+
+                if (recalculate) {
                     typename std::decay_t<decltype(std::get<0>(deq.front()))> tmp_reader(impl.operator typename reader_fake<reader_type>::table &());
                     struct {
                         bool no_header = true;

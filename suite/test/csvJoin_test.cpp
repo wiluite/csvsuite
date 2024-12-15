@@ -479,12 +479,40 @@ int main() {
                 args_copy.columns = "1,1,2";
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-                //std::cerr << cout_buffer.str();
+
                 expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
 2024-12-14,False,4,N/A,2024-12-14,True,7,N/A,0:00:02,,,,,
 2024-12-15,True,5,N/A,2024-12-15,False,6,N/A,0:00:01,,,,,
 ,,,,,,,,,2024-12-15,F,8,N/A,0:00:03
 ,,,,,,,,,2024-12-16,,9,N/A,0:00:04
+)");
+            }
+            {
+                // blanks and honest print after honest last typifying:
+                args_copy.honest_outer_join = true;
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+
+                // now we have the same except for type-aware printing!
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+14/12/2024,F,4,N/A,14/12/2024,T,7,N/A,2s,,,,,
+15/12/2024,T,5,N/A,15/12/2024,F,6,N/A,1s,,,,,
+,,,,,,,,,15/12/2024,F,8,N/A,3s
+,,,,,,,,,16/12/2024,,9,N/A,4s
+)");
+            }
+            {
+                // NO blanks and honest print after honest last typifying:
+                args_copy.blanks = false;
+                args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
+
+                // now we have again have the type-aware printing!
+                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+2024-12-14,False,4,,2024-12-14,True,7,,0:00:02,,,,,
+2024-12-15,True,5,,2024-12-15,False,6,,0:00:01,,,,,
+,,,,,,,,,2024-12-15,False,8,,0:00:03
+,,,,,,,,,2024-12-16,,9,,0:00:04
 )");
             }
 
