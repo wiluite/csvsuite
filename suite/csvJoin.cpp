@@ -169,8 +169,6 @@ namespace csvjoin::detail::typify {
     }
 }
 
-//#define LAST_TYPIFY_FOR_OUTER_JOIN
-
 namespace csvjoin::detail {
 
     template<typename Reader, typename ElemType=std::string>

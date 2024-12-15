@@ -436,6 +436,17 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 expect(column_cells[25] == "z");
             }));
         }
+        {
+            csv_co::reader r("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28\n");
+            expect(nothrow([&]() {
+                auto column_cells = generate_column_names(r);
+                expect(column_cells[0] == "a");
+                expect(column_cells[2] == "c");
+                expect(column_cells[25] == "z");
+                expect(column_cells[26] == "aa");
+                expect(column_cells[27] == "bb");
+            }));
+        }
     };
 
     "obtain_header_and_skip"_test = [] {
@@ -852,6 +863,41 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             expect(types[0] == column_type::number_t);
             expect(precisions[0] == 4);
         }
+    };
+
+    "mix rows and run_rows"_test = [] {
+        struct Args : common_args, type_aware_args, single_file_arg {
+            std::size_t skip_lines = 2;
+            bool no_header = false; // or true - no matter
+        } args;
+
+        reader<::csvsuite::cli::trim_policy::crtrim> r("\n\nhdr\nF\nT");
+        skip_lines(r, args);
+        quick_check(r, args);
+
+        auto [types, blanks] = std::get<1>(typify(r, args, typify_option::typify_without_precisions));
+
+        // After typify() we must "skip_lines()" again (if skip_lines != 0)
+        skip_lines(r, args);
+
+        expect(r.rows() == 3);
+
+        std::string s;
+        r.run_rows<1>([&](auto & span) {
+            for (auto e : span)
+                s += cell_string(e);
+        });
+        expect(s == "hdrFT");
+        expect(r.rows() == 3);
+        s.clear();
+
+        // run_rows() is "pure" function, it does not change start position after previous run_rows()
+        r.run_rows<1>([&](auto & span) {
+            for (auto e : span)
+                s += cell_string(e);
+        });
+        expect(s == "hdrFT");
+        expect(r.rows() == 3);
     };
 
 }
