@@ -455,7 +455,6 @@ int main() {
                 args_copy.blanks = false;
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-//                std::cerr << cout_buffer.str();
                 expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
 14/12/2024,F,4,,14/12/2024,T,7,,2s,,,,,
 15/12/2024,T,5,,15/12/2024,F,6,,1s,15/12/2024,F,8,,3s

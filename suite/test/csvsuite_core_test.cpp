@@ -880,6 +880,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
         // After typify() we must "skip_lines()" again (if skip_lines != 0)
         skip_lines(r, args);
 
+        expect(r.cols() == 1);
         expect(r.rows() == 3);
 
         std::string s;
@@ -888,6 +889,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 s += cell_string(e);
         });
         expect(s == "hdrFT");
+        expect(r.cols() == 1);
         expect(r.rows() == 3);
         s.clear();
 
@@ -897,6 +899,7 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 s += cell_string(e);
         });
         expect(s == "hdrFT");
+        expect(r.cols() == 1);
         expect(r.rows() == 3);
     };
 
