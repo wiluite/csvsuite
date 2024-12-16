@@ -621,66 +621,57 @@ namespace csvjoin::detail {
                     , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
 #endif
                     auto & first_source = deq.front();
-                    auto & second_source = deq[1];
+                    auto & other_source = deq[1];
+                    std::visit([&](auto &&cmp) {
                     std::visit([&](auto &&arg) {
 
-                        assert(!std::holds_alternative<reader_fake<reader_type>>(second_source));
-#if 0
-                        auto & rdr = std::get<0>(second_source);
-                        using current_reader_type = std::decay_t<decltype(rdr)>;
-                        std::vector<typename current_reader_type::row_span> row_span_vector;
+                        assert(!std::holds_alternative<reader_fake<reader_type>>(other_source));
 
-                        max_field_size_checker s_size_checker(rdr, args, rdr.cols(), init_row{args.no_header ? 1u : 2u});
+                        auto & other_reader = std::get<0>(other_source);
+                        using other_reader_type = std::decay_t<decltype(other_reader)>;
+                        std::vector<typename other_reader_type::cell_span> other_cell_span_vector;
+                        std::vector<elem_t> other_typed_span_vector;
+                        auto const other_cols = other_reader.cols();
+                        auto const other_rows = other_reader.rows();
+                        max_field_size_checker other_size_checker(other_reader, args, other_cols, init_row{args.no_header ? 1u : 2u});
 
-                        row_span_vector.reserve(rdr.rows());
-                        rdr.run_rows([&](auto & span) {
-                            check_max_size(span, s_size_checker);
-                            static_assert(std::is_same_v<std::decay_t<decltype(span)>, typename current_reader_type::row_span>);
-                            row_span_vector.push_back(span);
+                        other_cell_span_vector.reserve(other_rows * other_cols);
+                        other_typed_span_vector.reserve(other_rows * other_cols);
+
+                        other_reader.run_rows([&](auto & other_span) {
+                            check_max_size(other_span, other_size_checker);
+                            static_assert(std::is_same_v<std::decay_t<decltype(other_span)>, typename other_reader_type::row_span>);
+                            for (auto & e : other_span) {
+                                other_cell_span_vector.push_back(e);
+                                other_typed_span_vector.push_back(elem_t{e});
+                                using UElemType = typename std::decay_t<elem_t>::template rebind<csv_co::unquoted>::other;
+                                other_typed_span_vector.back().operator UElemType const&().type();
+                            }
                         });
-#endif
 
-                        max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                        max_field_size_checker this_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
                         arg.run_rows([&](auto &span) {
                             if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
-                                check_max_size(span, f_size_checker);
-#if 0
-                            for (auto && e : row_span_vector) {
-                                    std::visit([&](auto &&cmp) {
-                                        if (!cmp(elem_t{span[c_ids[0]]}, elem_t{e[c_ids[1]]})) {
-                                            std::vector<std::string> join_vec;
+                                check_max_size(span, this_size_checker);
+                            std::size_t rows_count = 0;
+                            while (rows_count < other_rows) {
+                                typename other_reader_type::row_span e(other_cell_span_vector.begin() + rows_count * other_cols, other_cols);
+                                auto & _ = other_typed_span_vector[rows_count * other_cols + c_ids[1]];
+                                if (!cmp(elem_t{span[c_ids[0]]}, _)) {
+                                    std::vector<std::string> join_vec;
 
-                                            assert(types1.size() == e.size());
-                                            join_vec.reserve(span.size() + e.size() - 1);
-                                            join_vec.assign(span.begin(), span.end());
-                                            join_vec.insert(join_vec.end(), e.begin(), e.begin() + c_ids[1]);
-                                            join_vec.insert(join_vec.end(), e.begin() + c_ids[1] + 1, e.end());
-                                            impl.add(std::move(join_vec));
-                                        }
-                                    }, fun);
+                                    join_vec.reserve(span.size() + e.size() - 1);
+                                    join_vec.assign(span.begin(), span.end());
+                                    join_vec.insert(join_vec.end(), e.begin(), e.begin() + c_ids[1]);
+                                    join_vec.insert(join_vec.end(), e.begin() + c_ids[1] + 1, e.end());
+                                    impl.add(std::move(join_vec));
+                                }
+                                rows_count++;
                             }
-#endif
-                            auto & arg = std::get<0>(second_source);
-                            max_field_size_checker s_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
-                            arg.run_rows([&](auto &span1) {
-
-                                    check_max_size(span1, s_size_checker);
-
-                                std::visit([&](auto &&cmp) {
-                                    if (!cmp(elem_t{span[c_ids[0]]}, elem_t{span1[c_ids[1]]})) {
-                                        std::vector<std::string> join_vec;
-                                        assert(types1.size() == span1.size());
-                                        join_vec.reserve(span.size() + span1.size() - 1);
-                                        join_vec.assign(span.begin(), span.end());
-                                        join_vec.insert(join_vec.end(), span1.begin(), span1.begin() + c_ids[1]);
-                                        join_vec.insert(join_vec.end(), span1.begin() + c_ids[1] + 1, span1.end());
-                                        impl.add(std::move(join_vec));
-                                    }
-                                }, fun);
-                            });
                         });
                     }, first_source);
+                    }, fun);
                 }
 
                 cycle_cleanup();
