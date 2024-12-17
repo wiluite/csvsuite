@@ -19,7 +19,7 @@ namespace csvsuite::cli::compare::detail {
         template <class ElemType>
         static inline int compare_blanks_no_I_when_blanks (ElemType const & elem1, ElemType const & elem2) {
             using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
-            return elem1.operator UElemType const& ().compare(elem2.operator UElemType const& ());
+            return elem1.operator UElemType const& ().text_compare(elem2.operator UElemType const& ());
         }
 
         template <class ElemType>
@@ -69,8 +69,8 @@ namespace csvsuite::cli::compare::detail {
             using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
             UElemType const & ue1 = elem1;
             UElemType const & ue2 = elem2;
-            auto const e1 = (ue1.is_boolean(), ue1.unsafe_bool());
-            auto const e2 = (ue2.is_boolean(), ue2.unsafe_bool());
+            auto const e1 = (ue1.is_boolean(), static_cast<bool>(ue1.unsafe()));
+            auto const e2 = (ue2.is_boolean(), static_cast<bool>(ue2.unsafe()));
             return e1 == e2 ? 0 : (e1 < e2 ? -1 : 1);
         }
         explicit bool_compare_impl(auto const & ) {}
@@ -150,7 +150,7 @@ namespace csvsuite::cli::compare::detail {
         template <class ElemType>
         static int native_compare (ElemType const & elem1, ElemType const & elem2) {
             using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
-            return elem1.operator UElemType const& ().compare(elem2.operator UElemType const& ());
+            return elem1.operator UElemType const& ().text_compare(elem2.operator UElemType const& ());
         }
         explicit text_compare_impl (auto &) {}
         text_compare_impl() = default;

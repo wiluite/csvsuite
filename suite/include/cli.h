@@ -1201,7 +1201,7 @@ namespace csvsuite::cli {
     std::string compose_bool(T const & elem, std::any const &) {
         static bool_stringstream<Q> ss;
         ss.rdbuf()->str("");
-        ss << std::boolalpha << (elem.is_boolean(), elem.unsafe_bool());
+        ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
         return ss.str();
     }
 
@@ -1229,7 +1229,7 @@ namespace csvsuite::cli {
     std::string compose_bool_1_arg(T const & elem) {
         static bool_stringstream<Q> ss;
         ss.rdbuf()->str("");
-        ss << std::boolalpha << (elem.is_boolean(), elem.unsafe_bool());
+        ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
         return ss.str();
     }
 

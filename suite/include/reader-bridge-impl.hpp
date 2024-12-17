@@ -262,7 +262,7 @@ namespace csv_co {
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
-    [[nodiscard]] auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::compare(typed_span const &other) const -> int {
+    [[nodiscard]] auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::text_compare(typed_span const &other) const -> int {
         static_assert(Unquoted == csv_co::unquoted);
         return string_comparison_func(unquoted_cell_string(*this).c_str(), unquoted_cell_string(other).c_str());
     }
@@ -288,7 +288,7 @@ namespace csv_co {
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
-    inline bool reader<T, Q, D, L, M, E>::typed_span<Unquoted>::unsafe_bool() const noexcept {
+    inline auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::unsafe() const noexcept {
         assert(static_cast<DataType>(type_) != DataType::UNKNOWN);
         return value;
     }
@@ -415,18 +415,62 @@ namespace csv_co {
             return this->operator unquoted_cell_string();
     }
 
+    enum class DateTimeType : signed char {
+        UNKNOWN = -1,
+        NO,
+        DATE,
+        DATETIME
+    };
+
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::datetime(std::string const &extra_dt_fmt) const {
+        static_assert(sizeof(date::sys_seconds) < sizeof(decltype(value)));
         static datetime_format_proc datetime_fmt_proc(extra_dt_fmt);
-        return datetime_fmt_proc(*this);
+        if (static_cast<DateTimeType>(datetime_type) == DateTimeType::UNKNOWN || !extra_dt_fmt.empty()) {
+            auto [is, v] = datetime_fmt_proc(*this);
+            if (is) {
+                datetime_type = static_cast<signed char>(DateTimeType::DATETIME);
+                value = std::chrono::system_clock::to_time_t(v);
+                date::sys_seconds tp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(value));
+                return std::tuple{true, v};
+            } else {
+                datetime_type = static_cast<signed char>(DateTimeType::NO);
+                return std::tuple{false, date::sys_seconds{}};
+            }
+        } else {
+            if (static_cast<DateTimeType>(datetime_type) == DateTimeType::DATETIME) {
+                date::sys_seconds tp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(value));
+                return std::tuple{true, tp};
+            }
+            else
+                return std::tuple{false, date::sys_seconds{}};
+        }
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::date(std::string const &extra_date_fmt) const {
-        static date_format_proc date_fmt_proc(extra_date_fmt);    
-        return date_fmt_proc(*this);
+        static date_format_proc date_fmt_proc(extra_date_fmt);
+         
+        if (static_cast<DateTimeType>(datetime_type) == DateTimeType::UNKNOWN || !extra_date_fmt.empty()) {
+            auto [is, v] = date_fmt_proc(*this);
+            if (is) {
+                datetime_type = static_cast<signed char>(DateTimeType::DATE);
+                value = std::chrono::system_clock::to_time_t(v);
+                return std::tuple{true, v};
+            } else {
+                datetime_type = static_cast<signed char>(DateTimeType::NO);
+                return std::tuple{false, date::sys_seconds{}};
+            }
+        } else {
+            if (static_cast<DateTimeType>(datetime_type) == DateTimeType::DATE) {
+                date::sys_seconds tp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(value));
+                return std::tuple{true, tp};
+            }
+            else
+                return std::tuple{false, date::sys_seconds{}};
+        }
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
@@ -457,20 +501,20 @@ namespace csv_co {
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
-    inline auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::date_datetime_call_operator_implementation(auto const & ccs, auto & formats) {
+    inline auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::datetime_call_operator_impl(auto const & span, auto & formats) {
         static class parser {
             std::function<std::tuple<bool, date::sys_seconds>(typed_span const &, std::vector<std::string> &)> fun_impl;
         public:
             parser() {
                 using namespace std::chrono; 
                 if (date_parser_backend == date_parser_backend_t::date_lib_supported) {
-                    fun_impl = [&](typed_span const & ccs, std::vector<std::string> & formats) -> std::tuple<bool, date::sys_seconds> {
+                    fun_impl = [&](typed_span const & span, std::vector<std::string> & formats) -> std::tuple<bool, date::sys_seconds> {
 
                         date::sys_seconds tp;
-                        std::string ccs_trimmed = ccs;
-                        ccs_trimmed.erase(0, ccs_trimmed.find_first_not_of(' '));
+                        std::string trimmed = span;
+                        trimmed.erase(0, trimmed.find_first_not_of(' '));
                         for (auto const &fmt : formats) {
-                            std::istringstream in {ccs_trimmed};
+                            std::istringstream in {trimmed};
                             in >> date::parse(fmt, tp);
                             if (in.fail() or in.bad())
                                 continue;
@@ -479,7 +523,7 @@ namespace csv_co {
                         return std::tuple{false, date::sys_seconds{}};
                     };
                 } else {
-                    fun_impl = [&](typed_span const & ccs, std::vector<std::string> & formats) -> std::tuple<bool, date::sys_seconds> {
+                    fun_impl = [&](typed_span const & span, std::vector<std::string> & formats) -> std::tuple<bool, date::sys_seconds> {
                         std::tm calendar = {};
                         std::stringstream ss;
                         ss.imbue(num_locale());
@@ -487,7 +531,7 @@ namespace csv_co {
                             ss.clear();
                             ss.str({});
                             calendar = {};
-                            ss << ccs << ' ';
+                            ss << span << ' ';
                             ss >> std::get_time(&calendar, fmt.c_str());
                             if (!ss.fail()) {
                                 if (std::mktime(&calendar) == -1)
@@ -501,12 +545,12 @@ namespace csv_co {
                     };
                 }
             }
-            auto parse(typed_span const & ccs, std::vector<std::string> & formats) {
-                return fun_impl(ccs, formats);
+            auto parse(typed_span const & span, std::vector<std::string> & formats) {
+                return fun_impl(span, formats);
             }
         } p;
 
-        return p.parse(ccs, formats);
+        return p.parse(span, formats);
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
@@ -524,8 +568,8 @@ namespace csv_co {
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
-    auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::datetime_format_proc::operator()(typed_span const & ccs) const {
-        return date_datetime_call_operator_implementation(ccs, formats);
+    auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::datetime_format_proc::operator()(typed_span const & span) const {
+        return datetime_call_operator_impl(span, formats);
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
@@ -534,15 +578,14 @@ namespace csv_co {
         if (!extra_date_fmt.empty()) {
             formats.emplace_back(extra_date_fmt);
             formats.emplace_back("%Y-%m-%d");
-        } else {
+        } else
             assert(!formats.empty());  
-        }
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::date_format_proc::operator()(typed_span const & ccs) const {
-        return date_datetime_call_operator_implementation(ccs, formats);
+        return datetime_call_operator_impl(ccs, formats);
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>

@@ -108,7 +108,7 @@ namespace csvjson {
             std::array<check_dup_func, static_cast<std::size_t>(column_type::sz) - 1> type2key_check_func {
                     [&](auto const & elem) {
                         return check_dup_func_impl(elem
-                                , [&] {return (elem.is_boolean(), elem.unsafe_bool()); }
+                                , [&] {return (elem.is_boolean(), static_cast<bool>(elem.unsafe())); }
                                 , [&] (auto & value) {
                                     std::ostringstream oss;
                                     oss.imbue(std::locale(std::locale("C"), new custom_boolean_facet));
@@ -199,7 +199,7 @@ namespace csvjson {
                 [] (auto & elem) {
                     std::ostringstream oss;
                     oss.imbue(std::locale(std::locale("C"), new custom_boolean_facet));
-                    oss << std::boolalpha << (elem.is_boolean(), elem.unsafe_bool());
+                    oss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
                     return oss.str();
                 }
                 , [] (auto & elem) { return carefully_adjusted_number<0>(elem); }

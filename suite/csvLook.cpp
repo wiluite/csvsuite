@@ -116,7 +116,7 @@ namespace csvlook {
                                     constexpr unsigned false_len = 5u;
                                     constexpr unsigned true_len = 4u;
 
-                                    auto const value = (e.is_boolean(), e.unsafe_bool());
+                                    auto const value = (e.is_boolean(), static_cast<bool>(e.unsafe()));
                                     auto const unrestricted_size = (value ? std::max(current_size, true_len) : std::max(current_size, false_len));
                                     return std::max(std::min(unrestricted_size, args.max_column_width), micro_ellipsis_len);
                                 }

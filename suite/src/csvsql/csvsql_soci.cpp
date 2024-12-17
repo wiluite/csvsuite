@@ -71,7 +71,7 @@ namespace soci_client_ns {
                 std::array<func_type, static_cast<std::size_t>(column_type::sz)> fill_funcs {
                         [](elem_type const &) { assert(false && "this is unknown data type, logic error."); }
                         , [&](elem_type const & e) {
-                            std::get<3>(data_holder[col]) = static_cast<generic_bool>(e.is_boolean(), e.unsafe_bool());
+                            std::get<3>(data_holder[col]) = static_cast<generic_bool>(e.is_boolean(), static_cast<bool>(e.unsafe()));
                         }
                         , [&](elem_type const & e) {
                             std::get<0>(data_holder[col]) = static_cast<double>(e.num());
@@ -220,7 +220,7 @@ namespace soci_client_ns {
                 std::array<func_type, static_cast<std::size_t>(column_type::sz)> fill_funcs {
                         [](elem_type const &) { assert(false && "this is unknown data type, logic error."); }
                         , [&](elem_type const & e) {
-                            std::get<3>(data_holder[col])[offset] = static_cast<generic_bool>(e.is_boolean(), e.unsafe_bool());
+                            std::get<3>(data_holder[col])[offset] = static_cast<generic_bool>(e.is_boolean(), static_cast<bool>(e.unsafe()));
                         }
                         , [&](elem_type const & e) {
                             std::get<0>(data_holder[col])[offset] = static_cast<double>(e.num());

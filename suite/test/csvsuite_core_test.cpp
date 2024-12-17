@@ -324,40 +324,40 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             cs = R"( 01 )";
             {
                 reader<>::typed_span<quoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 1 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 1 and span.is_num());
             }
 
             cs = R"( 0 )";
             {
                 reader<>::typed_span<quoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 0 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 0 and span.is_num());
             }
 
             cs = R"( " 01 " )";
             expect(not (reader<>::typed_span<quoted>{reader<>::cell_span{cs}}).is_boolean());
             {
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 1 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 1 and span.is_num());
             }
 
             cs = R"( " 0 " )";
             expect(not (reader<>::typed_span<quoted>{reader<>::cell_span{cs}}).is_boolean());
             {
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 0 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 0 and span.is_num());
             }
 
             cs = R"(  TrUe  )";
             {
                 reader<>::typed_span<quoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 1 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 1 and span.is_num());
             }
 
             cs = R"( "TrUe " )";
             expect(not (reader<>::typed_span<quoted>{reader<>::cell_span{cs}}).is_boolean());
             {
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 1 and span.is_num() and span.num() == 1);
+                expect(span.is_boolean() and span.unsafe() == 1 and span.is_num() and span.num() == 1);
             }
 
             cs = R"( " F" )";
@@ -370,12 +370,12 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
             cs = R"( 01 )";
             {
                 reader<>::typed_span<quoted> span{reader<>::cell_span{cs}};
-                expect(span.is_boolean() and span.unsafe_bool() == 1 and span.is_num());
+                expect(span.is_boolean() and span.unsafe() == 1 and span.is_num());
             }
             {
                 reader<>::typed_span<quoted> span{reader<>::cell_span{cs}};
                 reader<>::typed_span<quoted>::no_leading_zeroes(true);
-                expect(!span.is_boolean() /*and span.unsafe_bool() == 1*/ and !span.is_num());
+                expect(!span.is_boolean() and !span.is_num());
                 reader<>::typed_span<quoted>::no_leading_zeroes(false);
             }
             cs = R"( 02.3 )";
@@ -404,13 +404,13 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
                 reader<>::typed_span<unquoted> span2{reader<>::cell_span{cs2}};
                 reader<>::typed_span<unquoted>::case_insensitivity(false);
-                expect (span.compare(span2) < 0);
+                expect (span.text_compare(span2) < 0);
             }
             {
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
                 reader<>::typed_span<unquoted> span2{reader<>::cell_span{cs2}};
                 reader<>::typed_span<unquoted>::case_insensitivity(true);
-                expect(span.compare(span2) == 0);
+                expect(span.text_compare(span2) == 0);
                 reader<>::typed_span<unquoted>::case_insensitivity(false);
             }
         };

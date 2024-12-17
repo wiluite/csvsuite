@@ -1278,7 +1278,7 @@ namespace csvstat {
         std::size_t null_number = 0;
         for (auto const & e : slice) {
             if (!e.is_null_or_null_value()) {
-                mcv_map_[e.unsafe_bool()]++;
+                mcv_map_[static_cast<bool>(e.unsafe())]++;
                 ++B::non_nulls();
             } else
                 null_number++;
@@ -1301,7 +1301,7 @@ namespace csvstat {
             if (elem.is_null_or_null_value())
                 null_num++;
             else
-                mcv_map_[elem.unsafe_bool()]++;
+                mcv_map_[static_cast<bool>(elem.unsafe())]++;
         }
         B::compose_operation_result(output_lines, std::to_string(mcv_map_.size() + (null_num ? 1 : 0)));
     }
@@ -1322,7 +1322,7 @@ namespace csvstat {
             if (elem.is_null_or_null_value())
                 null_num++;
             else
-                mcv_map_[elem.unsafe_bool()]++;
+                mcv_map_[static_cast<bool>(elem.unsafe())]++;
         }
 
         B::complete(null_num, mcv_map_, mcv_vec_);
