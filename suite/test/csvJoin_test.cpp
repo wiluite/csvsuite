@@ -18,6 +18,35 @@
                                                  call;                                             \
                                              }
 
+using namespace ::csvsuite::cli::compare::detail;
+
+using element_type = typename notrimming_reader_type::template typed_span<csv_co::quoted>;
+std::vector<std::tuple<unsigned, compare_fun<element_type>>> compare_functionality;
+
+bool operator<(std::vector<element_type> & key_vector, std::vector<element_type> const & v) {
+    assert(compare_functionality.size() == 1);
+    auto & col = std::get<0>(compare_functionality[0]);
+
+    int result;
+    std::visit([&](auto & c_cmp) {
+        result = c_cmp(key_vector[col], v[col]);
+    }, std::get<1>(compare_functionality[0]));
+
+    return result ? std::less<>()(result, 0) : false;
+}
+
+bool operator<(std::vector<element_type> const & v, std::vector<element_type> & key_vector) {
+    assert(compare_functionality.size() == 1);
+    auto & col = std::get<0>(compare_functionality[0]);
+
+    int result;
+    std::visit([&](auto & c_cmp) {
+        result = c_cmp(v[col], key_vector[col]);
+    }, std::get<1>(compare_functionality[0]));
+
+    return result ? std::less<>()(result, 0) : false;
+}
+
 int main() {
     using namespace boost::ut;
 
@@ -516,6 +545,36 @@ int main() {
             }
 
         };
-    };
 
+        "std::equal_range"_test = [&] {
+            auto args_copy = args;
+            args_copy.columns = "1";
+            notrimming_reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d");
+            auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
+
+            // Filling in data to sort.
+            // It is sufficient to have csv_co::quoted cell_spans in it, because comparison is quite sophisticated and takes it into account
+            compromise_table_MxN table(reader, args);
+            auto only_key_idx = 0;
+            assert(table[1][0].str() == "10.01234");
+
+            std::vector<unsigned> ids {{only_key_idx}};
+            std::vector<element_type> key_to_search(table[0].size());
+
+            key_to_search[only_key_idx] = table[1][only_key_idx]; // typed_span with 10.01234 value
+
+            // first sort what to search by a key in key_to_search
+            compare_functionality = obtain_compare_functionality<element_type>(ids, types_blanks, args);
+            std::stable_sort(table.begin(), table.end(), sort_comparator(compare_functionality, std::less<>()));
+
+            // search by std::equal_range algo.
+            const auto p = std::equal_range(table.begin(), table.end(), key_to_search);
+            std::string accumulator;
+            for (auto i = p.first; i != p.second; ++i) {
+                accumulator += (*i)[1];
+                accumulator += ' ';
+            }
+            expect (accumulator == "m b d ");
+        };
+    };
 }

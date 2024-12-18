@@ -35,29 +35,6 @@ namespace csvsort {
 
     void sort(std::monostate &, auto const  &) {}
 
-    template <class CFA, class C=std::less<>>
-    class sort_comparator {
-        CFA cfa_;
-        C cpp_cmp;
-    public:
-        bool operator()(auto & a, auto & b) {
-            for (auto & elem : cfa_) {
-#if !defined(__clang__) || __clang_major__ >= 16
-                auto & [col, fun] = elem;
-#else
-                auto & col = std::get<0>(elem);
-                auto & fun = std::get<1>(elem);
-#endif
-                int result;
-                std::visit([&](auto & c_cmp) { result = c_cmp(a[col], b[col]); }, fun);
-                if (result)
-                    return cpp_cmp(result, 0);
-            }
-            return false;
-        }
-        sort_comparator(CFA cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
-    };
-
     template <class OS>
     class printer {
         OS &os;
@@ -186,61 +163,6 @@ namespace csvsort {
 
     };
 
-    template <class R, class Args, bool Quoted_or_not=csv_co::quoted>
-    class compromise_table_MxN {
-    public:
-        using element_type = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
-    private:
-        using field_array = std::vector<element_type>;
-        using table = std::vector<field_array>;
-        std::unique_ptr<table> impl;
-        struct hibernator {
-            explicit hibernator(auto &reader) : reader_(reader) { reader_.skip_rows(0); }
-            ~hibernator() { reader_.skip_rows(0); }
-        private:
-            R & reader_;
-        };
-    public:
-        explicit compromise_table_MxN(R & reader, Args const & args) {
-            using namespace csv_co;
-            hibernator h(reader);
-            skip_lines(reader, args);
-            auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
-            auto const field_array_size = obtain_header_and_<skip_header>(reader, args).size();
-            impl = std::make_unique<table>(rest_rows, field_array(field_array_size));
-
-            std::size_t row = 0;
-            auto & impl_ref = *impl;
-
-            auto const ir = init_row{args.no_header ? 1u : 2u};
-
-            reader.run_rows([&] (auto & row_span) {
-                unsigned i = 0;
-                for (auto & elem : row_span)
-                    impl_ref[row][i++] = elem;
-                row++;
-            });
-        }
-        decltype (auto) operator[](size_t r) {
-            return (*impl)[r];
-        }
-        [[nodiscard]] auto rows() const {
-            return (*impl).size();
-        }
-        [[nodiscard]] auto cols() const {
-            return (*impl)[0].size();
-        }
-
-        [[nodiscard]] auto cbegin() const { return impl->cbegin(); }
-        [[nodiscard]] auto cend() const { return impl->cend(); }
-        auto begin() { return impl->begin(); }
-        auto end() { return impl->end(); }
-        compromise_table_MxN (compromise_table_MxN && other) noexcept = default;
-        auto operator=(compromise_table_MxN && other) noexcept -> compromise_table_MxN & = default;
-    };
-    static_assert(!std::is_copy_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
-    static_assert(std::is_move_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
-
     template <typename Reader, typename Args>
     void setup_string_comparison_type(Reader &, Args const &args) {
         using unquoted_elem_type = typename Reader::template typed_span<csv_co::unquoted>;
@@ -269,11 +191,12 @@ namespace csvsort {
 
             auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
 
+            using namespace ::csvsuite::cli::compare::detail;
             // Filling in data to sort.
             // It is sufficient to have csv_co::quoted cell_spans in it, because comparison is quite sophisticated and takes it into account
             compromise_table_MxN table(reader, args);
 
-            auto cfa = ::csvsuite::cli::compare::detail::obtain_compare_functionality<std::decay_t<decltype(table[0][0])>>(ids, types_blanks, args);
+            auto cfa = obtain_compare_functionality<std::decay_t<decltype(table[0][0])>>(ids, types_blanks, args);
             if (args.r) {
                 if (args.parallel_sort)
                     std::sort(poolstl::par, table.begin(), table.end(), sort_comparator(std::move(cfa), std::greater<>()));

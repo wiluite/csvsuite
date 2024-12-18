@@ -182,21 +182,40 @@ namespace csvsuite::cli::compare::detail {
         }
     };
 
+    template<class type>
+    using bc_fun = compare_host_class<type, bool_compare_impl>;
+
+    template<class type>
+    using tdc_fun = compare_host_class<type, timedelta_compare_impl>;
+
+    template<class type>
+    using nc_fun = compare_host_class<type, num_compare_impl>;
+
+    template<class type>
+    using dtc_fun = compare_host_class<type, datetime_compare_impl>;
+
+    template<class type>
+    using dc_fun = compare_host_class<type, date_compare_impl>;
+
+    template<class type>
+    using tc_fun = compare_host_class<type, text_compare_impl>;
+
+    template<class type>
+    using compare_fun = std::variant<bc_fun<type>, tdc_fun<type>, nc_fun<type>, dtc_fun<type>, dc_fun<type>, tc_fun<type>>;
+
     template <class ElemType>
     auto obtain_compare_functionality (auto const & ids, auto const & types_blanks, auto const & args ) {
-        using bc_fun  = compare_host_class<ElemType, bool_compare_impl>;
-        using tdc_fun = compare_host_class<ElemType, timedelta_compare_impl>;
-        using nc_fun  = compare_host_class<ElemType, num_compare_impl>;
-        using dtc_fun = compare_host_class<ElemType, datetime_compare_impl>;
-        using dc_fun  = compare_host_class<ElemType, date_compare_impl>;
-        using tc_fun  = compare_host_class<ElemType, text_compare_impl>;
-
-        using compare_fun = std::variant<bc_fun, tdc_fun, nc_fun, dtc_fun, dc_fun, tc_fun>;
-        
         using col_t = column_type; 
-        std::unordered_map<col_t, compare_fun> hash {{col_t::bool_t, bc_fun()}, {col_t::number_t, nc_fun()}, {col_t::datetime_t, dtc_fun()}, {col_t::date_t, dc_fun()}, {col_t::timedelta_t, tdc_fun()}, {col_t::text_t, tc_fun()} };
+        std::unordered_map<col_t, compare_fun<ElemType>> hash {
+            {col_t::bool_t, bc_fun<ElemType>()}
+            , {col_t::number_t, nc_fun<ElemType>()}
+            , {col_t::datetime_t, dtc_fun<ElemType>()}
+            , {col_t::date_t, dc_fun<ElemType>()}
+            , {col_t::timedelta_t, tdc_fun<ElemType>()}
+            , {col_t::text_t, tc_fun<ElemType>()}
+        };
 
-        std::vector<std::tuple<unsigned, compare_fun>> result;
+        std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
         auto const [types, blanks] = types_blanks;
 
         for (auto elem : ids) {
@@ -208,6 +227,118 @@ namespace csvsuite::cli::compare::detail {
         return result;
     }
 
+    template <class ElemType>
+    auto obtain_compare_functionality (unsigned id, auto const & types_blanks, auto const & args ) {
+        using col_t = column_type;
+        std::unordered_map<col_t, compare_fun<ElemType>> hash {
+            {col_t::bool_t, bc_fun<ElemType>()}
+            , {col_t::number_t, nc_fun<ElemType>()}
+            , {col_t::datetime_t, dtc_fun<ElemType>()}
+            , {col_t::date_t, dc_fun<ElemType>()}
+            , {col_t::timedelta_t, tdc_fun<ElemType>()}
+            , {col_t::text_t, tc_fun<ElemType>()}
+        };
+
+        //std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
+        std::tuple<unsigned, compare_fun<ElemType>> result;
+        auto const [types, blanks] = types_blanks;
+
+        std::visit([&](auto & arg) {
+            result = {id, arg.clone(args, std::get<1>(types_blanks)[id])};
+        }, hash[types[id]]);
+
+        return result;
+    }
+
+    template <class CFA, class C=std::less<>>
+    class sort_comparator {
+        CFA cfa_;
+        C cpp_cmp;
+    public:
+        bool operator()(auto & a, auto & b) {
+            for (auto & elem : cfa_) {
+#if !defined(__clang__) || __clang_major__ >= 16
+                auto & [col, fun] = elem;
+#else
+                auto & col = std::get<0>(elem);
+                auto & fun = std::get<1>(elem);
+#endif
+                int result;
+                std::visit([&](auto & c_cmp) { result = c_cmp(a[col], b[col]); }, fun);
+                if (result)
+                    return cpp_cmp(result, 0);
+            }
+            return false;
+        }
+        sort_comparator(CFA cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
+    };
+
+    template <class ElemType>
+    using tup = std::tuple<unsigned, compare_fun<ElemType>>;
+
+    template <class ElemType, class C>
+    class sort_comparator<tup<ElemType>, C> {
+        tup<ElemType> cfa_;
+        C cpp_cmp;
+    public:
+        bool operator()(auto & a, auto & b) {
+            return false;
+        }
+        sort_comparator(tup<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
+    };
+
+    template <class R, class Args, bool Quoted_or_not=csv_co::quoted>
+    class compromise_table_MxN {
+    public:
+        using element_type = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
+    private:
+        using field_array = std::vector<element_type>;
+        using table = std::vector<field_array>;
+        std::unique_ptr<table> impl;
+        struct hibernator {
+            explicit hibernator(auto &reader) : reader_(reader) { reader_.skip_rows(0); }
+            ~hibernator() { reader_.skip_rows(0); }
+        private:
+            R & reader_;
+        };
+    public:
+        explicit compromise_table_MxN(R & reader, Args const & args) {
+            using namespace csv_co;
+            hibernator h(reader);
+            skip_lines(reader, args);
+            auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
+            auto const field_array_size = obtain_header_and_<skip_header>(reader, args).size();
+            impl = std::make_unique<table>(rest_rows, field_array(field_array_size));
+
+            std::size_t row = 0;
+            auto & impl_ref = *impl;
+
+            reader.run_rows([&] (auto & row_span) {
+                unsigned i = 0;
+                for (auto & elem : row_span)
+                    impl_ref[row][i++] = elem;
+                row++;
+            });
+        }
+        decltype (auto) operator[](size_t r) {
+            return (*impl)[r];
+        }
+        [[nodiscard]] auto rows() const {
+            return (*impl).size();
+        }
+        [[nodiscard]] auto cols() const {
+            return (*impl)[0].size();
+        }
+
+        [[nodiscard]] auto cbegin() const { return impl->cbegin(); }
+        [[nodiscard]] auto cend() const { return impl->cend(); }
+        auto begin() { return impl->begin(); }
+        auto end() { return impl->end(); }
+        compromise_table_MxN (compromise_table_MxN && other) noexcept = default;
+        auto operator=(compromise_table_MxN && other) noexcept -> compromise_table_MxN & = default;
+    };
+    static_assert(!std::is_copy_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
+    static_assert(std::is_move_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
 }
 
 #endif

@@ -852,10 +852,6 @@ Either use/reuse the -K option for alignment, or use the csvclean utility to fix
     "typify with precisions"_test = [&] {
         struct args : common_args, type_aware_args {} a;
 
-        a.datetime_fmt = R"(%d/%m/%EY %I:%M:%S)";
-        a.date_fmt = R"(%d/%m/%EY)";
-        a.date_lib_parser = false;
-
         notrimming_reader_type r("h1\n10.1\n10.1234\n10.12\n");
         {
             auto [types, blanks, precisions] = std::get<0>(typify(r, a, typify_option::typify_with_precisions));
