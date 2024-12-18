@@ -390,13 +390,13 @@ namespace csvstat {
 
                     update_null_values(args.null_value);
 
-                    std::vector<column_type> task_vec (table.rows(), column_type::unknown_t);
+                    std::vector<column_type> types (table.rows(), column_type::unknown_t);
 
-                    std::vector<std::size_t> column_numbers (task_vec.size());
+                    std::vector<std::size_t> column_numbers (types.size());
                     std::iota(column_numbers.begin(), column_numbers.end(), 0);
 
                     transwarp::parallel exec(std::thread::hardware_concurrency());
-                    std::vector<bool> blanks (task_vec.size(), false);
+                    std::vector<bool> blanks (types.size(), false);
 
                     imbue_numeric_locale(reader, args);
 
@@ -421,35 +421,35 @@ namespace csvstat {
                             SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && e.is_boolean());
                         })) {
-                            task_vec[c] = column_type::bool_t;
+                            types[c] = column_type::bool_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto &e) {
                             SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
                         })) {
-                            task_vec[c] = column_type::timedelta_t;
+                            types[c] = column_type::timedelta_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto & e) {
                             SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
                         })) {
-                            task_vec[c] = column_type::datetime_t;
+                            types[c] = column_type::datetime_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&args, &blanks, &c](auto &e) {
                             SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
                         })) {
-                            task_vec[c] = column_type::date_t;
+                            types[c] = column_type::date_t;
                             return;
                         }
                         if (std::all_of(table[c].cbegin(), table[c].cend(), [&blanks, &c, &args](auto & e) {
                             SETUP_NULLS_AND_BLANKS
                             return n || (!args.no_inference && e.is_num());
                         })) {
-                            task_vec[c] = column_type::number_t;
+                            types[c] = column_type::number_t;
                             return;
                         }
                         // Text type: check ALL rows for an absent.
@@ -458,14 +458,14 @@ namespace csvstat {
                                 blanks[c] = true;
                             return true;
                         })) {
-                            task_vec[c] = column_type::text_t;
+                            types[c] = column_type::text_t;
                             return;
                         }
                     });
                     task->wait();
                     #undef SETUP_NULLS_AND_BLANKS
 
-                    for (auto & elem : task_vec) {
+                    for (auto & elem : types) {
                         assert(elem != column_type::unknown_t);
                         if (args.no_inference and elem != column_type::text_t) {
                             assert(elem == column_type::bool_t);  // all nulls in a column otherwise boolean
@@ -473,7 +473,7 @@ namespace csvstat {
                         }
                     }
 
-                    return std::tuple{task_vec, blanks};
+                    return std::tuple{types, blanks};
                 };
 
                 auto [types, blanks] = detect_types_and_blanks(transposed_2d);

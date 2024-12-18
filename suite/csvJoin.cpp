@@ -81,15 +81,14 @@ namespace csvjoin::detail::typify {
             c_col = 0;
         });
 
-        std::vector<column_type> task_vec (table.rows(), column_type::unknown_t);
+        std::vector<column_type> types (table.rows(), column_type::unknown_t);
 
-        std::vector<std::size_t> column_numbers (task_vec.size());
+        std::vector<std::size_t> column_numbers (types.size());
         std::iota(column_numbers.begin(), column_numbers.end(), 0);
 
         transwarp::parallel exec(std::thread::hardware_concurrency());
 
-        std::vector<unsigned char> blanks (task_vec.size(), 0);
-        std::vector<unsigned> precisions (task_vec.size(), 0);
+        std::vector<unsigned char> blanks (types.size(), 0);
 
         imbue_numeric_locale(reader, args);
         [&option] {
@@ -112,35 +111,35 @@ namespace csvjoin::detail::typify {
                 SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && e.is_boolean());
             })) {
-                task_vec[c] = column_type::bool_t;
+                types[c] = column_type::bool_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
                 SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
             })) {
-                task_vec[c] = column_type::timedelta_t;
+                types[c] = column_type::timedelta_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto & e) {
                 SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
             })) {
-                task_vec[c] = column_type::datetime_t;
+                types[c] = column_type::datetime_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
                 SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
             })) {
-                task_vec[c] = column_type::date_t;
+                types[c] = column_type::date_t;
                 return;
             }
             if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
                 SETUP_NULLS_AND_BLANKS
                 return n || (!args.no_inference && e.is_num());
             })) {
-                task_vec[c] = column_type::number_t;
+                types[c] = column_type::number_t;
                 return;
             }
             // Text type: check ALL rows for an absent.
@@ -149,7 +148,7 @@ namespace csvjoin::detail::typify {
                     blanks[c] = true;
                 return true;
             })) {
-                task_vec[c] = column_type::text_t;
+                types[c] = column_type::text_t;
                 return;
             }
         });
@@ -158,14 +157,14 @@ namespace csvjoin::detail::typify {
 
         task->wait();
 
-        for (auto & elem : task_vec) {
+        for (auto & elem : types) {
             assert(elem != column_type::unknown_t);
             if (args.no_inference and elem != column_type::text_t) {
                 assert(elem == column_type::bool_t);  // all nulls in a column otherwise boolean
                 elem = column_type::text_t;           // force setting it to text
             }
         }
-        return std::tuple{task_vec, blanks};
+        return std::tuple{types, blanks};
     }
 }
 
