@@ -239,7 +239,6 @@ namespace csvsuite::cli::compare::detail {
             , {col_t::text_t, tc_fun<ElemType>()}
         };
 
-        //std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
         std::tuple<unsigned, compare_fun<ElemType>> result;
         auto const [types, blanks] = types_blanks;
 
@@ -276,13 +275,20 @@ namespace csvsuite::cli::compare::detail {
     template <class ElemType>
     using tup = std::tuple<unsigned, compare_fun<ElemType>>;
 
+    // partial specialization for single key/column comparison
     template <class ElemType, class C>
     class sort_comparator<tup<ElemType>, C> {
         tup<ElemType> cfa_;
         C cpp_cmp;
     public:
         bool operator()(auto & a, auto & b) {
-            return false;
+            auto & col = std::get<0>(cfa_);
+            int result;
+            std::visit([&](auto & c_cmp) {
+                result = c_cmp(a[col], b[col]);
+            }, std::get<1>(cfa_));
+
+            return result ? cpp_cmp(result, 0) : false;
         }
         sort_comparator(tup<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
     };
