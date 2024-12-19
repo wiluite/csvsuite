@@ -191,7 +191,7 @@ namespace csvsort {
 
             auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
 
-            using namespace ::csvsuite::cli::compare::detail;
+            using namespace ::csvsuite::cli::compare;
             // Filling in data to sort.
             // It is sufficient to have csv_co::quoted cell_spans in it, because comparison is quite sophisticated and takes it into account
             compromise_table_MxN table(reader, args);

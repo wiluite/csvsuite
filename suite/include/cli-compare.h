@@ -181,6 +181,11 @@ namespace csvsuite::cli::compare::detail {
             return compare_host_class(args, has_blanks);
         }
     };
+}
+
+namespace csvsuite::cli::compare {
+
+    using namespace detail;
 
     template<class type>
     using bc_fun = compare_host_class<type, bool_compare_impl>;
@@ -205,14 +210,13 @@ namespace csvsuite::cli::compare::detail {
 
     template <class ElemType>
     auto obtain_compare_functionality (auto const & ids, auto const & types_blanks, auto const & args ) {
-        using col_t = column_type; 
-        std::unordered_map<col_t, compare_fun<ElemType>> hash {
-            {col_t::bool_t, bc_fun<ElemType>()}
-            , {col_t::number_t, nc_fun<ElemType>()}
-            , {col_t::datetime_t, dtc_fun<ElemType>()}
-            , {col_t::date_t, dc_fun<ElemType>()}
-            , {col_t::timedelta_t, tdc_fun<ElemType>()}
-            , {col_t::text_t, tc_fun<ElemType>()}
+        std::unordered_map<column_type, compare_fun<ElemType>> hash {
+            {column_type::bool_t, bc_fun<ElemType>()}
+            , {column_type::number_t, nc_fun<ElemType>()}
+            , {column_type::datetime_t, dtc_fun<ElemType>()}
+            , {column_type::date_t, dc_fun<ElemType>()}
+            , {column_type::timedelta_t, tdc_fun<ElemType>()}
+            , {column_type::text_t, tc_fun<ElemType>()}
         };
 
         std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
@@ -220,30 +224,30 @@ namespace csvsuite::cli::compare::detail {
 
         for (auto elem : ids) {
             std::visit([&](auto & arg) {
-                result.push_back({elem, arg.clone(args, std::get<1>(types_blanks)[elem])});
+                result.push_back({elem, arg.clone(args, blanks[elem])});
             }, hash[types[elem]]);
         }
 
         return result;
     }
 
+    // Overrides the above one for an unique key/column
     template <class ElemType>
     auto obtain_compare_functionality (unsigned id, auto const & types_blanks, auto const & args ) {
-        using col_t = column_type;
-        std::unordered_map<col_t, compare_fun<ElemType>> hash {
-            {col_t::bool_t, bc_fun<ElemType>()}
-            , {col_t::number_t, nc_fun<ElemType>()}
-            , {col_t::datetime_t, dtc_fun<ElemType>()}
-            , {col_t::date_t, dc_fun<ElemType>()}
-            , {col_t::timedelta_t, tdc_fun<ElemType>()}
-            , {col_t::text_t, tc_fun<ElemType>()}
+        std::unordered_map<column_type, compare_fun<ElemType>> hash {
+            {column_type::bool_t, bc_fun<ElemType>()}
+            , {column_type::number_t, nc_fun<ElemType>()}
+            , {column_type::datetime_t, dtc_fun<ElemType>()}
+            , {column_type::date_t, dc_fun<ElemType>()}
+            , {column_type::timedelta_t, tdc_fun<ElemType>()}
+            , {column_type::text_t, tc_fun<ElemType>()}
         };
 
         std::tuple<unsigned, compare_fun<ElemType>> result;
         auto const [types, blanks] = types_blanks;
 
         std::visit([&](auto & arg) {
-            result = {id, arg.clone(args, std::get<1>(types_blanks)[id])};
+            result = {id, arg.clone(args, blanks[id])};
         }, hash[types[id]]);
 
         return result;
@@ -273,12 +277,12 @@ namespace csvsuite::cli::compare::detail {
     };
 
     template <class ElemType>
-    using tup = std::tuple<unsigned, compare_fun<ElemType>>;
+    using tuple_ = std::tuple<unsigned, compare_fun<ElemType>>;
 
     // partial specialization for single key/column comparison
     template <class ElemType, class C>
-    class sort_comparator<tup<ElemType>, C> {
-        tup<ElemType> cfa_;
+    class sort_comparator<tuple_<ElemType>, C> {
+        tuple_<ElemType> cfa_;
         C cpp_cmp;
     public:
         bool operator()(auto & a, auto & b) {
@@ -290,7 +294,7 @@ namespace csvsuite::cli::compare::detail {
 
             return result ? cpp_cmp(result, 0) : false;
         }
-        sort_comparator(tup<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
+        sort_comparator(tuple_<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
     };
 
     template <class R, class Args, bool Quoted_or_not=csv_co::quoted>
@@ -345,6 +349,7 @@ namespace csvsuite::cli::compare::detail {
     };
     static_assert(!std::is_copy_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
     static_assert(std::is_move_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
+
 }
 
 #endif

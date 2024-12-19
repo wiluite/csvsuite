@@ -18,31 +18,28 @@
                                                  call;                                             \
                                              }
 
-using namespace ::csvsuite::cli::compare::detail;
+using namespace ::csvsuite::cli::compare;
 
 using element_type = typename notrimming_reader_type::template typed_span<csv_co::quoted>;
 std::tuple<unsigned, compare_fun<element_type>> compare_functionality;
 
-bool operator<(std::vector<element_type> & key_vector, std::vector<element_type> const & v) {
-    auto & col = std::get<0>(compare_functionality);
-
+inline bool std_equal_range_less (auto & left, auto & right) {
     int result;
     std::visit([&](auto & c_cmp) {
-        result = c_cmp(key_vector[col], v[col]);
+        result = c_cmp(left, right);
     }, std::get<1>(compare_functionality));
 
     return result ? std::less<>()(result, 0) : false;
 }
 
+bool operator<(std::vector<element_type> & key_vector, std::vector<element_type> const & v) {
+    auto & col = std::get<0>(compare_functionality);
+    return std_equal_range_less(key_vector[col], v[col]);
+}
+
 bool operator<(std::vector<element_type> const & v, std::vector<element_type> & key_vector) {
     auto & col = std::get<0>(compare_functionality);
-
-    int result;
-    std::visit([&](auto & c_cmp) {
-        result = c_cmp(v[col], key_vector[col]);
-    }, std::get<1>(compare_functionality));
-
-    return result ? std::less<>()(result, 0) : false;
+    return std_equal_range_less(v[col], key_vector[col]);
 }
 
 int main() {
@@ -545,6 +542,7 @@ int main() {
         };
 
         "std::equal_range"_test = [&] {
+            using namespace ::csvsuite::cli::compare;
             auto args_copy = args;
             args_copy.columns = "1";
             notrimming_reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d");

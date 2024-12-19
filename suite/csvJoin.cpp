@@ -610,7 +610,7 @@ namespace csvjoin::detail {
                 };
 
                 if (can_compare()) {
-                    using namespace ::csvsuite::cli::compare::detail;
+                    using namespace ::csvsuite::cli::compare;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
@@ -711,7 +711,7 @@ namespace csvjoin::detail {
                 (void)recalculate_types_blanks; // it is really used (Clang bug!)
 #endif
                 if (can_compare()) {
-                    using namespace ::csvsuite::cli::compare::detail;
+                    using namespace ::csvsuite::cli::compare;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
@@ -819,7 +819,7 @@ namespace csvjoin::detail {
 
                 bool recalculate_types_blanks = false;
                 if (can_compare()) {
-                    using namespace ::csvsuite::cli::compare::detail;
+                    using namespace ::csvsuite::cli::compare;
                     using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
                     auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
