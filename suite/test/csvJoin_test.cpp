@@ -23,24 +23,25 @@ using namespace ::csvsuite::cli::compare;
 using element_type = typename notrimming_reader_type::template typed_span<csv_co::quoted>;
 std::tuple<unsigned, compare_fun<element_type>> compare_functionality;
 
-inline bool std_equal_range_less (auto & left, auto & right) {
-    int result;
-    std::visit([&](auto & c_cmp) {
-        result = c_cmp(left, right);
-    }, std::get<1>(compare_functionality));
+struct EqualRangeComp {
+    bool operator()(element_type key, const std::vector<element_type>& v) const {
+        int result;
+        std::visit([&](auto & c_cmp) {
+            result = c_cmp(key, v[std::get<0>(compare_functionality)]);
+        }, std::get<1>(compare_functionality));
 
-    return result ? std::less<>()(result, 0) : false;
-}
+        return result != 0 && std::less<>()(result, 0);
+    }
 
-bool operator<(std::vector<element_type> & key_vector, std::vector<element_type> const & v) {
-    auto & col = std::get<0>(compare_functionality);
-    return std_equal_range_less(key_vector[col], v[col]);
-}
+    bool operator()(const std::vector<element_type>& v, element_type key) const {
+        int result;
+        std::visit([&](auto & c_cmp) {
+            result = c_cmp(v[std::get<0>(compare_functionality)], key);
+        }, std::get<1>(compare_functionality));
 
-bool operator<(std::vector<element_type> const & v, std::vector<element_type> & key_vector) {
-    auto & col = std::get<0>(compare_functionality);
-    return std_equal_range_less(v[col], key_vector[col]);
-}
+        return result != 0 && std::less<>()(result, 0);
+    }
+};
 
 int main() {
     using namespace boost::ut;
@@ -554,17 +555,15 @@ int main() {
             auto only_key_idx = 0u;
             assert(table[1][0].str() == "10.01234");
 
-            std::vector<unsigned> ids {{only_key_idx}};
-            std::vector<element_type> key_to_search(table[0].size());
-
-            key_to_search[only_key_idx] = table[1][only_key_idx]; // typed_span with 10.01234 value
+            // typed_span with 10.01234 value
+            auto const key_to_search = table[1][only_key_idx];
 
             // first sort what to search by a key in key_to_search
             compare_functionality = obtain_compare_functionality<element_type>(only_key_idx, types_blanks, args);
             std::stable_sort(table.begin(), table.end(), sort_comparator(compare_functionality, std::less<>()));
 
-            // search by std::equal_range algo.
-            const auto p = std::equal_range(table.begin(), table.end(), key_to_search);
+            // search "10.01234" by std::equal_range algo.
+            const auto p = std::equal_range(table.begin(), table.end(), key_to_search, EqualRangeComp{});
             std::string accumulator;
             for (auto i = p.first; i != p.second; ++i) {
                 accumulator += (*i)[1];

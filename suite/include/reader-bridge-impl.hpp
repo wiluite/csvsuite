@@ -425,12 +425,12 @@ namespace csv_co {
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::datetime(std::string const &extra_dt_fmt) const {
-        static_assert(sizeof(date::sys_seconds) < sizeof(decltype(value)));
         static datetime_format_proc datetime_fmt_proc(extra_dt_fmt);
         if (static_cast<DateTimeType>(datetime_type) == DateTimeType::UNKNOWN || !extra_dt_fmt.empty()) {
             auto [is, v] = datetime_fmt_proc(*this);
             if (is) {
                 datetime_type = static_cast<signed char>(DateTimeType::DATETIME);
+                static_assert(sizeof(std::chrono::system_clock::to_time_t(v)) <= sizeof(decltype(value)));
                 value = std::chrono::system_clock::to_time_t(v);
                 date::sys_seconds tp = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(value));
                 return std::tuple{true, v};
