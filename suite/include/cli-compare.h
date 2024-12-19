@@ -292,7 +292,7 @@ namespace csvsuite::cli::compare {
                 result = c_cmp(a[col], b[col]);
             }, std::get<1>(cfa_));
 
-            return result ? cpp_cmp(result, 0) : false;
+            return result != 0 && cpp_cmp(result, 0);
         }
         sort_comparator(tuple_<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
     };
@@ -349,6 +349,33 @@ namespace csvsuite::cli::compare {
     };
     static_assert(!std::is_copy_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
     static_assert(std::is_move_constructible<compromise_table_MxN<csv_co::reader<>,ARGS>>::value);
+
+    template <typename R>
+    using typed_span_t = typename R::template typed_span<csv_co::quoted>;
+
+    template <typename R, typename F = std::tuple<unsigned, compare_fun<typed_span_t<R>>>>
+    struct equal_range_comparator {
+        explicit equal_range_comparator(F f) : f_(std::move(f)) {}
+        bool operator()(typed_span_t<R> key, const std::vector<typed_span_t<R>>& v) const {
+            int result;
+            std::visit([&](auto & c_cmp) {
+                result = c_cmp(key, v[std::get<0>(f_)]);
+            }, std::get<1>(f_));
+
+            return result != 0 && std::less<>()(result, 0);
+        }
+
+        bool operator()(const std::vector<typed_span_t<R>>& v, typed_span_t<R> key) const {
+            int result;
+            std::visit([&](auto & c_cmp) {
+                result = c_cmp(v[std::get<0>(f_)], key);
+            }, std::get<1>(f_));
+
+            return result != 0 && std::less<>()(result, 0);
+        }
+    private:
+        F f_;
+    };
 
 }
 

@@ -20,29 +20,6 @@
 
 using namespace ::csvsuite::cli::compare;
 
-using element_type = typename notrimming_reader_type::template typed_span<csv_co::quoted>;
-std::tuple<unsigned, compare_fun<element_type>> compare_functionality;
-
-struct EqualRangeComp {
-    bool operator()(element_type key, const std::vector<element_type>& v) const {
-        int result;
-        std::visit([&](auto & c_cmp) {
-            result = c_cmp(key, v[std::get<0>(compare_functionality)]);
-        }, std::get<1>(compare_functionality));
-
-        return result != 0 && std::less<>()(result, 0);
-    }
-
-    bool operator()(const std::vector<element_type>& v, element_type key) const {
-        int result;
-        std::visit([&](auto & c_cmp) {
-            result = c_cmp(v[std::get<0>(compare_functionality)], key);
-        }, std::get<1>(compare_functionality));
-
-        return result != 0 && std::less<>()(result, 0);
-    }
-};
-
 int main() {
     using namespace boost::ut;
 
@@ -546,7 +523,9 @@ int main() {
             using namespace ::csvsuite::cli::compare;
             auto args_copy = args;
             args_copy.columns = "1";
-            notrimming_reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d");
+            using reader_type = skipinitspace_reader_type;
+            reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d");
+            using element_t = typed_span_t<reader_type>;
             auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
 
             // Filling in data to sort.
@@ -559,11 +538,11 @@ int main() {
             auto const key_to_search = table[1][only_key_idx];
 
             // first sort what to search by a key in key_to_search
-            compare_functionality = obtain_compare_functionality<element_type>(only_key_idx, types_blanks, args);
-            std::stable_sort(table.begin(), table.end(), sort_comparator(compare_functionality, std::less<>()));
+            auto compare_fun = obtain_compare_functionality<element_t>(only_key_idx, types_blanks, args);
+            std::stable_sort(table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
 
             // search "10.01234" by std::equal_range algo.
-            const auto p = std::equal_range(table.begin(), table.end(), key_to_search, EqualRangeComp{});
+            const auto p = std::equal_range(table.begin(), table.end(), key_to_search, equal_range_comparator<reader_type>(compare_fun));
             std::string accumulator;
             for (auto i = p.first; i != p.second; ++i) {
                 accumulator += (*i)[1];
