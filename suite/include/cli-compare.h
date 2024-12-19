@@ -253,13 +253,13 @@ namespace csvsuite::cli::compare {
         return result;
     }
 
-    template <class CFA, class C=std::less<>>
+    template <class CF, class CPP_COMP=std::less<>>
     class sort_comparator {
-        CFA cfa_;
-        C cpp_cmp;
+        CF compare_fun_;
+        CPP_COMP cpp_cmp;
     public:
         bool operator()(auto & a, auto & b) {
-            for (auto & elem : cfa_) {
+            for (auto & elem : compare_fun_) {
 #if !defined(__clang__) || __clang_major__ >= 16
                 auto & [col, fun] = elem;
 #else
@@ -273,28 +273,26 @@ namespace csvsuite::cli::compare {
             }
             return false;
         }
-        sort_comparator(CFA cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
+        sort_comparator(CF cf, CPP_COMP cmp) : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
     };
 
-    template <class ElemType>
-    using tuple_ = std::tuple<unsigned, compare_fun<ElemType>>;
-
     // partial specialization for single key/column comparison
-    template <class ElemType, class C>
-    class sort_comparator<tuple_<ElemType>, C> {
-        tuple_<ElemType> cfa_;
-        C cpp_cmp;
+    template <class ElemType, class CPP_COMP>
+    class sort_comparator<std::tuple<unsigned, compare_fun<ElemType>>, CPP_COMP> {
+        std::tuple<unsigned, compare_fun<ElemType>> compare_fun_;
+        CPP_COMP cpp_cmp;
     public:
         bool operator()(auto & a, auto & b) {
-            auto & col = std::get<0>(cfa_);
+            auto & col = std::get<0>(compare_fun_);
             int result;
             std::visit([&](auto & c_cmp) {
                 result = c_cmp(a[col], b[col]);
-            }, std::get<1>(cfa_));
+            }, std::get<1>(compare_fun_));
 
             return result != 0 && cpp_cmp(result, 0);
         }
-        sort_comparator(tuple_<ElemType> cfa, C cmp) : cfa_(std::move(cfa)), cpp_cmp(std::move(cmp)) {}
+        sort_comparator(std::tuple<unsigned, compare_fun<ElemType>> cf, CPP_COMP cmp)
+            : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
     };
 
     template <class R, class Args, bool Quoted_or_not=csv_co::quoted>
