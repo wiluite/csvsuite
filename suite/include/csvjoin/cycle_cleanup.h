@@ -10,7 +10,7 @@ auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)
             for (;;) {
                 auto const what_subst = n + '_' + std::to_string(mangled_part);
                 if (!std::count(headers[0].cbegin(), headers[0].cend(), what_subst)) {
-#if 0
+#if !defined(BOOST_UT_DISABLE_MODULE)
                     std::cerr << "Column name " << std::quoted(n) << " already exists in Table. "
                               << "Column will be renamed to "
                               << std::quoted(n + '_' + std::to_string(mangled_part)) << ".\n";

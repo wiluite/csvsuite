@@ -1,4 +1,4 @@
-auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
+auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare] {
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
@@ -11,12 +11,12 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
         auto const & blanks1 = std::get<1>(ts_n_blanks[1]);
 #endif
         reader_fake<reader_type> impl{0, 0};
-
-        auto can_compare = [&]() {
+#if 0
+        auto can_compare = [&] {
             return (types0[c_ids[0]] == types1[c_ids[1]]) or args.no_inference;
         };
-
-        if (can_compare()) {
+#endif
+        if (can_compare(types0, types1)) {
             using namespace ::csvsuite::cli::compare;
             using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 
@@ -31,7 +31,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
 
                 compromise_table_MxN other(other_reader, args);
                 auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], ts_n_blanks[1], args);
-                std::stable_sort(poolstl::par, table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
+                std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
 
                 auto cache_types = [&] {
                     for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
