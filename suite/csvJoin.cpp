@@ -416,268 +416,10 @@ namespace csvjoin::detail {
         if (args.right_join)
             std::reverse(join_column_names.begin(), join_column_names.end());
 
-        try {
-            auto idx = 0u;
-            std::for_each(deq.begin(), deq.end(), [&](auto &r) {
-
-                auto quick_check = [&r, &args]() {
-                    skip_lines(std::get<0>(r), args);
-                    ::csvsuite::cli::quick_check(std::get<0>(r), args);
-                };
-
-                //TODO: FIXME --- THIS SHOULD REALLY WORK (and works in GCC10.2, MSVC, CLANG 16)
-                // (COMPILER BUGS IN: GCC 11, CLANG 12,13,14,15)
-#if 0
-                std::visit([&](auto &&arg) {
-                    if constexpr (!std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>) {
-                        quick_check();
-                        ts_n_blanks.push_back(std::get<1>(typify::typify(arg, args, typify_option::typify_without_precisions)));
-                    }
-                    skip_lines(arg, args);
-                    auto const header = obtain_header_and_<skip_header>(arg, args);
-
-                    max_field_size_checker size_checker(*std::get_if<0>(&r), args, header.size(), init_row{1});
-                    // TODO: it is very hard to optimize this place (get rid of premature transformation - try it out)
-                    //  but it is vain to do, due to no many resources spending.
-                    check_max_size(header_to_strings<unquoted>(header), size_checker);
-
-                    auto const q_header = header_to_strings<quoted>(header);
-
-                    headers.push_back(q_header);
-                    if (!join_column_names.empty())
-                        c_ids.push_back(match_column_identifier(q_header, join_column_names[idx++].c_str(), get_column_offset(args)));
-                }, r);
-#else
-                if (!std::holds_alternative<reader_fake<reader_type>>(r)) {
-                    quick_check();
-                    ts_n_blanks.push_back(std::get<1>(typify::typify(std::get<0>(r), args, typify_option::typify_without_precisions)));
-                }
-                std::visit([&](auto &&arg) {
-                    skip_lines(arg, args);
-                    auto const header = obtain_header_and_<skip_header>(arg, args);
-
-                    max_field_size_checker size_checker(arg, args, header.size(), init_row{1});
-                    // TODO: it is very hard to optimize this place (get rid of premature transformation - try it out)
-                    //  but it is vain to do, due to no many resources spending.
-                    check_max_size(header_to_strings<unquoted>(header), size_checker);
-
-                    auto const q_header = header_to_strings<quoted>(header);
-
-                    headers.push_back(q_header);
-                    if (!join_column_names.empty())
-                        c_ids.push_back(match_column_identifier(q_header, join_column_names[idx++].c_str(), get_column_offset(args)));
-                }, r);
-#endif
-            });
-        } catch (std::exception const &e) {
-            std::cout << e.what() << std::endl;
-            return;
-        }
-
-        auto print_results = [&](auto join_flag) {
-            std::ostringstream oss;
-            std::ostream & oss_ = args.asap ? std::cout : oss;
-            printer p(oss_);
-            struct non_typed_output {};
-            p.write(headers[0], non_typed_output{}, args);
-            join_flag ? p.write(std::get<1>(deq.front()), ts_n_blanks[0], args) : p.write(std::get<0>(deq.front()), ts_n_blanks[0], args);
-            if (!args.asap)
-                std::cout << oss.str();
-        };
-
-        auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)) {
-            std::string subst;
-            unsigned const h0_size = headers[0].size();
-            std::replace_copy_if(headers[1].begin(), headers[1].end(), std::back_inserter(headers[0]),
-                [&](auto const & n) {
-                    if (!std::count(headers[0].cbegin(), headers[0].cend(), n))
-                        return false;
-
-                    auto mangled_part = 2u;
-                    for (;;) {
-                        auto const what_subst = n + '_' + std::to_string(mangled_part);
-                        if (!std::count(headers[0].cbegin(), headers[0].cend(), what_subst)) {
-#if 0
-                            std::cerr << "Column name " << std::quoted(n) << " already exists in Table. "
-                                      << "Column will be renamed to "
-                                      << std::quoted(n + '_' + std::to_string(mangled_part)) << ".\n";
-#endif
-                            subst = what_subst;
-                            return true;
-                        }
-                        mangled_part++;
-                    }
-                }, subst
-            );
-            if (excl_v_idx != static_cast<unsigned>(-1))
-                headers[0].erase(headers[0].begin() + h0_size + excl_v_idx);
-        };
-
-        auto concat_ts_n_blanks = [&ts_n_blanks](unsigned excl_idx = static_cast<unsigned>(-1)) {
-            unsigned const size_0 = std::get<0>(ts_n_blanks[0]).size();
-            std::get<0>(ts_n_blanks[0]).insert(std::get<0>(ts_n_blanks[0]).end()
-                , std::get<0>(ts_n_blanks[1]).begin(), std::get<0>(ts_n_blanks[1]).end());
-            std::get<1>(ts_n_blanks[0]).insert(std::get<1>(ts_n_blanks[0]).end()
-                , std::get<1>(ts_n_blanks[1]).begin(), std::get<1>(ts_n_blanks[1]).end());
-
-            if (excl_idx != static_cast<unsigned>(-1)) {
-                std::get<0>(ts_n_blanks[0]).erase(std::get<0>(ts_n_blanks[0]).begin() + size_0 + excl_idx);
-                std::get<1>(ts_n_blanks[0]).erase(std::get<1>(ts_n_blanks[0]).begin() + size_0 + excl_idx);
-            }
-        };
-
-        enum class exclude_c_column {
-            yes,
-            no
-        }; 
-        enum class union_join {
-            yes,
-            no
-        }; 
-
-        auto cycle_cleanup = [&](exclude_c_column is_c_excluded = exclude_c_column::yes, union_join is_union_join = union_join::no) {
-            deq.pop_front();
-            deq.pop_front();
-            concat_headers(is_c_excluded == exclude_c_column::yes ? c_ids[1] : static_cast<unsigned>(-1));
-            headers.erase(headers.begin() + 1);
-            concat_ts_n_blanks(is_c_excluded == exclude_c_column::yes ? c_ids[1] : static_cast<unsigned>(-1));
-
-            if (is_union_join == union_join::no)
-                c_ids.erase(c_ids.begin() + 1);
-            ts_n_blanks.erase(ts_n_blanks.begin() + 1);
-        };
-
-        auto union_join = [&cycle_cleanup, &deq, &args]() {
-            while (deq.size() > 1) {
-                std::size_t rows = 0u;
-                std::size_t cols = 0u;
-                std::for_each(deq.begin(), deq.begin() + 2, [&](auto &r) {
-                    std::visit([&](auto &&arg) {
-                        rows = std::max(rows, arg.rows());
-                        cols += arg.cols();
-                    }, r);
-                });
-
-                reader_fake<reader_type> impl{rows, cols};
-
-                auto col_ofs = 0;
-                std::for_each(deq.begin(), deq.begin() + 2, [&](auto &r) {
-                    std::visit([&](auto &&arg) {
-                        std::size_t row = 0;
-                        auto const total_cols = arg.cols();
-                        // TODO: for multiple (more than 2) joins do the same!
-                        max_field_size_checker size_checker(arg, args, total_cols, init_row{args.no_header ? 1u : 2u});
-
-                        arg.run_rows([&](auto &row_span) {
-                            // Do not check max size if it is fake reader.
-                            if constexpr (!std::is_same_v<std::remove_reference_t<decltype(row_span[0])>, std::string>)
-                                check_max_size(row_span, size_checker);
-                            unsigned col = 0;
-                            for (auto &elem: row_span) {
-                                if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)
-                                    impl[row][col_ofs + col++] = std::move(elem);
-                                else
-                                    impl[row][col_ofs + col++] = std::move(elem.operator cell_string());
-                            }
-                            ++row;
-                        });
-                        col_ofs += total_cols;
-                    }, r);
-                });
-
-                cycle_cleanup(exclude_c_column::no, union_join::yes);
-                deq.push_front(std::move(impl));
-            }
-        };
-
-        // "Inner" join
-        auto pure_c_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
-            assert(!c_ids.empty());
-            while (deq.size() > 1) {
-#if !defined(__clang__) || __clang_major__ >= 16
-                auto const & [types0, blanks0] = ts_n_blanks[0];
-                auto const & [types1, blanks1] = ts_n_blanks[1];
-#else
-                auto const & types0 = std::get<0>(ts_n_blanks[0]);
-                auto const & blanks0 = std::get<1>(ts_n_blanks[0]);
-                auto const & types1 = std::get<0>(ts_n_blanks[1]);
-                auto const & blanks1 = std::get<1>(ts_n_blanks[1]);
-#endif
-                reader_fake<reader_type> impl{0, 0};
-
-                auto can_compare = [&]() {
-                    return (types0[c_ids[0]] == types1[c_ids[1]]) or args.no_inference;
-                };
-
-                if (can_compare()) {
-                    using namespace ::csvsuite::cli::compare;
-                    using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
-#if !defined(__clang__) || __clang_major__ >= 16
-                    auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-                    , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0];
-#else
-                    auto fun = std::get<1>(obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-                    , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
-#endif
-                    auto & first_source = deq.front();
-                    auto & other_source = deq[1];
-                    std::visit([&](auto &&cmp) {
-                    std::visit([&](auto &&arg) {
-
-                        assert(!std::holds_alternative<reader_fake<reader_type>>(other_source));
-
-                        auto & other_reader = std::get<0>(other_source);
-                        using other_reader_type = std::decay_t<decltype(other_reader)>;
-                        std::vector<typename other_reader_type::cell_span> other_cell_span_vector;
-                        std::vector<elem_t> other_typed_span_vector;
-                        auto const other_cols = other_reader.cols();
-                        auto const other_rows = other_reader.rows();
-                        max_field_size_checker other_size_checker(other_reader, args, other_cols, init_row{args.no_header ? 1u : 2u});
-
-                        other_cell_span_vector.reserve(other_rows * other_cols);
-                        other_typed_span_vector.reserve(other_rows * other_cols);
-
-                        other_reader.run_rows([&](auto & other_span) {
-                            check_max_size(other_span, other_size_checker);
-                            static_assert(std::is_same_v<std::decay_t<decltype(other_span)>, typename other_reader_type::row_span>);
-                            for (auto & e : other_span) {
-                                other_cell_span_vector.push_back(e);
-                                other_typed_span_vector.push_back(elem_t{e});
-                                using UElemType = typename std::decay_t<elem_t>::template rebind<csv_co::unquoted>::other;
-                                other_typed_span_vector.back().operator UElemType const&().type();
-                            }
-                        });
-
-                        max_field_size_checker this_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
-
-                        arg.run_rows([&](auto &span) {
-                            if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
-                                check_max_size(span, this_size_checker);
-                            std::size_t rows_count = 0;
-                            while (rows_count < other_rows) {
-                                typename other_reader_type::row_span e(other_cell_span_vector.begin() + rows_count * other_cols, other_cols);
-                                auto & _ = other_typed_span_vector[rows_count * other_cols + c_ids[1]];
-                                if (!cmp(elem_t{span[c_ids[0]]}, _)) {
-                                    std::vector<std::string> join_vec;
-
-                                    join_vec.reserve(span.size() + e.size() - 1);
-                                    join_vec.assign(span.begin(), span.end());
-                                    join_vec.insert(join_vec.end(), e.begin(), e.begin() + c_ids[1]);
-                                    join_vec.insert(join_vec.end(), e.begin() + c_ids[1] + 1, e.end());
-                                    impl.add(std::move(join_vec));
-                                }
-                                rows_count++;
-                            }
-                        });
-                    }, first_source);
-                    }, fun);
-                }
-
-                cycle_cleanup();
-                deq.push_front(std::move(impl));
-            }
-        };
-
+        #include "include/csvjoin/auxiliary_queue_filler.h"
+        #include "include/csvjoin/cycle_cleanup.h"
+        #include "include/csvjoin/union_join.h"
+        #include "include/csvjoin/inner_join.h"
         auto left_or_right_join = [&] {
 
             assert(!c_ids.empty());
@@ -948,11 +690,22 @@ namespace csvjoin::detail {
         if (c_ids.empty())  // column ids are unspecified : UNION
             union_join();
         else if (!args.outer_join && !args.left_join && !args.right_join)        // just -c 1
-            pure_c_join();
+            inner_join();
         else if (args.left_join || args.right_join)
             left_or_right_join();
         else
             outer_join();
+
+        auto print_results = [&](auto join_flag) {
+            std::ostringstream oss;
+            std::ostream & oss_ = args.asap ? std::cout : oss;
+            printer p(oss_);
+            struct non_typed_output {};
+            p.write(headers[0], non_typed_output{}, args);
+            join_flag ? p.write(std::get<1>(deq.front()), ts_n_blanks[0], args) : p.write(std::get<0>(deq.front()), ts_n_blanks[0], args);
+            if (!args.asap)
+                std::cout << oss.str();
+        };
 
         print_results(join);
     }
