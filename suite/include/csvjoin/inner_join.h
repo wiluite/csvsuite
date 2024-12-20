@@ -19,8 +19,6 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
         if (can_compare()) {
             using namespace ::csvsuite::cli::compare;
             using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
-            auto precise_types_blanks = blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1};
-            unsigned precise_idx = blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? c_ids[0] : c_ids[1];
 
             auto & this_source = deq.front();
             auto & other_source = deq[1];
@@ -32,7 +30,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
                 auto & other_reader = std::get<0>(other_source);
 
                 compromise_table_MxN table(other_reader, args);
-                auto compare_fun = obtain_compare_functionality<elem_t>(precise_idx, precise_types_blanks, args);
+                auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], ts_n_blanks[1], args);
                 std::stable_sort(table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
 
                 max_field_size_checker this_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
