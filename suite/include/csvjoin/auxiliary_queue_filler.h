@@ -24,7 +24,7 @@ try {
 
             // TODO: it is very hard to optimize this place (get rid of premature transformation - try it out)
             //  but it is vain to do, due to no many resources spending.
-            heck_max_size(header_to_strings<unquoted>(header), size_checker);
+            check_max_size(header_to_strings<unquoted>(header), size_checker);
 
             auto const q_header = header_to_strings<quoted>(header);
 
@@ -55,7 +55,7 @@ try {
         }, r);
 #endif
     });
-} catch (std::exception const &e) {
+} catch (ColumnIdentifierError const& e) {
     std::cout << e.what() << std::endl;
     return;
 }

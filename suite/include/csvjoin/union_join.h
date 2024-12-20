@@ -17,13 +17,8 @@ auto union_join = [&cycle_cleanup, &deq, &args]() {
             std::visit([&](auto &&arg) {
                 std::size_t row = 0;
                 auto const total_cols = arg.cols();
-                // TODO: for multiple (more than 2) joins do the same!
-                max_field_size_checker size_checker(arg, args, total_cols, init_row{args.no_header ? 1u : 2u});
 
                 arg.run_rows([&](auto &row_span) {
-                    // Do not check max size if it is fake reader.
-                    if constexpr (!std::is_same_v<std::remove_reference_t<decltype(row_span[0])>, std::string>)
-                        check_max_size(row_span, size_checker);
                     unsigned col = 0;
                     for (auto &elem: row_span) {
                         if constexpr (std::is_same_v<std::remove_reference_t<decltype(elem)>, std::string>)

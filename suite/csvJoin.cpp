@@ -60,11 +60,17 @@ namespace csvjoin::detail::typify {
 
         if (!reader.cols()) // alternatively : if (!reader.rows())
             throw std::runtime_error("Typify(). Columns == 0. Vain to do next actions!"); // well, vain to do rest things
+        {
+            max_field_size_checker size_checker(reader, args, header.size(), init_row{1});
+            check_max_size(header, size_checker);
+        }
 
         fixed_array_2d_replacement<typename Reader::template typed_span<csv_co::unquoted>> table(header.size(), reader.rows());
 
         auto c_row{0u};
         auto c_col{0u};
+
+        max_field_size_checker size_checker(reader, args, header.size(), init_row{args.no_header ? 1u : 2u});
 
         reader.run_rows([&] (auto & rowspan) {
             static struct tabular_checker {
@@ -74,6 +80,8 @@ namespace csvjoin::detail::typify {
                         throw typename Reader::exception("The number of header and data columns do not match. Use -K option to align.");
                 }
             } checker (header, rowspan);
+
+            check_max_size(rowspan, size_checker);
 
             for (auto & elem : rowspan)
                 table[c_col++][c_row] = elem;

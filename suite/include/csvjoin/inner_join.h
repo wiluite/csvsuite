@@ -29,24 +29,24 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
 
                 auto & other_reader = std::get<0>(other_source);
 
-                compromise_table_MxN table(other_reader, args);
+                compromise_table_MxN other(other_reader, args);
                 auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], ts_n_blanks[1], args);
                 std::stable_sort(poolstl::par, table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
 
-                for_each(poolstl::par, table.begin(), table.end(), [&](auto &item) {
-                    for (auto & elem : item) {
-                        using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
-                        elem.operator UElemType const&().type();
-                    }
-                });
+                auto cache_types = [&] {
+                    for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
+                        for (auto & elem : item) {
+                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
+                            elem.operator UElemType const&().type();
+                        }
+                    });
+                };
 
-                max_field_size_checker this_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+                cache_types();
 
                 arg.run_rows([&](auto &span) {
-                    if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
-                        check_max_size(span, this_size_checker);
                     auto key = elem_t{span[c_ids[0]]};
-                    const auto p = std::equal_range(table.begin(), table.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                    const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
                     for (auto next = p.first; next != p.second; ++next) {
                         std::vector<std::string> join_vec;
 
