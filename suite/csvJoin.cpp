@@ -7,6 +7,7 @@
 #include <cli-compare.h>
 #include "type_name.h"
 #include <printer_concepts.h>
+#include "external/poolstl/poolstl.hpp"
 
 using namespace ::csvsuite::cli;
 

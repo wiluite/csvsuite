@@ -31,7 +31,14 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup] {
 
                 compromise_table_MxN table(other_reader, args);
                 auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], ts_n_blanks[1], args);
-                std::stable_sort(table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
+                std::stable_sort(poolstl::par, table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
+
+                for_each(poolstl::par, table.begin(), table.end(), [&](auto &item) {
+                    for (auto & elem : item) {
+                        using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
+                        elem.operator UElemType const&().type();
+                    }
+                });
 
                 max_field_size_checker this_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
 
