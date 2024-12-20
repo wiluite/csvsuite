@@ -6,16 +6,10 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         auto const & [types1, blanks1] = ts_n_blanks[1];
 #else
         auto const & types0 = std::get<0>(ts_n_blanks[0]);
-        auto const & blanks0 = std::get<1>(ts_n_blanks[0]);
         auto const & types1 = std::get<0>(ts_n_blanks[1]);
-        auto const & blanks1 = std::get<1>(ts_n_blanks[1]);
 #endif
         reader_fake<reader_type> impl{0, 0};
-#if 0
-        auto can_compare = [&] {
-            return (types0[c_ids[0]] == types1[c_ids[1]]) or args.no_inference;
-        };
-#endif
+
         if (can_compare(types0, types1)) {
             using namespace ::csvsuite::cli::compare;
             using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
