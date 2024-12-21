@@ -41,6 +41,7 @@ namespace csvjoin::detail::typify {
         csvjoin_string_source
     };
 
+    // TODO: consider using generic typify() from cli.h
     template <typename Reader, typename Args>
     auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
 
@@ -418,6 +419,7 @@ namespace csvjoin::detail {
     void join(auto && deq, auto const & args, auto & join_column_names) {
         using namespace csv_co;
         using reader_type = std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>;
+        using args_type = std::decay_t<decltype(args)>;
         std::deque<unsigned> c_ids;
         std::deque<std::vector<std::string>> headers;
         std::deque<std::tuple<std::vector<column_type>, std::vector<unsigned char>>> ts_n_blanks;
@@ -457,7 +459,6 @@ namespace csvjoin::detail {
             if (!args.asap)
                 std::cout << oss.str();
         };
-
         print_results(join);
     }
 } //  namespace csvjoin

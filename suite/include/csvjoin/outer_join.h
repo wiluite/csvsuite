@@ -12,11 +12,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         auto const & blanks1 = std::get<1>(ts_n_blanks[1]);
 #endif
         reader_fake<reader_type> impl{0, 0};
-#if 0
-        auto can_compare = [&] {
-            return (types0[c_ids[0]] == types1[c_ids[1]]) or args.no_inference;
-        };
-#endif
+
         auto compose_distinct_left_part = [&](auto const &span) {
             std::vector<std::string> join_vec;
             join_vec.reserve(span.size() + types1.size());
@@ -41,45 +37,54 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
             using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
 #if !defined(__clang__) || __clang_major__ >= 16
             auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-            , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0];
+                , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0];
 #else
             auto fun = std::get<1>(obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-            , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
+                , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
 #endif
-            auto & first_source = deq.front();
-            auto & second_source = deq[1];
+            auto & this_source = deq.front();
+            auto & other_source = deq[1];
 
             std::visit([&](auto &&arg) {
-                //max_field_size_checker f_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
+
+                assert(!std::holds_alternative<reader_fake<reader_type>>(other_source));
+
+                auto & other_reader = std::get<0>(other_source);
+
+                constexpr bool skip_to_first_line_after_fill = true;
+                compromise_table_MxN<reader_type, args_type, skip_to_first_line_after_fill> other(other_reader, args);
+                bool blanks_regress = blanks0[c_ids[0]] >= blanks1[c_ids[1]];
+                auto compare_fun = obtain_compare_functionality<elem_t>
+                    (blanks_regress ? c_ids[0] : c_ids[1], blanks_regress ? ts_n_blanks[0] : ts_n_blanks[1], args);
+                std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
+                auto cache_types = [&] {
+                    for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
+                        for (auto & elem : item) {
+                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
+                            elem.operator UElemType const&().type();
+                        }
+                    });
+                };
+
+                cache_types();
+
                 arg.run_rows([&](auto &span) {
-                    //if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span[0])>, std::string>)
-                    //    check_max_size(span, f_size_checker);
-
-                    std::visit([&](auto &&arg) {
-                        bool were_joins = false;
-                        //max_field_size_checker s_size_checker(arg, args, arg.cols(), init_row{args.no_header ? 1u : 2u});
-                        arg.run_rows([&](auto &span1) {
-                            //if constexpr (!std::is_same_v<std::remove_reference_t<decltype(span1[0])>, std::string>)
-                            //    check_max_size(span1, s_size_checker);
-
-                            std::visit([&](auto &&cmp) {
-                                if (!cmp(elem_t{span[c_ids[0]]}, elem_t{span1[c_ids[1]]})) {
-                                    std::vector<std::string> join_vec;
-                                    assert(types1.size() == span1.size());
-                                    join_vec.reserve(span.size() + span1.size());
-                                    join_vec.assign(span.begin(), span.end());
-                                    join_vec.insert(join_vec.end(), span1.begin(), span1.end());
-                                    impl.add(std::move(join_vec));
-                                    if (!were_joins)
-                                        were_joins = true;
-                                }
-                            }, fun);
-                        });
+                    bool were_joins = false;
+                    auto key = elem_t{span[c_ids[0]]};
+                    const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                    for (auto next = p.first; next != p.second; ++next) {
+                        std::vector<std::string> join_vec;
+                        join_vec.reserve(span.size() + next->size());
+                        join_vec.assign(span.begin(), span.end());
+                        join_vec.insert(join_vec.end(), next->begin(), next->end());
+                        impl.add(std::move(join_vec));
                         if (!were_joins)
-                            impl.add(std::move(compose_distinct_left_part(span)));
-                    }, second_source);
+                            were_joins = true;
+                    }
+                    if (!were_joins)
+                        impl.add(std::move(compose_distinct_left_part(span)));
                 });
-            }, first_source);
+            }, this_source);
 
             // Here, outer join right table
             std::visit([&](auto &&arg) {
@@ -96,9 +101,9 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                             impl.add(std::move(compose_distinct_right_part(span)));
                             recalculate_types_blanks = true;
                         }
-                    }, first_source);
+                    }, this_source);
                 });
-            }, second_source);
+            }, other_source);
         } else {
             std::visit([&](auto &&arg) {
                 arg.run_rows([&impl, &compose_distinct_left_part](auto &span) {
@@ -150,5 +155,4 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         assert(deq.size() == ts_n_blanks.size());
         assert(deq.size() == c_ids.size());
     }
-
 };

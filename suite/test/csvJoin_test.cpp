@@ -524,7 +524,7 @@ int main() {
             auto args_copy = args;
             args_copy.columns = "1";
             using reader_type = skipinitspace_reader_type;
-            reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d");
+            reader_type reader("h1,h2\n7,aa\n10.01234,m\n11.1,a\n10.01234,b\n10.012,c\n10.01234,d\n,mm\n");
             using element_t = typed_span_t<reader_type>;
             auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
 
@@ -533,22 +533,32 @@ int main() {
             compromise_table_MxN table(reader, args);
             auto only_key_idx = 0u;
             assert(table[1][0].str() == "10.01234");
+            assert(table[6][0].str() == "");
 
             // typed_span with 10.01234 value
             auto const key_to_search = table[1][only_key_idx];
+            auto const empty_key_to_search = table[6][only_key_idx];
 
             // first sort what to search by a key in key_to_search
             auto compare_fun = obtain_compare_functionality<element_t>(only_key_idx, types_blanks, args);
             std::stable_sort(table.begin(), table.end(), sort_comparator(compare_fun, std::less<>()));
 
             // search "10.01234" by std::equal_range algo.
-            const auto p = std::equal_range(table.begin(), table.end(), key_to_search, equal_range_comparator<reader_type>(compare_fun));
+            auto p = std::equal_range(table.begin(), table.end(), key_to_search, equal_range_comparator<reader_type>(compare_fun));
             std::string accumulator;
             for (auto i = p.first; i != p.second; ++i) {
                 accumulator += (*i)[1];
                 accumulator += ' ';
             }
             expect (accumulator == "m b d ");
+
+            accumulator.clear();
+            p = std::equal_range(table.begin(), table.end(), empty_key_to_search, equal_range_comparator<reader_type>(compare_fun));
+            for (auto i = p.first; i != p.second; ++i) {
+                accumulator += (*i)[1];
+                accumulator += ' ';
+            }
+            expect (accumulator == "mm ");
         };
     };
 }

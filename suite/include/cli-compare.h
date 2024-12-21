@@ -295,7 +295,7 @@ namespace csvsuite::cli::compare {
             : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
     };
 
-    template <class R, class Args, bool Quoted_or_not=csv_co::quoted>
+    template <class R, class Args, bool HibernateToFirstRow = false, bool Quoted_or_not=csv_co::quoted>
     class compromise_table_MxN {
     public:
         using element_type = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
@@ -304,15 +304,20 @@ namespace csvsuite::cli::compare {
         using table = std::vector<field_array>;
         std::unique_ptr<table> impl;
         struct hibernator {
-            explicit hibernator(auto &reader) : reader_(reader) { reader_.skip_rows(0); }
-            ~hibernator() { reader_.skip_rows(0); }
+            explicit hibernator(auto &reader, Args const & args) : reader_(reader), args_(args) { reader_.skip_rows(0); }
+            ~hibernator() {
+                reader_.skip_rows(0);
+                if constexpr(HibernateToFirstRow)
+                    obtain_header_and_<skip_header>(reader_, args_);
+            }
         private:
             R & reader_;
+            Args const & args_;
         };
     public:
         explicit compromise_table_MxN(R & reader, Args const & args) {
             using namespace csv_co;
-            hibernator h(reader);
+            hibernator h(reader, args);
             skip_lines(reader, args);
             auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
             auto const field_array_size = obtain_header_and_<skip_header>(reader, args).size();
