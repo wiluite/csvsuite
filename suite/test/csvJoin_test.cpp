@@ -296,7 +296,6 @@ int main() {
             }
             {
                 // TEST FOR UBSAN (multiple (more than 2) sources)
-                // TODO: fixme till NY.
                 auto args_copy = args;
                 args_copy.columns = "a";
                 args_copy.outer_join = true;
@@ -514,6 +513,19 @@ int main() {
 2024-12-15,True,5,,2024-12-15,False,6,,0:00:01,,,,,
 ,,,,,,,,,2024-12-15,False,8,,0:00:03
 ,,,,,,,,,2024-12-16,,9,,0:00:04
+)");
+            }
+
+            {
+                auto args_copy = args;
+                args_copy.columns = "3,1,1";
+                args_copy.outer_join = true;
+                args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n", "a,b\n1,b\n", "a,b\n2,c\n"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,a_3,b_3
+True,2,3,,,,
+,,,True,b,,
+,,,,,2,c
 )");
             }
 

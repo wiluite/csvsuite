@@ -53,10 +53,18 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                 constexpr bool skip_to_first_line_after_fill = true;
                 compromise_table_MxN<reader_type, args_type, skip_to_first_line_after_fill> other(other_reader, args);
-                bool blanks_regress = blanks0[c_ids[0]] >= blanks1[c_ids[1]];
-                auto compare_fun = obtain_compare_functionality<elem_t>
-                    (blanks_regress ? c_ids[0] : c_ids[1], blanks_regress ? ts_n_blanks[0] : ts_n_blanks[1], args);
+
+                auto blanks1_copy = blanks1;
+
+                auto worst_of_blanks = [&] {
+                    return std::max(blanks0[c_ids[0]], blanks1[c_ids[1]]);
+                };
+
+                blanks1_copy[c_ids[1]] = worst_of_blanks();
+                auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], std::tuple{types1, blanks1_copy}, args);
+
                 std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
+
                 auto cache_types = [&] {
                     for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
                         for (auto & elem : item) {
