@@ -36,14 +36,8 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         bool recalculate_types_blanks = false;
         if (can_compare(types0, types1)) {
             using namespace ::csvsuite::cli::compare;
-            using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
-#if !defined(__clang__) || __clang_major__ >= 16
-            auto [_, fun] = obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-                , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0];
-#else
-            auto fun = std::get<1>(obtain_compare_functionality<elem_t>(blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::vector<unsigned>{c_ids[0]} : std::vector<unsigned>{c_ids[1]}
-                , blanks0[c_ids[0]] >= blanks1[c_ids[1]] ? std::tuple{types0, blanks0} : std::tuple{types1, blanks1}, args)[0]);
-#endif
+            using elem_t = typename reader_type::template typed_span<quoted>;
+
             auto & this_source = deq.front();
             auto & other_source = deq[1];
 
@@ -145,7 +139,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         bool const recalculate = args.honest_outer_join ? recalculate_types_blanks : (recalculate_types_blanks && !deq.empty());
 
         if (recalculate) {
-            typename std::decay_t<decltype(std::get<0>(deq.front()))> tmp_reader(impl.operator typename reader_fake<reader_type>::table &());
+            reader_type tmp_reader(impl.operator typename reader_fake<reader_type>::table &());
             struct {
                 bool no_header = true;
                 unsigned skip_lines = 0;

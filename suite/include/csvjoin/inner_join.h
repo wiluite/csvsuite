@@ -14,7 +14,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
         if (can_compare(types0, types1)) {
             using namespace ::csvsuite::cli::compare;
-            using elem_t = typename std::decay_t<decltype(std::get<0>(deq.front()))>::template typed_span<quoted>;
+            using elem_t = typename reader_type::template typed_span<quoted>;
 
             auto & this_source = deq.front();
             auto & other_source = deq[1];
