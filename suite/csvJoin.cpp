@@ -429,6 +429,7 @@ namespace csvjoin::detail {
 
         #include "include/csvjoin/auxiliary_queue_filler.h"
         #include "include/csvjoin/can_compare.h"
+        #include "include/csvjoin/compare_function.h"
         #include "include/csvjoin/cycle_cleanup.h"
         #include "include/csvjoin/union_join.h"
         #include "include/csvjoin/inner_join.h"

@@ -1,9 +1,11 @@
-auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare] {
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
+
+auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function] {
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
-        auto const & [types0, blanks0] = ts_n_blanks[0];
-        auto const & [types1, blanks1] = ts_n_blanks[1];
+        auto const & [types0, _] = ts_n_blanks[0];
+        auto const & [types1, __] = ts_n_blanks[1];
 #else
         auto const & types0 = std::get<0>(ts_n_blanks[0]);
         auto const & types1 = std::get<0>(ts_n_blanks[1]);
@@ -24,7 +26,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 auto & other_reader = std::get<0>(other_source);
 
                 compromise_table_MxN other(other_reader, args);
-                auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], ts_n_blanks[1], args);
+                auto compare_fun = compose_compare_function();
                 std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
 
                 auto cache_types = [&] {
@@ -58,3 +60,5 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         deq.push_front(std::move(impl));
     }
 };
+
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------

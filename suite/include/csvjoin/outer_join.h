@@ -1,4 +1,6 @@
-auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare] {
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
+
+auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function] {
     assert(!c_ids.empty());
     assert (!args.left_join and !args.right_join and args.outer_join);
     while (deq.size() > 1) {
@@ -53,15 +55,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                 constexpr bool skip_to_first_line_after_fill = true;
                 compromise_table_MxN<reader_type, args_type, skip_to_first_line_after_fill> other(other_reader, args);
-
-                auto blanks1_copy = blanks1;
-
-                auto worst_of_blanks = [&] {
-                    return std::max(blanks0[c_ids[0]], blanks1[c_ids[1]]);
-                };
-
-                blanks1_copy[c_ids[1]] = worst_of_blanks();
-                auto compare_fun = obtain_compare_functionality<elem_t>(c_ids[1], std::tuple{types1, blanks1_copy}, args);
+                auto compare_fun = compose_compare_function();
 
                 std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
 
@@ -164,3 +158,5 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         assert(deq.size() == c_ids.size());
     }
 };
+
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------

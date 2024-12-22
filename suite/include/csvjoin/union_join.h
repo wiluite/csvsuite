@@ -1,3 +1,5 @@
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
+
 /// Performs the union join
 auto union_join = [&cycle_cleanup, &deq, &args]() {
     while (deq.size() > 1) {
@@ -36,3 +38,5 @@ auto union_join = [&cycle_cleanup, &deq, &args]() {
         deq.push_front(std::move(impl));
     }
 };
+
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------

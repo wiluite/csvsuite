@@ -135,6 +135,14 @@ int main() {
 #endif
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_1, header::no_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
             };
+            "indices absent in rest files"_test = [&] {
+                auto args_copy = args;
+                args_copy.columns = "3,1,1";
+                args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,c,b_2,b_3
+)");
+            };
         };
 
         "left"_test = [&] {
@@ -275,6 +283,15 @@ int main() {
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_1, header::no_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
             };
 
+            "indices absent in rest files"_test = [&] {
+                args_copy.columns = "3,1,1";
+                assert(args_copy.right_join);
+                args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,b_2,a_2,b_3
+3,c,,1,2
+)");
+            };
         };
 
         "outer"_test = [&] {
@@ -516,19 +533,18 @@ int main() {
 )");
             }
 
-            {
+            "indices absent in rest files"_test = [&] {
                 auto args_copy = args;
                 args_copy.columns = "3,1,1";
                 args_copy.outer_join = true;
-                args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n", "a,b\n1,b\n", "a,b\n2,c\n"};
+                args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n", "a,b\n2,b\n", "a,b\n2,c\n"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
                 expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,a_3,b_3
 True,2,3,,,,
-,,,True,b,,
+,,,2,b,,
 ,,,,,2,c
 )");
-            }
-
+            };
         };
 
         "std::equal_range"_test = [&] {

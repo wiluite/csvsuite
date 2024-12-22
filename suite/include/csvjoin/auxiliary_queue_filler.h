@@ -1,4 +1,5 @@
-#pragma once 
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
+
 try {
     auto idx = 0u;
     std::for_each(deq.begin(), deq.end(), [&](auto &r) {
@@ -59,3 +60,5 @@ try {
     std::cout << e.what() << std::endl;
     return;
 }
+
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------

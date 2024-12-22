@@ -1,3 +1,5 @@
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
+
 auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)) {
     std::string subst;
     unsigned const h0_size = headers[0].size();
@@ -62,3 +64,5 @@ auto cycle_cleanup = [&](exclude_c_column is_c_excluded = exclude_c_column::yes,
         c_ids.erase(c_ids.begin() + 1);
     ts_n_blanks.erase(ts_n_blanks.begin() + 1);
 };
+
+//------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
