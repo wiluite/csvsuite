@@ -300,7 +300,7 @@ namespace csv_co {
     }
 
     inline auto & get_none_set() {
-        static std::unordered_set<std::string_view> default_none_set {"NA", "N/A", "NONE", "NULL", "."};
+        static std::unordered_set<std::string_view> default_none_set {"NA", "N/A", "NONE", "NULL", ".", ","};
         return default_none_set;
     }
 
