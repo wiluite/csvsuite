@@ -10,6 +10,7 @@
 #include "external/poolstl/poolstl.hpp"
 
 using namespace ::csvsuite::cli;
+using namespace ::csvsuite::cli::compare;
 
 namespace csvjoin {
     struct Args final : ARGS_positional_files {
