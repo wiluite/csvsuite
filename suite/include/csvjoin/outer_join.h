@@ -1,17 +1,15 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, compose_symmetric_compare_function] {
+auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, compose_symmetric_compare_function, &cache_values] {
     assert(!c_ids.empty());
     assert (!args.left_join and !args.right_join and args.outer_join);
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
-        auto const & [types0, blanks0] = ts_n_blanks[0];
-        auto const & [types1, blanks1] = ts_n_blanks[1];
+        auto const & [types0, _] = ts_n_blanks[0];
+        auto const & [types1, __] = ts_n_blanks[1];
 #else
         auto const & types0 = std::get<0>(ts_n_blanks[0]);
-        auto const & blanks0 = std::get<1>(ts_n_blanks[0]);
         auto const & types1 = std::get<0>(ts_n_blanks[1]);
-        auto const & blanks1 = std::get<1>(ts_n_blanks[1]);
 #endif
         reader_fake<reader_type> impl{0, 0};
 
@@ -52,17 +50,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 auto compare_fun = compose_compare_function();
 
                 std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
-
-                auto cache_types = [&] {
-                    for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
-                        for (auto & elem : item) {
-                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
-                            elem.operator UElemType const&().type();
-                        }
-                    });
-                };
-
-                cache_types();
+                cache_values(other);
 
                 arg.run_rows([&](auto &span) {
                     auto key = elem_t{span[c_ids[0]]};
@@ -97,16 +85,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 auto compare_fun = compose_symmetric_compare_function();
 
                 std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
-                auto cache_types = [&] {
-                    for_each(poolstl::par, this_.begin(), this_.end(), [&](auto &item) {
-                        for (auto & elem : item) {
-                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
-                            elem.operator UElemType const&().type();
-                        }
-                    });
-                };
-
-                cache_types();
+                cache_values(this_);
 
                 arg.run_rows([&](auto &span) {
                     auto key = elem_t{span[c_ids[1]]};

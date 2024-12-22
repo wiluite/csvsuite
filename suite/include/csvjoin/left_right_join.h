@@ -1,6 +1,6 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function] {
+auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, &cache_values] {
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
@@ -37,17 +37,7 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                 compromise_table_MxN other(other_reader, args);
                 auto compare_fun = compose_compare_function();
                 std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
-
-                auto cache_types = [&] {
-                    for_each(poolstl::par, other.begin(), other.end(), [&](auto &item) {
-                        for (auto & elem : item) {
-                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
-                            elem.operator UElemType const&().type();
-                        }
-                    });
-                };
-
-                cache_types();
+                cache_values(other);
 
                 arg.run_rows([&](auto &span) {
                     auto key = elem_t{span[c_ids[0]]};
