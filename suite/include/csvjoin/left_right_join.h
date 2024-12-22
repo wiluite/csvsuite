@@ -50,21 +50,19 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                 cache_types();
 
                 arg.run_rows([&](auto &span) {
-                    bool were_joins = false;
                     auto key = elem_t{span[c_ids[0]]};
                     const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                    for (auto next = p.first; next != p.second; ++next) {
-                        std::vector<std::string> join_vec;
+                    if (p.first != p.second)
+                        for (auto next = p.first; next != p.second; ++next) {
+                            std::vector<std::string> join_vec;
 
-                        join_vec.reserve(span.size() + next->size() - 1);
-                        join_vec.assign(span.begin(), span.end());
-                        join_vec.insert(join_vec.end(), next->begin(), next->begin() + c_ids[1]);
-                        join_vec.insert(join_vec.end(), next->begin() + c_ids[1] + 1, next->end());
-                        impl.add(std::move(join_vec));
-                        if (!were_joins)
-                            were_joins = true;
-                    }
-                    if (!were_joins)
+                            join_vec.reserve(span.size() + next->size() - 1);
+                            join_vec.assign(span.begin(), span.end());
+                            join_vec.insert(join_vec.end(), next->begin(), next->begin() + c_ids[1]);
+                            join_vec.insert(join_vec.end(), next->begin() + c_ids[1] + 1, next->end());
+                            impl.add(std::move(join_vec));
+                        }
+                    else
                         impl.add(std::move(compose_distinct_record(span)));
                 });
             }, this_source);
