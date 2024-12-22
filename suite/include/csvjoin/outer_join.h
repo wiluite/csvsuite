@@ -1,6 +1,6 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function] {
+auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, compose_symmetric_compare_function] {
     assert(!c_ids.empty());
     assert (!args.left_join and !args.right_join and args.outer_join);
     while (deq.size() > 1) {
@@ -90,20 +90,40 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
             // Here, outer join right table
             std::visit([&](auto &&arg) {
-                arg.run_rows([&](auto &span) {
-                    std::visit([&](auto &&arg) {
-                        bool were_joins = false;
-                        arg.run_rows([&](auto &span1) {
-                            std::visit([&](auto &&cmp) {
-                                if (!cmp(elem_t{span[c_ids[1]]}, elem_t{span1[c_ids[0]]}))
-                                    were_joins = true;
-                            }, fun);
-                        });
-                        if (!were_joins) {
-                            impl.add(std::move(compose_distinct_right_part(span)));
-                            recalculate_types_blanks = true;
+                reader_type tmp_reader(" ");
+                auto tmp_args = args;
+                if (std::holds_alternative<reader_fake<reader_type>>(this_source)) {
+                    auto & this_reader = std::get<1>(this_source);
+                    reader_type standard_reader(this_reader.operator typename reader_fake<reader_type>::table &());
+                    tmp_args.no_header = true;
+                    tmp_args.skip_lines = 0;
+                    tmp_reader = std::move(standard_reader);
+                } else
+                    tmp_reader = std::move(std::get<0>(this_source));
+
+                compromise_table_MxN this_(tmp_reader, args);
+                auto compare_fun = compose_symmetric_compare_function();
+
+                std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
+                auto cache_types = [&] {
+                    for_each(poolstl::par, this_.begin(), this_.end(), [&](auto &item) {
+                        for (auto & elem : item) {
+                            using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
+                            elem.operator UElemType const&().type();
                         }
-                    }, this_source);
+                    });
+                };
+
+                cache_types();
+
+                arg.run_rows([&](auto &span) {
+                    bool were_joins = false;
+                    auto key = elem_t{span[c_ids[1]]};
+                    const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                    if (p.first == p.second) {
+                        impl.add(std::move(compose_distinct_right_part(span)));
+                        recalculate_types_blanks = true;
+                    }
                 });
             }, other_source);
         } else {
