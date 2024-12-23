@@ -139,7 +139,7 @@ int main() {
                 auto args_copy = args;
                 args_copy.columns = "3,1,1";
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
-                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
                 expect(cout_buffer.str() == R"(a,b,c,b2,b2_2
 )");
             };
@@ -287,7 +287,7 @@ int main() {
                 args_copy.columns = "3,1,1";
                 assert(args_copy.right_join);
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
-                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
                 expect(cout_buffer.str() == R"(a,b,b2,a2,b2_2
 3,c,,1,2
 )");
@@ -435,12 +435,12 @@ int main() {
         "csvjoin sequential/union strings"_test = [&] {
             auto args_copy = args;
             args_copy.files = std::vector<std::string>{"h1\nabc","h2\nabc\ndef","h3\n\nghi"};
-            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
             expect(cout_buffer.str() == "h1,h2,3\r\nabc,abc,\r\n,def,ghi\r\n" || cout_buffer.str() == "h1,h2,h3\nabc,abc,\n,def,ghi\n");
         };
 
         "COMPLEX OUTER JOINS"_test = [&] {
-            using namespace csvjoin::detail::typify;
+            using namespace csvjoin::detail;
 
             auto args_copy = args;
             args_copy.outer_join = true;
@@ -538,7 +538,7 @@ int main() {
                 args_copy.columns = "3,1,1";
                 args_copy.outer_join = true;
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n", "a,b\n2,b\n", "a,b\n2,c\n"};
-                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
                 expect(cout_buffer.str() == R"(a,b,c,a2,b2,a2_2,b2_2
 True,2,3,,,,
 ,,,2,b,,

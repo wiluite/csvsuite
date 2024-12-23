@@ -141,7 +141,8 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 , args.date_lib_parser
                 , args.maxfieldsize
             };
-            ts_n_blanks[0] = std::get<1>(typify::typify(tmp_reader, tmp_args, typify_option::typify_without_precisions));
+            using namespace ::csvsuite::cli;
+            ts_n_blanks[0] = std::get<1>(::csvsuite::cli::typify(tmp_reader, tmp_args, typify_option::typify_without_precisions));
         }
         deq.push_front(std::move(impl));
         assert(deq.size() == ts_n_blanks.size());

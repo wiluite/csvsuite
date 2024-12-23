@@ -15,7 +15,7 @@ try {
         std::visit([&](auto &&arg) {
             if constexpr (!std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>) {
                 quick_check();
-                ts_n_blanks.push_back(std::get<1>(typify::typify(arg, args, typify_option::typify_without_precisions)));
+                ts_n_blanks.push_back(std::get<1>(::csvsuite::cli::typify(arg, args, typify_option::typify_without_precisions)));
             }
 
             skip_lines(arg, args);
@@ -36,7 +36,7 @@ try {
 #else
         if (!std::holds_alternative<reader_fake<reader_type>>(r)) {
             quick_check();
-            ts_n_blanks.push_back(std::get<1>(typify::typify(std::get<0>(r), args, typify_option::typify_without_precisions)));
+            ts_n_blanks.push_back(std::get<1>(::csvsuite::cli::typify(std::get<0>(r), args, typify_option::typify_without_precisions)));
         }
         std::visit([&](auto &&arg) {
              skip_lines(arg, args);

@@ -36,148 +36,6 @@ namespace csvjoin {
         }
     };
 }
-namespace csvjoin::detail::typify {
-    enum class csvjoin_source_option {
-        csvjoin_file_source,
-        csvjoin_string_source
-    };
-
-    // TODO: consider using generic typify() from cli.h
-    template <typename Reader, typename Args>
-    auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
-
-        // Detect types and blanks presence in columns, also imbue cell locale
-        update_null_values(args.null_value);
-
-        struct hibernator {
-            explicit hibernator(Reader & reader) : reader_(reader) { reader_.skip_rows(0); }
-            ~hibernator() { reader_.skip_rows(0); }
-        private:
-            Reader & reader_;
-        };
-
-        hibernator h(reader);
-        skip_lines(reader, args);
-        auto header = obtain_header_and_<skip_header>(reader, args);
-
-        if (!reader.cols()) // alternatively : if (!reader.rows())
-            throw std::runtime_error("Typify(). Columns == 0. Vain to do next actions!"); // well, vain to do rest things
-        {
-            max_field_size_checker size_checker(reader, args, header.size(), init_row{1});
-            check_max_size(header, size_checker);
-        }
-
-        fixed_array_2d_replacement<typename Reader::template typed_span<csv_co::unquoted>> table(header.size(), reader.rows());
-
-        auto c_row{0u};
-        auto c_col{0u};
-
-        max_field_size_checker size_checker(reader, args, header.size(), init_row{args.no_header ? 1u : 2u});
-
-        reader.run_rows([&] (auto & rowspan) {
-            static struct tabular_checker {
-                using cell_span_t= typename Reader::cell_span;
-                tabular_checker (std::vector<cell_span_t> const & header, typename Reader::row_span const & row_span) {
-                    if (header.size() != row_span.size())
-                        throw typename Reader::exception("The number of header and data columns do not match. Use -K option to align.");
-                }
-            } checker (header, rowspan);
-
-            check_max_size(rowspan, size_checker);
-
-            for (auto & elem : rowspan)
-                table[c_col++][c_row] = elem;
-
-            c_row++;
-            c_col = 0;
-        });
-
-        std::vector<column_type> types (table.rows(), column_type::unknown_t);
-
-        std::vector<std::size_t> column_numbers (types.size());
-        std::iota(column_numbers.begin(), column_numbers.end(), 0);
-
-        transwarp::parallel exec(std::thread::hardware_concurrency());
-
-        std::vector<unsigned char> blanks (types.size(), 0);
-
-        imbue_numeric_locale(reader, args);
-        [&option] {
-            using unquoted_elem_type = typename Reader::template typed_span<csv_co::unquoted>;
-            unquoted_elem_type::no_maxprecision(option == typify_option::typify_without_precisions);
-
-            using quoted_elem_type = typename Reader::template typed_span<csv_co::quoted>;
-            unquoted_elem_type::no_maxprecision(option == typify_option::typify_without_precisions);
-        }();
-
-        setup_date_parser_backend(reader, args);
-        setup_leading_zeroes_processing(reader, args);
-
-        //TODO: for now e.is_null() calling first is obligate. Can we do better?
-
-        #define SETUP_NULLS_AND_BLANKS auto const n = e.is_null_or_null_value() && !args.blanks; if (!blanks[c] && n) blanks[c] = 1;
-
-        auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
-            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e)  {
-                SETUP_NULLS_AND_BLANKS
-                return n || (!args.no_inference && e.is_boolean());
-            })) {
-                types[c] = column_type::bool_t;
-                return;
-            }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_NULLS_AND_BLANKS
-                return n || (!args.no_inference && std::get<0>(e.timedelta_tuple()));
-            })) {
-                types[c] = column_type::timedelta_t;
-                return;
-            }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto & e) {
-                SETUP_NULLS_AND_BLANKS
-                return n || (!args.no_inference && std::get<0>(e.datetime(args.datetime_fmt)));
-            })) {
-                types[c] = column_type::datetime_t;
-                return;
-            }
-            if (std::all_of(table[c].begin(), table[c].end(), [&args, &blanks, &c](auto &e) {
-                SETUP_NULLS_AND_BLANKS
-                return n || (!args.no_inference && std::get<0>(e.date(args.date_fmt)));
-            })) {
-                types[c] = column_type::date_t;
-                return;
-            }
-            if (std::all_of(table[c].begin(), table[c].end(), [&blanks, &c, &args](auto & e) {
-                SETUP_NULLS_AND_BLANKS
-                return n || (!args.no_inference && e.is_num());
-            })) {
-                types[c] = column_type::number_t;
-                return;
-            }
-            // Text type: check ALL rows for an absent.
-            if (std::all_of(table[c].begin(), table[c].end(), [&](auto &e) {
-                if (e.is_null() && !blanks[c] && !args.blanks)
-                    blanks[c] = true;
-                return true;
-            })) {
-                types[c] = column_type::text_t;
-                return;
-            }
-        });
-
-        #undef SETUP_NULLS_AND_BLANKS
-
-        task->wait();
-
-        for (auto & elem : types) {
-            assert(elem != column_type::unknown_t);
-            if (args.no_inference and elem != column_type::text_t) {
-                assert(elem == column_type::bool_t);  // all nulls in a column otherwise boolean
-                elem = column_type::text_t;           // force setting it to text
-            }
-        }
-        return std::tuple{types, blanks};
-    }
-}
 
 namespace csvjoin::detail {
 
@@ -464,6 +322,7 @@ namespace csvjoin::detail {
         };
         print_results(join);
     }
+
 } //  namespace csvjoin
 
 namespace csvjoin::detail {
@@ -491,10 +350,16 @@ namespace csvjoin::detail {
         }
         return join_column_names;
     }
+
+    enum class csvjoin_source_option {
+        csvjoin_file_source,
+        csvjoin_string_source
+    };
+
 } // namespace csvjoin::detail
 
 namespace csvjoin {
-    using namespace detail::typify;
+    using namespace detail;
     void join_wrapper(auto const & args, csvjoin_source_option source_type = csvjoin_source_option::csvjoin_file_source) {
         using namespace csvjoin::detail;
 
