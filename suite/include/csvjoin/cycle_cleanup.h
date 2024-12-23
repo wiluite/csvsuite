@@ -9,21 +9,23 @@ auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)
                 return false;
 
             auto mangled_part = 2u;
+            std::string mangled_string;
             for (;;) {
-                auto const what_subst = n + '_' + std::to_string(mangled_part);
-                if (!std::count(headers[0].cbegin(), headers[0].cend(), what_subst)) {
+                auto const new_name = n + '2' + mangled_string;
+                if (!std::count(headers[0].cbegin(), headers[0].cend(), new_name)) {
 #if !defined(BOOST_UT_DISABLE_MODULE)
-                    std::cerr << "Column name " << std::quoted(n) << " already exists in Table. "
-                              << "Column will be renamed to "
-                              << std::quoted(n + '_' + std::to_string(mangled_part)) << ".\n";
+                    if (!mangled_string.empty())
+                        std::cerr << "Column name " << std::quoted(n + '2') << " already exists in Table. "
+                                  << "Column will be renamed to "
+                                  << std::quoted(new_name) << ".\n";
 #endif
-                    subst = what_subst;
+                    subst = new_name;
                     return true;
                 }
+                mangled_string = '_' + std::to_string(mangled_part);
                 mangled_part++;
             }
-        }, subst
-    );
+        }, subst);
     if (excl_v_idx != static_cast<unsigned>(-1))
         headers[0].erase(headers[0].begin() + h0_size + excl_v_idx);
 };

@@ -51,7 +51,7 @@ int main() {
                 auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2
+                expect(cout_buffer.str() == R"(a,b,c,a2,b2,c2
 1,b,c,1,b,c
 2,b,c,1,b,c
 3,b,c,4,b,c
@@ -64,7 +64,7 @@ int main() {
                 auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2,a_3,b_3,c_3
+                expect(cout_buffer.str() == R"(a,b,c,a2,b2,c2,a2_2,b2_2,c2_2
 1,b,c,1,b,c,1,b,c
 2,b,c,1,b,c,1,b,c
 3,b,c,4,b,c,4,b,c
@@ -96,7 +96,7 @@ int main() {
                 args_copy.columns = "a";
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2
 1,b,c,b,c
 1,b,c,b,c
 )");
@@ -109,7 +109,7 @@ int main() {
                 args_copy.columns = "a";
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2,b_3,c_3
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2,b2_2,c2_2
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
@@ -140,7 +140,7 @@ int main() {
                 args_copy.columns = "3,1,1";
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,b_3
+                expect(cout_buffer.str() == R"(a,b,c,b2,b2_2
 )");
             };
         };
@@ -152,7 +152,7 @@ int main() {
                 args_copy.left_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2
 1,b,c,b,c
 1,b,c,b,c
 2,b,c,,
@@ -168,7 +168,7 @@ int main() {
                 args_copy.left_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2,b_3,c_3
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2,b2_2,c2_2
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
@@ -206,7 +206,7 @@ int main() {
                 args_copy.right_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2
 1,b,c,b,c
 1,b,c,b,c
 4,b,c,,
@@ -221,7 +221,7 @@ int main() {
                 args_copy.right_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,b_2,c_2,b_3,c_3
+                expect(cout_buffer.str() == R"(a,b,c,b2,c2,b2_2,c2_2
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
 1,b,c,b,c,b,c
@@ -259,7 +259,7 @@ int main() {
             args_copy.right_join = true;
             args_copy.files = std::vector<std::string>{"join_a.csv", "blanks.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-            expect(cout_buffer.str() == R"(a,b,c,d,e,f,b_2,c_2
+            expect(cout_buffer.str() == R"(a,b,c,d,e,f,b2,c2
 ,,,,,,,
 )");
             notrimming_reader_type new_reader (cout_buffer.str());
@@ -288,7 +288,7 @@ int main() {
                 assert(args_copy.right_join);
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n4,5,", "a,b\n2,b", "a,b\n3,c\n"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,b_2,a_2,b_3
+                expect(cout_buffer.str() == R"(a,b,b2,a2,b2_2
 3,c,,1,2
 )");
             };
@@ -301,7 +301,7 @@ int main() {
                 args_copy.outer_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2
+                expect(cout_buffer.str() == R"(a,b,c,a2,b2,c2
 1,b,c,1,b,c
 1,b,c,1,b,c
 2,b,c,,,
@@ -318,7 +318,7 @@ int main() {
                 args_copy.outer_join = true;
                 args_copy.files = std::vector<std::string>{"join_a.csv", "join_b.csv", "join_b.csv"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
-                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,c_2,a_3,b_3,c_3
+                expect(cout_buffer.str() == R"(a,b,c,a2,b2,c2,a2_2,b2_2,c2_2
 1,b,c,1,b,c,1,b,c
 1,b,c,1,b,c,1,b,c
 1,b,c,1,b,c,1,b,c
@@ -368,10 +368,10 @@ int main() {
             args_copy.files = std::vector<std::string>{"blanks.csv", "blanks.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
-//          a,b,c,d,e,f,a_2,b_2,c_2,d_2,e_2,f_2
+//          a,b,c,d,e,f,a2,b2,c2,d2,e2,f2
 //          ,,,,,,,,,,,
 
-            expect("a,b,c,d,e,f,a_2,b_2,c_2,d_2,e_2,f_2\n,,,,,,,,,,,\n" == cout_buffer.str());
+            expect("a,b,c,d,e,f,a2,b2,c2,d2,e2,f2\n,,,,,,,,,,,\n" == cout_buffer.str());
         };
 
         "blanks"_test = [&] {
@@ -380,10 +380,10 @@ int main() {
             args_copy.files = std::vector<std::string>{"blanks.csv", "blanks.csv"};
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
 
-//          a,b,c,d,e,f,a_2,b_2,c_2,d_2,e_2,f_2
+//          a,b,c,d,e,f,a2,b2,c2,d2,e2,f2
 //          ,NA,N/A,NONE,NULL,.,,NA,N/A,NONE,NULL,.
 
-            expect("a,b,c,d,e,f,a_2,b_2,c_2,d_2,e_2,f_2\n,NA,N/A,NONE,NULL,.,,NA,N/A,NONE,NULL,.\n" == cout_buffer.str());
+            expect("a,b,c,d,e,f,a2,b2,c2,d2,e2,f2\n,NA,N/A,NONE,NULL,.,,NA,N/A,NONE,NULL,.\n" == cout_buffer.str());
         };
 
         "no header row"_test = [&] {
@@ -449,7 +449,7 @@ int main() {
                 args_copy.columns = "1,1,1";
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 2024-12-14,False,4,,2024-12-14,True,7,,0:00:02,,,,,
 2024-12-15,True,5,,2024-12-15,False,6,,0:00:01,2024-12-15,False,8,,0:00:03
 ,,,,,,,,,2024-12-16,,9,,0:00:04
@@ -461,7 +461,7 @@ int main() {
                 args_copy.blanks = true;
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 14/12/2024,F,4,N/A,14/12/2024,T,7,N/A,2s,,,,,
 15/12/2024,T,5,N/A,15/12/2024,F,6,N/A,1s,15/12/2024,F,8,N/A,3s
 ,,,,,,,,,16/12/2024,,9,N/A,4s
@@ -473,7 +473,7 @@ int main() {
                 args_copy.blanks = false;
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 14/12/2024,F,4,,14/12/2024,T,7,,2s,,,,,
 15/12/2024,T,5,,15/12/2024,F,6,,1s,15/12/2024,F,8,,3s
 ,,,,,,,,,16/12/2024,,9,,4s
@@ -485,7 +485,7 @@ int main() {
                 args_copy.blanks = true;
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 2024-12-14,False,4,N/A,2024-12-14,True,7,N/A,0:00:02,,,,,
 2024-12-15,True,5,N/A,2024-12-15,False,6,N/A,0:00:01,2024-12-15,F,8,N/A,0:00:03
 ,,,,,,,,,2024-12-16,,9,N/A,0:00:04
@@ -497,7 +497,7 @@ int main() {
                 args_copy.files = {"14/12/2024,F,4,N/A\n15/12/2024,T,5,N/A", "15/12/2024,F,6,N/A,1s\n14/12/2024,T,7,N/A,2s", "15/12/2024,F,8,N/A,3s\n16/12/2024,,9,N/A,4s"};         
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
 
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 2024-12-14,False,4,N/A,2024-12-14,True,7,N/A,0:00:02,,,,,
 2024-12-15,True,5,N/A,2024-12-15,False,6,N/A,0:00:01,,,,,
 ,,,,,,,,,2024-12-15,F,8,N/A,0:00:03
@@ -511,7 +511,7 @@ int main() {
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
 
                 // now we have the same except for type-aware printing!
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 14/12/2024,F,4,N/A,14/12/2024,T,7,N/A,2s,,,,,
 15/12/2024,T,5,N/A,15/12/2024,F,6,N/A,1s,,,,,
 ,,,,,,,,,15/12/2024,F,8,N/A,3s
@@ -525,7 +525,7 @@ int main() {
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin_source_option::csvjoin_string_source))
 
                 // now we have again have the type-aware printing!
-                expect(cout_buffer.str() == R"(a,b,c,d,a_2,b_2,c_2,d_2,e,a_3,b_3,c_3,d_3,e_2
+                expect(cout_buffer.str() == R"(a,b,c,d,a2,b2,c2,d2,e,a2_2,b2_2,c2_2,d2_2,e2
 2024-12-14,False,4,,2024-12-14,True,7,,0:00:02,,,,,
 2024-12-15,True,5,,2024-12-15,False,6,,0:00:01,,,,,
 ,,,,,,,,,2024-12-15,False,8,,0:00:03
@@ -539,7 +539,7 @@ int main() {
                 args_copy.outer_join = true;
                 args_copy.files = std::vector<std::string>{"a,b,c\n1,2,3\n", "a,b\n2,b\n", "a,b\n2,c\n"};
                 CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::typify::csvjoin_source_option::csvjoin_string_source))
-                expect(cout_buffer.str() == R"(a,b,c,a_2,b_2,a_3,b_3
+                expect(cout_buffer.str() == R"(a,b,c,a2,b2,a2_2,b2_2
 True,2,3,,,,
 ,,,2,b,,
 ,,,,,2,c
