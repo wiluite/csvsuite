@@ -71,7 +71,12 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
             // Here, outer join right table
             std::visit([&](auto &&arg) {
                 reader_type tmp_reader(" ");
-                auto tmp_args = args;
+
+                struct {
+                    bool no_header;
+                    unsigned skip_lines;
+                } tmp_args(args.no_header, args.skip_lines);
+
                 if (std::holds_alternative<reader_fake<reader_type>>(this_source)) {
                     auto & this_reader = std::get<1>(this_source);
                     reader_type standard_reader(this_reader.operator typename reader_fake<reader_type>::table &());
@@ -81,9 +86,8 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 } else
                     tmp_reader = std::move(std::get<0>(this_source));
 
-                compromise_table_MxN this_(tmp_reader, args);
+                compromise_table_MxN this_(tmp_reader, tmp_args);
                 auto compare_fun = compose_symmetric_compare_function();
-
                 std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
                 cache_values(this_);
 
