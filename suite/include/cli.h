@@ -1053,17 +1053,17 @@ namespace csvsuite::cli {
             return std::tuple{types};
     }
 
+    auto trim_string = [](std::string & s) {
+        s.erase(0, s.find_first_not_of(' '));
+        s.erase(s.find_last_not_of(' ') + 1);
+    };
+
     auto parse_column_identifiers(auto && ids, auto && column_names, auto && column_offset, auto && excl)->std::vector<unsigned> {
         if (column_names.empty())
             return {};
         if (ids().empty() && excl().empty())
             return iota_range(column_names);
         std::vector<unsigned> columns;
-
-        auto trim_string = [](std::string & s) {
-            s.erase(0, s.find_first_not_of(' '));
-            s.erase(s.find_last_not_of(' ') + 1);
-        };
 
         if (!ids().empty()) {
             for (auto c = strtok(ids().data(),","); c != nullptr; c = strtok(nullptr, ",")) {
@@ -1273,25 +1273,6 @@ namespace csvsuite::cli {
             tune_ostream(*this);
         }
     };
-
-    template <std::size_t Int_Prec>
-    inline std::string carefully_adjusted_number(auto const & elem) {
-        static num_stringstream ss;
-        static auto default_prec = ss.precision();
-        ss.rdbuf()->str("");
-        auto const value = elem.num();
-        if (std::trunc(value) == value)
-            ss << std::setprecision(Int_Prec);
-        else {
-            auto s = elem.str();
-            s.erase(0, s.find_first_not_of(" "));
-            s.erase(s.find_last_not_of(" ") + 1);
-            auto pos = s.find('.');
-            ss << std::setprecision(pos != std::string::npos ? s.size() - pos - 1 : default_prec);
-        }
-        ss << value;   
-        return ss.str();    
-    }
 
     class json_indenter {
     public:

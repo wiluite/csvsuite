@@ -9,6 +9,26 @@
 
 using namespace ::csvsuite::cli;
 
+namespace csvjson::detail {
+    template <std::size_t Int_Prec>
+    inline std::string carefully_adjusted_number(auto const & elem) {
+        static num_stringstream ss;
+        static auto default_prec = ss.precision();
+        ss.rdbuf()->str("");
+        auto const value = elem.num();
+        if (std::trunc(value) == value)
+            ss << std::setprecision(Int_Prec);
+        else {
+            auto s = elem.str();
+            trim_string(s);
+            auto pos = s.find('.');
+            ss << std::setprecision(pos != std::string::npos ? s.size() - pos - 1 : default_prec);
+        }
+        ss << value;
+        return ss.str();
+    }
+}
+
 namespace csvjson {
 
     struct Args : ARGS_positional_1 {
@@ -41,6 +61,7 @@ namespace csvjson {
     void json(auto & reader, auto const & args) {
 
         using namespace csv_co;
+        using namespace detail;
 
         auto const geojson = (!args.lat.empty() or !args.lon.empty() or !args.type.empty() or !args.geometry.empty() or !args.crs.empty() or args.no_bbox);
         if (!args.lat.empty() and args.lon.empty())
@@ -88,16 +109,16 @@ namespace csvjson {
             }
             key_idx = key_iter - begin(header);
 
-            static auto check_dup_func_impl = [&]( auto const & elem, auto get_val_func, auto print_func) {
-                static std::set<decltype(get_val_func())> dups;
+            static auto check_dup_func_impl = [&]( auto const & elem, auto get_value_function, auto print_function) {
+                static std::set<decltype(get_value_function())> dups;
                 static auto nulls = 0u;
                 if (elem.is_null()) {
                     if (++nulls > 1)
                         throw std::runtime_error("ValueError: Value None is not unique in the key column.");
                 } else {
-                    auto const value = get_val_func();
+                    auto const value = get_value_function();
                     if (dups.contains(value)) {
-                        std::string err = "ValueError: Value " + print_func(value) + " is not unique in the key column.";
+                        std::string err = "ValueError: Value " + print_function(value) + " is not unique in the key column.";
                         throw std::runtime_error(err.c_str());
                     }
                     dups.insert(value);

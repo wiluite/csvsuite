@@ -9,9 +9,7 @@ namespace csvsuite::cli::SOCI {
         ANOTHER
     };
 }
-#if 0
-#include "dbms-backend-id.h"
-#endif
+
 namespace csvsuite::cli::sql {
 
     void rowset_query(soci::session & sql, auto const & args, std::string const & q_s) {
