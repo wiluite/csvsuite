@@ -49,7 +49,7 @@ namespace in2csv::detail::fixed {
 
         auto process = [&](auto & args, auto & istrm) {
             std::string ln;
-            // TODO: process getline result below.
+
             while (skip_lns--)
                 if (!std::getline(istrm, ln, '\n'))
                     throw std::runtime_error("ValueError: Too many lines to skip.");
@@ -60,7 +60,7 @@ namespace in2csv::detail::fixed {
                     static std::size_t linenumber = 0; 
                     std::cout << ++linenumber << ',';
                 }
-                // TODO: fixme. If recode_source() is called not once - be sure to reconsider encodings names again.
+
                 auto _ = recode_source(std::move(ln), args);
                 for (auto i = 0u; i < s_dec.names().size(); i++) {
                     auto b = bytes_from(_, 0, s_dec.starts()[i]);

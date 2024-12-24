@@ -210,7 +210,6 @@ namespace {
             std::vector<std::string> sheet_filenames (sheet_names.size());
             int cursor = 0;
             for (auto const & e : sheet_names) {
-                //TODO: encode filename according to activepage in Windows.
                 auto const filename = "sheets_" + (a.use_sheet_names ? e : std::to_string(cursor)) + ".csv";
                 std::ofstream ofs(filename);
                 try {

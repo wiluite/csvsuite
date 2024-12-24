@@ -10,8 +10,6 @@
 using namespace ::csvsuite::cli;
 using namespace ::csvsuite::cli::encoding;
 
-//TODO: do type-aware printing
-//TODO: RAII
 namespace in2csv::detail::dbf {
 
     void print_func (auto && elem, std::size_t col, auto && types_n_blanks, auto const & args, std::ostream & os) {
