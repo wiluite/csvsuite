@@ -588,5 +588,19 @@ True,2,3,,,,
             }
             expect (accumulator == "mm ");
         };
+
+        "correctly compose new/joined header"_test = [&] {
+            auto args_copy = args;
+            args_copy.columns = "1";
+            args_copy.outer_join = true;
+            args_copy.files = std::vector<std::string>{"a,\"b,b\"\n1,2", "a,\"b,b\"\n2,b", "\"a\",\"b,b\"\n2,c"};
+            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
+            expect(cout_buffer.str() == R"(a,"b,b",a2,"b,b2",a2_2,"b,b2_2"
+True,2,,,,
+,,2,b,,
+,,,,2,c
+)");
+            };
+
     };
 }

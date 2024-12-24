@@ -27,7 +27,7 @@ try {
             //  but it is vain to do, due to no many resources spending.
             check_max_size(header_to_strings<unquoted>(header), size_checker);
 
-            auto const q_header = header_to_strings<quoted>(header);
+            auto const q_header = header_to_strings<unquoted>(header);
 
             headers.push_back(q_header);
             if (!join_column_names.empty())
@@ -48,7 +48,7 @@ try {
              //  but it is vain to do, due to no many resources spending.
              check_max_size(header_to_strings<unquoted>(header), size_checker);
 
-             auto const q_header = header_to_strings<quoted>(header);
+             auto const q_header = header_to_strings<unquoted>(header);
 
              headers.push_back(q_header);
              if (!join_column_names.empty())

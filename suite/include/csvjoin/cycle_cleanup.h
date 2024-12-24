@@ -8,7 +8,7 @@ auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)
             if (!std::count(headers[0].cbegin(), headers[0].cend(), n))
                 return false;
 
-            auto mangled_part = 2u;
+            auto mangled_number = 2u;
             std::string mangled_string;
             for (;;) {
                 auto const new_name = n + '2' + mangled_string;
@@ -22,8 +22,8 @@ auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)
                     subst = new_name;
                     return true;
                 }
-                mangled_string = '_' + std::to_string(mangled_part);
-                mangled_part++;
+                mangled_string = '_' + std::to_string(mangled_number);
+                mangled_number++;
             }
         }, subst);
     if (excl_v_idx != static_cast<unsigned>(-1))

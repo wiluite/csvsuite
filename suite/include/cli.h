@@ -218,7 +218,6 @@ namespace csvsuite::cli {
     std::string optional_quote(auto && span) {
         auto constexpr delim = std::decay_t<decltype(span)>::reader_type::delimiter_type::value;
         auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
-        //auto cell_str = std::move(span.operator csv_co::cell_string());
         auto cell_str = span.operator csv_co::cell_string();
         // 1st, we need to transform possible foreign line-breaking to the native one.
         bool stay_quoted = false;

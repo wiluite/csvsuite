@@ -133,10 +133,17 @@ namespace csvjoin::detail {
                 if (args.linenumbers)
                     os << "line_number,";
 
+                auto optionally_quoted = [](std::ostream & os, auto const & elem)->std::ostream& {
+                    if (elem.find(',') != std::string::npos)
+                        os << std::quoted(elem);
+                    else
+                        os << elem;
+                    return os;
+                };
                 std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
-                    os << elem << ',';
+                    optionally_quoted(os, elem) << ',';
                 });
-                os << printable.back();
+                optionally_quoted(os, printable.back());
                 print_LF(os);
             } else if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<decltype(std::declval<T>()[0])>>) { // print body
                 for (auto && elem : printable) {
