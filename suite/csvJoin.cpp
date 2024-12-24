@@ -204,10 +204,8 @@ namespace csvjoin::detail {
 
     private:
         void print_func (auto && elem, std::size_t col, auto && types_n_blanks, auto const & args) {
-            if (elem.is_null_value()) {
-                os << "";
+            if (elem.is_null_value())
                 return;
-            }
 
             using elem_type = std::decay_t<decltype(elem)>;
             auto & [types, blanks] = types_n_blanks;

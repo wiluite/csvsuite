@@ -73,10 +73,8 @@ namespace csvsort {
                 using UElemType = typename e_type::template rebind<csv_co::unquoted>::other;
                 auto & unquoted_elem = elem.operator UElemType const&();
 
-                if (unquoted_elem.is_null_value()) {
-                    os << "";
+                if (unquoted_elem.is_null_value())
                     return;
-                }
 
                 bool const is_null = unquoted_elem.is_null();
                 if (types[col] == column_type::text_t or (!args.blanks && is_null)) {

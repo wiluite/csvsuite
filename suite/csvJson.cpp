@@ -136,8 +136,6 @@ namespace csvjson {
                     }
             };
 
-            auto const ir = init_row{args.no_header ? 1u : 2u};
-
             reader.run_rows([&] (auto & row_span) {
                 type2key_check_func[static_cast<std::size_t>(types[key_idx]) - 1](elem_type{row_span[key_idx]});
             });
@@ -298,7 +296,6 @@ namespace csvjson {
             elem_type min_lat_elem, max_lat_elem, min_lon_elem, max_lon_elem;
 
             if (!args.no_bbox and !args.stream) {
-                auto const ir = init_row{args.no_header ? 1u : 2u};
                 reader.run_rows([&](auto &row_span) {
                     auto update_min_max = [&](auto & e, long double & max_, long double & min_, elem_type & max_e, elem_type & min_e) {
                         auto const et = elem_type{e};
@@ -314,11 +311,10 @@ namespace csvjson {
                     };
                     auto i = 0u;
                     for (auto &e: row_span) {
-                        if (i == lat_column) {
+                        if (i == lat_column)
                             update_min_max(e, max_lat, min_lat, max_lat_elem, min_lat_elem);
-                        } else if (i == lon_column) {
+                        else if (i == lon_column)
                             update_min_max(e, max_lon, min_lon, max_lon_elem, min_lon_elem);
-                        }
                         ++i;
                     }
                 });

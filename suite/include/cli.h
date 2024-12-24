@@ -220,6 +220,9 @@ namespace csvsuite::cli {
         auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
         auto cell_str = span.operator csv_co::cell_string();
         // 1st, we need to transform possible foreign line-breaking to the native one.
+        // There has supposed that you proccess an Apple CSV document on windows/linux machine
+        // and you have manually changed line-breaking character in CSV_co parser to correctly parse the document. 
+        // Now we must automatically change those foreign line-breakings in each cell.
         bool stay_quoted = false;
         if constexpr('\n' != line_break) {
             std::remove_const_t<decltype(std::string::npos)> it;
@@ -234,7 +237,7 @@ namespace csvsuite::cli {
         return stay_quoted ? cell_str : span.operator csv_co::unquoted_cell_string();
     }
 
-    /// "Display column names and indices from the input CSV"
+    /// "Display column names and indices for -n/--names option"
     template<class OS, class C, class Args>
     void print_header(OS & os, C &c, Args const &args) {
         auto index = args.zero ? 0 : 1;
@@ -1197,43 +1200,27 @@ namespace csvsuite::cli {
     };
 
     template <typename T, typename Q=void>
-    std::string compose_bool(T const & elem, std::any const &) {
+    inline std::string compose_bool_DRY (T const & elem) {
         static bool_stringstream<Q> ss;
         ss.rdbuf()->str("");
         ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
         return ss.str();
     }
 
-    struct in2csv_conversion_datetime;
-    template <typename T, typename Q=void>             
-    std::string compose_datetime(T const & elem, std::any const &) {
-        if constexpr(std::is_same_v<Q,void>)
-            return datetime_s(elem);
-        else
-        if constexpr(std::is_same_v<Q,in2csv_conversion_datetime>)
-            return datetime_s_json(elem);
-        else
-            return std::string("\"") + datetime_s_json(elem) + '"';
-    }
-
     template <typename T, typename Q=void>
-    std::string compose_date(T const & elem, std::any const &) {
-        if constexpr(std::is_same_v<Q,void>)
-            return date_s(elem);
-        else
-            return std::string("\"") + date_s(elem) + '"';
+    std::string compose_bool(T const & elem, std::any const &) {
+        return compose_bool_DRY<T, Q>(elem);
     }
 
     template <typename T, typename Q=void>
     std::string compose_bool_1_arg(T const & elem) {
-        static bool_stringstream<Q> ss;
-        ss.rdbuf()->str("");
-        ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
-        return ss.str();
+        return compose_bool_DRY<T, Q>(elem);
     }
 
-    template <typename T, typename Q=void>
-    std::string compose_datetime_1_arg(T const & elem) {
+    struct in2csv_conversion_datetime;
+
+    template <typename T, typename Q=void>             
+    inline std::string compose_datetime_DRY(T const & elem) {
         if constexpr(std::is_same_v<Q,void>)
             return datetime_s(elem);
         else
@@ -1244,11 +1231,32 @@ namespace csvsuite::cli {
     }
 
     template <typename T, typename Q=void>
-    std::string compose_date_1_arg(T const & elem) {
+    std::string compose_datetime(T const & elem, std::any const &) {
+        return compose_datetime_DRY<T, Q>(elem);
+    }
+
+    template <typename T, typename Q=void>
+    std::string compose_datetime_1_arg(T const & elem) {
+        return compose_datetime_DRY<T, Q>(elem);
+    }
+
+    template <typename T, typename Q=void>
+    inline std::string compose_date_DRY(T const & elem) {
         if constexpr(std::is_same_v<Q,void>)
             return date_s(elem);
         else
             return std::string("\"") + date_s(elem) + '"';
+    }
+
+    template <typename T, typename Q=void>
+    std::string compose_date(T const & elem, std::any const &) {
+        return compose_date_DRY<T, Q>(elem);
+    }
+
+
+    template <typename T, typename Q=void>
+    std::string compose_date_1_arg(T const & elem) {
+        return compose_date_DRY<T, Q>(elem);
     }
 
     std::string compose_text(auto const & elem) {
