@@ -1,5 +1,6 @@
 #include "../../include/in2csv/in2csv_csv.h"
 #include <cli.h>
+#include <cli-print.h>
 #include <iostream>
 #include "common_datetime_excel.h"
 #include "common_time_point.h"
@@ -45,39 +46,24 @@ namespace in2csv::detail::csv {
             std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
                     compose_bool<elem_type>
                     , [&](elem_type const & e, std::any const & info) {
-                        assert(!e.is_null());
-
                         static std::ostringstream ss;
-                        ss.str({});
-
                         typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                        auto const value = another_rep.num();
-
-                        if (std::isnan(value))
-                            ss << "NaN";
-                        else if (std::isinf(value))
-                            ss << (value > 0 ? "Infinity" : "-Infinity");
-                        else {
-                            if (args.num_locale != "C") {
-                                std::string s = another_rep.str();
-                                another_rep.to_C_locale(s);
-                                ss << s;
-                            } else {
-                                auto c = std::any_cast<std::size_t const>(info); 
-                                if (is_date_column(c)) {
-                                    using date::operator<<;
-                                    std::ostringstream local_oss;
-                                    local_oss << to_chrono_time_point(value);
-                                    auto str = local_oss.str();
-                                    ss << std::string{str.begin(), str.begin() + 10};
-                                } else
-                                if (is_datetime_column(c)) {
-                                    using date::operator<<;
-                                    std::ostringstream local_oss;
-                                    ss << to_chrono_time_point(value);
-                                } else
-                                    ss << another_rep.str();
-                            }
+                        if (!ostream_numeric_corner_cases(ss, another_rep, args)) {
+                            auto const value = another_rep.num();
+                            auto c = std::any_cast<std::size_t const>(info); 
+                            if (is_date_column(c)) {
+                                using date::operator<<;
+                                std::ostringstream local_oss;
+                                local_oss << to_chrono_time_point(value);
+                                auto str = local_oss.str();
+                                ss << std::string{str.begin(), str.begin() + 10};
+                            } else
+                            if (is_datetime_column(c)) {
+                                using date::operator<<;
+                                std::ostringstream local_oss;
+                                ss << to_chrono_time_point(value);
+                            } else
+                                ss << another_rep.str();                            
                         }
                         return ss.str();
                     }

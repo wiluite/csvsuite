@@ -5,6 +5,7 @@
 
 #include <cli.h>
 #include <cli-compare.h>
+#include <cli-print.h>
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
 
@@ -93,29 +94,9 @@ namespace csvsort {
                 static std::array<func_type, static_cast<std::size_t>(column_type::sz) - 1> type2func {
                         compose_bool_1_arg<UElemType>
                         , [&args](UElemType const & e) {
-
                             static std::ostringstream ss;
-                            ss.str({});
-
-                            // Surprisingly, csvsuite represents a number from file without distortion:
-                            // knowing, that it is a valid number in a locale, it simply removes
-                            // the thousands separators and replaces the decimal point with its
-                            // C-locale equivalent. Thus, the number actually written to the file
-                            // is output, and we have to do some tricks.
-                            auto const value = e.num();
-
-                            if (std::isnan(value))
-                                ss << "NaN";
-                            else if (std::isinf(value))
-                                ss << (value > 0 ? "Infinity" : "-Infinity");
-                            else {
-                                if (args.num_locale != "C") {
-                                    std::string s = e.str();
-                                    e.to_C_locale(s);
-                                    ss << s;
-                                } else
-                                    ss << e.str();
-                            }
+                            if (!ostream_numeric_corner_cases(ss, e, args))
+                                ss << e.str();
                             return ss.str();
                         }
                         , compose_datetime_1_arg<UElemType>

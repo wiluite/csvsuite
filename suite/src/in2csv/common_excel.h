@@ -1,4 +1,5 @@
 #pragma once
+#include "cli-print.h"
 
 namespace {
     auto is_number = [](std::string const & name) {
@@ -110,26 +111,10 @@ namespace {
         std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
                 compose_bool_1_arg<elem_type>
                 , [&](elem_type const & e) {
-                    assert(!e.is_null());
-
                     static std::ostringstream ss;
-                    ss.str({});
-
                     typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                    auto const value = another_rep.num();
-
-                    if (std::isnan(value))
-                        ss << "NaN";
-                    else if (std::isinf(value))
-                        ss << (value > 0 ? "Infinity" : "-Infinity");
-                    else {
-                        if (args.num_locale != "C") {
-                            std::string s = another_rep.str();
-                            another_rep.to_C_locale(s);
-                            ss << s;
-                        } else
-                            ss << another_rep.str();
-                    }
+                    if (!ostream_numeric_corner_cases(ss, another_rep, args))
+                        ss << another_rep.str();
                     return ss.str();
                 }
                 , compose_datetime_1_arg<elem_type, in2csv_conversion_datetime>

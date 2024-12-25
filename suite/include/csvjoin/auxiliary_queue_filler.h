@@ -52,7 +52,7 @@ try {
 
              headers.push_back(q_header);
              if (!join_column_names.empty())
-                c_ids.push_back(match_column_identifier(q_header, join_column_names[idx++].c_str(), get_column_offset(args)));
+                 c_ids.push_back(match_column_identifier(q_header, join_column_names[idx++].c_str(), get_column_offset(args)));
         }, r);
 #endif
     });

@@ -377,15 +377,6 @@ namespace csvlook {
             result += '\n';
         }
         return result;
-#if 0
-        while (!std::cin.eof() && ++next_row < rows_to_read) {
-            static std::string temp;
-            std::getline(std::cin, temp);
-            csv += temp;
-            csv += '\n';
-        }
-        return {csv.begin(), csv.end() - 1};
-#endif
     };
 
 } /// namespace
@@ -416,9 +407,8 @@ namespace csvlook::detail {
             os << "NaN";
         else if (std::isinf(value)) {
             os << (value> 0 ? "Infinity" : "-Infinity");
-            os << "Infinity";
         } else
-            os << value << ((!no_ellipsis and max_precision < col_precision) ? "\xe2\x80\xa6" : "");
+            os << value << (!no_ellipsis and max_precision < col_precision ? "\xe2\x80\xa6" : "");
     }
 
     void make_required_adjustments(auto const & args) {

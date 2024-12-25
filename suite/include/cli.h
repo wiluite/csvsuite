@@ -662,13 +662,13 @@ namespace csvsuite::cli {
 
                 row_span_check_impl = [&] (typename Reader::row_span & collection) {
                     auto v = header_to_strings<csv_co::unquoted>(collection);
-                    for(auto e: v)
+                    for(auto & e: v)
                         check_tmpl(e);
                 };
 
                 vec_span_check_impl = [&] (std::vector<typename Reader::cell_span> const & collection) {
                     auto v = header_to_strings<csv_co::unquoted>(collection);
-                    for(auto e: v)
+                    for(auto & e: v)
                         check_tmpl(e);
                 };
 
@@ -1053,7 +1053,7 @@ namespace csvsuite::cli {
             return std::tuple{types};
     }
 
-    auto trim_string = [](std::string & s) {
+    inline auto trim_string = [](std::string & s) {
         s.erase(0, s.find_first_not_of(' '));
         s.erase(s.find_last_not_of(' ') + 1);
     };
@@ -1125,7 +1125,6 @@ namespace csvsuite::cli {
             return col;
         } else {
             auto column_names_string = [](auto const & container) {
-                //static_assert(std::is_same_v<std::decay_t<decltype(container[container.size() - 1])>, std::string>);
                 std::string s;
                 std::for_each(container.begin(), container.end() - 1, [&s](auto & elem) {
                     if constexpr (std::is_same_v<std::decay_t<decltype(elem)>, std::string>)

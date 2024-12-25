@@ -5,6 +5,7 @@
 
 #include <cli.h>
 #include <cli-compare.h>
+#include <cli-print.h>
 #include "type_name.h"
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
@@ -243,29 +244,10 @@ namespace csvjoin::detail {
             std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
                     compose_bool_1_arg<elem_type>
                     , [&](elem_type const & e) {
-                        assert(!e.is_null());
                         static std::ostringstream ss;
-                        ss.str({});
-                        // Surprisingly, csvsuite represents a number from file without distortion:
-                        // knowing, that it is a valid number in any locale, it simply removes
-                        // the thousands separators and replaces the decimal point with its
-                        // C-locale equivalent. Thus, the number actually written to the file
-                        // is output. and we have to do some tricks.
                         typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                        auto const value = another_rep.num();
-
-                        if (std::isnan(value))
-                            ss << "NaN";
-                        else if (std::isinf(value))
-                            ss << (value > 0 ? "Infinity" : "-Infinity");
-                        else {
-                            if (args.num_locale != "C") {
-                                std::string s = another_rep.str();
-                                another_rep.to_C_locale(s);
-                                ss << s;
-                            } else
-                                ss << another_rep.str();
-                        }
+                        if (!ostream_numeric_corner_cases(ss, another_rep, args))
+                            ss << another_rep.str();
                         return ss.str();
                     }
                     , compose_datetime_1_arg<elem_type>

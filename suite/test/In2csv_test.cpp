@@ -211,7 +211,8 @@ int main() {
             expect(cout_buffer.str() == get_source("dummy.csv"));
         }));
     };
-#if 0
+    //TODO: fix me (memory error and so on...)
+#if defined(__MINGW32__)
     "convert dbf"_test = [&] {
         struct Args : in2csv_args {
             Args() { file = "testdbf.dbf";}
