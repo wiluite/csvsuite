@@ -361,7 +361,15 @@ namespace csvstat {
 
             max_field_size_checker size_checker(reader, args, header.size(), init_row{args.no_header ? 1u : 2u});
 
-            if (all_columns_selected(ids, header.size()))
+            auto all_columns_selected = [&] {
+                if (header.size() != ids.size())
+                    return false;
+                std::vector<unsigned> atom (ids.size());
+                std::iota(atom.begin(), atom.end(), 0);
+                return (ids == atom);
+            };
+
+            if (all_columns_selected())
                 reader.run_rows([&](auto &row_span) { // more cache-friendly
                     check_max_size(row_span, size_checker);
                     for (auto &elem: row_span)

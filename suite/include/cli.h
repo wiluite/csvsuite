@@ -1101,14 +1101,6 @@ namespace csvsuite::cli {
         return result;
     }
 
-    static bool all_columns_selected(std::vector<unsigned> const & ids, unsigned cols) {
-        if (cols != ids.size())
-            return false;
-        std::vector<unsigned> atom (ids.size());
-        std::iota(atom.begin(), atom.end(), 0);
-        return (ids == atom);
-    }
-
     unsigned match_column_identifier (auto const & column_names, char const * c, auto column_offset) {
         auto const digital = python_isdigit(c);
         if (!digital) {
