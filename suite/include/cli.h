@@ -234,7 +234,7 @@ namespace csvsuite::cli {
         return span.operator csv_co::unquoted_cell_string();
     }
 
-    /// "Display column names and indices for -n/--names option"
+    /// Displays column names and indices with the -n/--names option
     template<class OS, class C, class Args>
     void print_header(OS & os, C &c, Args const &args) {
         auto index = args.zero ? 0 : 1;
@@ -251,7 +251,7 @@ namespace csvsuite::cli {
     /// Generates substitues for column names, if no header
     auto generate_column_names(auto & reader);
 
-    /// Returns header cells
+    /// Returns header cell range. Throws an exception if no more
     auto obtain_header(auto & reader, auto const & args) {
         auto header = (!args.no_header) ? reader.header() : generate_column_names(reader);
         if (header.empty())
@@ -262,7 +262,7 @@ namespace csvsuite::cli {
     constexpr bool skip_header = true;
     constexpr bool no_skip_header = false;
 
-    /// Optionally skips the CSV header to the data line 
+    /// Optionally skips the header to the first data line
     template<bool should_skip_header = skip_header>
     auto obtain_header_and_(auto & reader, auto const & args) {
         auto header = obtain_header(reader, args);
@@ -271,7 +271,7 @@ namespace csvsuite::cli {
         return header;
     }
 
-    /// Transforms the header cell range to the vector of strings
+    /// Transforms the header cell range to the range of strings
     template <bool Quoted_or_Unquoted>
     inline auto header_to_strings(auto const & cell_header) {
         std::vector<std::string> v;
@@ -298,7 +298,7 @@ namespace csvsuite::cli {
         return result;
     }
 
-    /// The output precision representation class used for the csvstat's standard and csv print visitors (except for 'most common values')    
+    /// The output precision representation class for the csvStat's standard/csv print visitors (except for 'most common values')    
     template <typename T>
     class spec_precision
     {
@@ -325,20 +325,20 @@ namespace csvsuite::cli {
         }
     };
 
-    /// The output precision representation function that uses the output precision representation class
+    /// The output precision representation function that uses the spec_precision<T> template
     template <typename T>
     inline spec_precision<T> spec_prec(const T& value) {
         return spec_precision<T>(value);
     }
 
-    /// Stream output operator working with special precision representation
+    /// Stream output operator working with the spec_precision<T> template
     template <typename T>
     inline std::ostream& operator << (std::ostream& stream, const spec_precision<T>& value) {
         value.write(stream);
         return stream;
     }
 
-    /// The output precision representation class used in the csvstat's csv's most common values printing
+    /// The output precision representation class for most common CSV values
     template <typename T>
     class csv_mcv_precision
     {
@@ -363,13 +363,13 @@ namespace csvsuite::cli {
         }
     };
 
-    /// To be documented
+    /// The output precision representation function that uses the csv_mcv_precision<T> template
     template <typename T>
     inline csv_mcv_precision<T> csv_mcv_prec(const T& value) {
         return csv_mcv_precision<T>(value);
     }
 
-    /// To be documented
+    /// Stream output operator working with the csv_mcv_precision<T> template
     template <typename T>
     inline std::ostream& operator << (std::ostream& stream, const csv_mcv_precision<T>& value) {
         value.write(stream);
@@ -390,9 +390,9 @@ namespace csvsuite::cli {
         (ss << ... << std::forward<Ts>(ts));
     }
 
-    /// Custom boolean and groping separator facet class
-    struct custom_boolean_and_groping_sep_facet : std::numpunct<char> {
-        custom_boolean_and_groping_sep_facet() {
+    /// Custom boolean and grouping separator facet class
+    struct custom_boolean_and_grouping_sep_facet : std::numpunct<char> {
+        custom_boolean_and_grouping_sep_facet() {
             s = std::use_facet<std::numpunct<char>>(std::locale()).grouping();
             t = std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep();
             d = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point();
@@ -413,8 +413,8 @@ namespace csvsuite::cli {
         char d;
     };
 
-    /// Custom boolean and no-groping separator facet class
-    struct custom_boolean_and_no_groping_sep_facet : custom_boolean_and_groping_sep_facet {
+    /// Custom boolean and no-grouping separator facet class
+    struct custom_boolean_and_no_grouping_sep_facet : custom_boolean_and_grouping_sep_facet {
         [[nodiscard]] std::string do_grouping() const override { return ""; }
     };
 
@@ -473,9 +473,9 @@ namespace csvsuite::cli {
     /// Tunes an output stream with special facets, depending on arguments, and with those things mentioned
     void tune_ostream(auto & os, auto const & args) {
         if (!args.no_grouping_sep)
-            tune_ostream<custom_boolean_and_groping_sep_facet>(os, args.decimal_format.c_str());
+            tune_ostream<custom_boolean_and_grouping_sep_facet>(os, args.decimal_format.c_str());
         else
-            tune_ostream<custom_boolean_and_no_groping_sep_facet>(os, args.decimal_format.c_str());
+            tune_ostream<custom_boolean_and_no_grouping_sep_facet>(os, args.decimal_format.c_str());
     }
 
     namespace trim_policy {
@@ -1182,7 +1182,7 @@ namespace csvsuite::cli {
         bool_stringstream() {
             if constexpr(std::is_same_v<T,void>) {
                 static std::locale loc(""); 
-                this->imbue(std::locale(loc, new custom_boolean_and_no_groping_sep_facet));
+                this->imbue(std::locale(loc, new custom_boolean_and_no_grouping_sep_facet));
             }        
         }
     };
@@ -1305,7 +1305,7 @@ namespace csvsuite::cli {
     public:
         explicit num_stringstream(std::string_view new_locale) {
             imbue(std::locale(std::string(new_locale)));
-            tune_ostream<custom_boolean_and_groping_sep_facet>(*this);
+            tune_ostream<custom_boolean_and_grouping_sep_facet>(*this);
         }
         num_stringstream() {
             tune_ostream(*this);

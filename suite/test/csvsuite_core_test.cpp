@@ -64,12 +64,12 @@ int main() {
         "tune_ostream"_test = [] {
             std::ostringstream oss;
             std::locale::global(std::locale("en_GB"));
-            expect(nothrow([&] { tune_ostream<custom_boolean_and_groping_sep_facet>(oss, "%.4f"); }));
+            expect(nothrow([&] { tune_ostream<custom_boolean_and_grouping_sep_facet>(oss, "%.4f"); }));
             oss << std::boolalpha << true << ' ' << false << ' ' << 123456.123456;
             expect("True False 123,456.1235" == oss.str());
 
             oss.str({});
-            expect(nothrow([&] { tune_ostream<custom_boolean_and_no_groping_sep_facet>(oss, "%.4f"); }));
+            expect(nothrow([&] { tune_ostream<custom_boolean_and_no_grouping_sep_facet>(oss, "%.4f"); }));
             oss << std::boolalpha << true << ' ' << false << ' ' << 123456.123456;
             expect("True False 123456.1235" == oss.str());
         };

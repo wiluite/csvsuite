@@ -243,7 +243,7 @@ namespace csvlook {
             oss_ << "--- |\n";
         }
 
-        tune_ostream<custom_boolean_and_groping_sep_facet>(oss_);
+        tune_ostream<custom_boolean_and_grouping_sep_facet>(oss_);
 
         auto line_numbers_print = [&] (auto index) {
             if (args.linenumbers) {
