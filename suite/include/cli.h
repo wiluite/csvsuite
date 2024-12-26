@@ -1250,8 +1250,58 @@ namespace csvsuite::cli {
         return compose_date_DRY<T, Q>(elem);
     }
 
-    std::string compose_text(auto const & elem) {
-        return elem.str();
+    template <typename T, typename Q=void>
+    inline std::string compose_timedelta_DRY(T const & elem) {
+        auto const timedelta = std::get<1>(elem.timedelta_tuple());
+        return timedelta.find(',') != std::string::npos ? R"(")" + timedelta + '"' : timedelta;
+    }
+
+    template <typename T, typename Q=void>
+    inline std::string compose_timedelta_1_arg(T const & elem) {
+        return compose_timedelta_DRY<T, Q>(elem);
+    }
+
+    template <typename T, typename Q=void>
+    inline std::string compose_timedelta(T const & elem, std::any const &) {
+        return compose_timedelta_DRY<T, Q>(elem);
+    }
+
+    inline auto compose_text = [](auto const & e) -> std::string {
+        using elem_type = std::decay_t<decltype(e)>;
+        static_assert(elem_type::is_unquoted());
+        if (e.raw_string_view().find(',') != std::string_view::npos)
+            return e;       // convertion to std::string: "Unquoted, please turn quoted!"
+        else
+            return e.str(); // unquoted via str()
+    };
+
+    inline bool ostream_numeric_corner_cases(std::ostringstream & ss, auto const & rep, auto const & args) {
+        assert(!rep.is_null());
+        ss.str({});
+
+        // Surprisingly, csvkit represents numbers from source without distortion:
+        // knowing, that they are valid numbers in a locale, it simply (almost for
+        // sure) removes the thousands separators and replaces the decimal point
+        // with its C-locale equivalent. So, numbers in a source are actually the
+        // outputs too, we only have to do some tricks.
+
+        auto const value = rep.num();
+
+        if (std::isnan(value)) {
+            ss << "NaN";
+            return true;
+        }
+        if (std::isinf(value)) {
+            ss << (value > 0 ? "Infinity" : "-Infinity");
+            return true;
+        }
+        if (args.num_locale != "C") {
+            std::string s = rep.str();
+            rep.to_C_locale(s);
+            ss << s;
+            return true;
+        }
+        return false;
     }
 
     class num_stringstream : public std::stringstream {

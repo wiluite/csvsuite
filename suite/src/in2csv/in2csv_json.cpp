@@ -1,6 +1,5 @@
 #include "../../include/in2csv/in2csv_json.h"
 #include <cli.h>
-#include <cli-print.h>
 #include <iostream>
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
@@ -18,13 +17,6 @@ namespace in2csv::detail::json {
         auto & [types, blanks] = types_n_blanks;
         bool const is_null = elem.is_null();
         if (types[col] == column_type::text_t or (!args.blanks and is_null)) {
-            auto compose_text = [&](auto const & e) -> std::string {
-                typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                if (another_rep.raw_string_view().find(',') != std::string_view::npos)
-                    return another_rep;
-                else
-                    return another_rep.str();
-            };
             os << (!args.blanks && is_null ? "" : compose_text(elem));
             return;
         }
@@ -46,10 +38,7 @@ namespace in2csv::detail::json {
                 }
                 , compose_datetime_1_arg < elem_type, in2csv_conversion_datetime >
                 , compose_date_1_arg < elem_type >
-                , [](elem_type const & e) {
-                    auto str = std::get<1>(e.timedelta_tuple());
-                    return str.find(',') != std::string::npos ? R"(")" + str + '"' : str;
-                }
+                , compose_timedelta_1_arg< elem_type >
         };
         auto const type_index = static_cast<std::size_t>(types[col]) - 1;
         os << type2func[type_index](elem);

@@ -5,7 +5,6 @@
 
 #include <cli.h>
 #include <cli-compare.h>
-#include <cli-print.h>
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
 
@@ -79,13 +78,7 @@ namespace csvsort {
 
                 bool const is_null = unquoted_elem.is_null();
                 if (types[col] == column_type::text_t or (!args.blanks && is_null)) {
-                    auto compose_text = [&]() -> std::string {
-                        if (unquoted_elem.raw_string_view().find(',') != std::string_view::npos)
-                            return unquoted_elem;
-                        else
-                            return unquoted_elem.str();
-                    };
-                    os << (!args.blanks && is_null ? "" : compose_text());
+                    os << (!args.blanks && is_null ? "" : compose_text(unquoted_elem));
                     return;
                 }
 
@@ -101,10 +94,7 @@ namespace csvsort {
                         }
                         , compose_datetime_1_arg<UElemType>
                         , compose_date_1_arg<UElemType>
-                        , [](UElemType const & e) {
-                            auto const str = std::get<1>(e.timedelta_tuple());
-                            return str.find(',') != std::string::npos ? R"(")" + str + '"' : str;
-                        }
+                        , compose_timedelta_1_arg<UElemType>
                 };
 
                 auto const type_index = static_cast<std::size_t>(types[col]) - 1;

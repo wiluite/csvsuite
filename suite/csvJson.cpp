@@ -27,6 +27,11 @@ namespace csvjson::detail {
         ss << value;
         return ss.str();
     }
+
+    std::string compose_text(auto const & elem) {
+        static_assert(std::decay_t<decltype(elem)>::is_unquoted());
+        return elem.str();
+    }
 }
 
 namespace csvjson {

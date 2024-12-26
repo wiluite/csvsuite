@@ -1,6 +1,5 @@
 #include "../../include/in2csv/in2csv_ndjson.h"
 #include <cli.h>
-#include <cli-print.h>
 #include <iostream>
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/csv/csv.hpp>
@@ -26,13 +25,6 @@ namespace in2csv::detail::ndjson {
         //TODO: Check whether we need to call is_null_value() as well.
         bool const is_null = elem.is_null();
         if (types[col] == column_type::text_t or (!args.blanks and is_null)) {
-            auto compose_text = [&](auto const & e) -> std::string {
-                typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                if (another_rep.raw_string_view().find(',') != std::string_view::npos)
-                    return another_rep;
-                else
-                    return another_rep.str();
-            };
             align_columns();
             csv_map[header[col]].push_back(!args.blanks && is_null ? "" : compose_text(elem));
             return;
@@ -55,10 +47,7 @@ namespace in2csv::detail::ndjson {
                 }
                 , compose_datetime_1_arg < elem_type, in2csv_conversion_datetime >
                 , compose_date_1_arg < elem_type >
-                , [](elem_type const & e) {
-                    auto str = std::get<1>(e.timedelta_tuple());
-                    return str.find(',') != std::string::npos ? R"(")" + str + '"' : str;
-                }
+                , compose_timedelta_1_arg< elem_type >
         };
         align_columns();
         csv_map[header[col]].push_back(type2func[static_cast<unsigned>(types[col]) - 1](elem));

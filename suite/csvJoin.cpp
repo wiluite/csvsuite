@@ -5,7 +5,6 @@
 
 #include <cli.h>
 #include <cli-compare.h>
-#include <cli-print.h>
 #include "type_name.h"
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
@@ -213,20 +212,10 @@ namespace csvjoin::detail {
 
             bool const is_null = elem.is_null();
 
-            bool text_or_null;
-            if (args.outer_join and !args.honest_outer_join)
-                text_or_null = types[col] == column_type::text_t or is_null;
-            else
-                text_or_null = types[col] == column_type::text_t or (!args.blanks and is_null);
+            bool text_or_null = args.outer_join and !args.honest_outer_join
+                ? types[col] == column_type::text_t or is_null : types[col] == column_type::text_t or (!args.blanks and is_null);
 
             if (text_or_null) {
-                auto compose_text = [&](auto const & e) -> std::string {
-                    typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                    if (another_rep.raw_string_view().find(',') != std::string_view::npos)
-                        return another_rep;
-                    else
-                        return another_rep.str();
-                };
                 os << (!args.blanks && is_null ? "" : compose_text(elem));
                 return;
             }
@@ -252,10 +241,7 @@ namespace csvjoin::detail {
                     }
                     , compose_datetime_1_arg<elem_type>
                     , compose_date_1_arg<elem_type>
-                    , [](elem_type const & e) {
-                        auto str = std::get<1>(e.timedelta_tuple());
-                        return str.find(',') != std::string::npos ? R"(")" + str + '"' : str;
-                    }
+                    , compose_timedelta_1_arg<elem_type>
             };
             auto const type_index = static_cast<std::size_t>(types[col]) - 1;
             os << type2func[type_index](elem);

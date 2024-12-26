@@ -263,7 +263,7 @@ namespace csvlook {
                     bool const is_null = elem.is_null();
                     if (types[col] == column_type::text_t or (!args.blanks && is_null)) {
                         oss_.setf(std::ios::left, std::ios::adjustfield);
-                        print_func_impl(!args.blanks && is_null ? "" : compose_text(elem), max_sizes[col], row);
+                        print_func_impl(!args.blanks && is_null ? "" : elem.str(), max_sizes[col], row);
                         return;
                     }
 
