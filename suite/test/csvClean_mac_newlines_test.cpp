@@ -4,7 +4,6 @@
 
 #define BOOST_UT_DISABLE_MODULE
 #include "ut.hpp"
-//TODO: rename this file to python csvsuite test
 #include "../csvClean.cpp"
 #include "common_args.h"
 
@@ -17,11 +16,10 @@ int main() {
 #endif
 
     "mac newlines"_test = [&] () {
-        // we now handle with a Mac's line-breaking file with a Mac's line-breaking multiline field.
-        // Output file is a native system line-breaking one, still having 3 rows and 1 multiline field with
-        // native line-breaking.
+        // We now handle with a Mac's line-breaking file with a Mac's line-breaking multiline field.
+        // Output file is a native system line-breaking one, still having 3 rows and 1 multiline field
+        // with native line-breaking.
 #if !defined (__APPLE__)
-
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
             Args() { file = "mac_newlines.csv"; }
             bool dry_run {false};

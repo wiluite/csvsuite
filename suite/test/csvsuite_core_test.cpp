@@ -88,17 +88,17 @@ int main() {
         expect(throws([&] { quick_check(reader<> ("a,b,c\n1,3"), args); }));
         try {quick_check(reader<> ("a,b,c\n1,3"), args);} catch(std::exception const & e) {
             expect(std::string(e.what()) == R"(The document has different numbers of columns : 2 3 at least at rows : 2 1...
-Either use/reuse the -K option for alignment, or use the csvclean utility to fix it.)"
+Either use/reuse the -K option for alignment, or use the csvClean utility to fix it.)"
             or std::string(e.what()) == R"(The document has different numbers of columns : 3 2 at least at rows : 1 2...
-Either use/reuse the -K option for alignment, or use the csvclean utility to fix it.)");
+Either use/reuse the -K option for alignment, or use the csvClean utility to fix it.)");
         }
 
         expect(throws([&] { quick_check(reader<> ("a,b,c\n1,2,3,4"), args); }));
         try {quick_check(reader<> ("a,b,c\n1,2,3,4"), args);} catch(std::exception const & e) {
             expect(std::string(e.what()) == R"(The document has different numbers of columns : 4 3 at least at rows : 2 1...
-Either use/reuse the -K option for alignment, or use the csvclean utility to fix it.)"
+Either use/reuse the -K option for alignment, or use the csvClean utility to fix it.)"
             or std::string(e.what()) == R"(The document has different numbers of columns : 3 4 at least at rows : 1 2...
-Either use/reuse the -K option for alignment, or use the csvclean utility to fix it.)");
+Either use/reuse the -K option for alignment, or use the csvClean utility to fix it.)");
         }
 
         expect(throws([&] { quick_check(reader<>("a,b,c\n1,2,3\n\n"), args); }));

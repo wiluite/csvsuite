@@ -200,7 +200,7 @@ namespace csvsuite::cli {
                     continue;
                 error_message += (" " + std::to_string(e.second));
             }
-            error_message += "...\nEither use/reuse the -K option for alignment, or use the csvclean utility to fix it.";
+            error_message += "...\nEither use/reuse the -K option for alignment, or use the csvClean utility to fix it.";
 
             throw std::runtime_error(error_message.c_str());
         }
