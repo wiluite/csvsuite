@@ -216,25 +216,22 @@ namespace csvsuite::cli {
     // TODO: add test
     /// Returns optionally quoted cell string
     std::string optional_quote(auto && span) {
-        auto constexpr delim = std::decay_t<decltype(span)>::reader_type::delimiter_type::value;
         auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
-        auto cell_str = span.operator csv_co::cell_string();
-        // 1st, we need to transform possible foreign line-breaking to the native one.
-        // There has supposed that you proccess an Apple CSV document on windows/linux machine
-        // and you have manually changed line-breaking character in CSV_co parser to correctly parse the document. 
-        // Now we must automatically change those foreign line-breakings in each cell.
-        bool stay_quoted = false;
+        auto full = span.operator csv_co::cell_string();
+        if (full.find_first_of(",\n") != std::string::npos)
+            return full;
+        // Comment this in more details:
         if constexpr('\n' != line_break) {
+            bool stay_quoted = false;
             std::remove_const_t<decltype(std::string::npos)> it;
-            while ((it = cell_str.find(line_break)) != std::string::npos) {
-                cell_str.replace(it, 1, "\n");
+            while ((it = full.find(line_break)) != std::string::npos) {
+                full.replace(it, 1, "\n");
                 stay_quoted = true;
             }
+            if (stay_quoted)
+                return full;
         }
-        // 2nd, we stay quoted if a delimiter detected within a cell.
-        if (!stay_quoted && cell_str.find(delim) != std::string::npos)
-            stay_quoted = true;
-        return stay_quoted ? cell_str : span.operator csv_co::unquoted_cell_string();
+        return span.operator csv_co::unquoted_cell_string();
     }
 
     /// "Display column names and indices for -n/--names option"
@@ -1269,7 +1266,7 @@ namespace csvsuite::cli {
     inline auto compose_text = [](auto const & e) -> std::string {
         using elem_type = std::decay_t<decltype(e)>;
         static_assert(elem_type::is_unquoted());
-        if (e.raw_string_view().find(',') != std::string_view::npos)
+        if (e.raw_string_view().find_first_of(",\n") != std::string_view::npos)
             return e;       // convertion to std::string: "Unquoted, please turn quoted!"
         else
             return e.str(); // unquoted via str()
