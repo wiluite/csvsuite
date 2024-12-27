@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "col_types.h"
 #include "../external/argparse/argparse.hpp"
 #include "../external/transwarp/transwarp.h"
 #include "reader-bridge-impl.hpp"
@@ -874,6 +873,17 @@ namespace csvsuite::cli {
         typify_with_precisions,
         typify_without_precisions,
         typify_without_precisions_and_blanks
+    };
+
+    enum struct column_type {
+        unknown_t,
+        bool_t,
+        number_t,
+        datetime_t,
+        date_t,
+        timedelta_t,
+        text_t,
+        sz
     };
 
     using typify_with_precisions_result = std::tuple<std::vector<column_type>, std::vector<unsigned char>, std::vector<unsigned>>;
