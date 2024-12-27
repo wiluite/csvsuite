@@ -88,7 +88,7 @@ namespace csvsort {
                         compose_bool_1_arg<UElemType>
                         , [&args](UElemType const & e) {
                             static std::ostringstream ss;
-                            if (!ostream_numeric_corner_cases(ss, e, args))
+                            if (!compose_numeric_corner_cases(ss, e, args))
                                 ss << e.str();
                             return ss.str();
                         }

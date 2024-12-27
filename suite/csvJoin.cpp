@@ -235,7 +235,7 @@ namespace csvjoin::detail {
                     , [&](elem_type const & e) {
                         static std::ostringstream ss;
                         typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                        if (!ostream_numeric_corner_cases(ss, another_rep, args))
+                        if (!compose_numeric_corner_cases(ss, another_rep, args))
                             ss << another_rep.str();
                         return ss.str();
                     }
