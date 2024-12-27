@@ -1,7 +1,7 @@
 ///
-/// \file   utils/csvsuite/include/cli.h
+/// \file   suite/include/cli.h
 /// \author wiluite
-/// \brief  Common small csv kit facilities.
+/// \brief  Common csvsuite facilities.
 
 #pragma once
 
@@ -1093,7 +1093,7 @@ namespace csvsuite::cli {
         return result;
     }
 
-    /// To be documented
+    /// Returns zero-based index of a column by name or by order depending on the offset value
     unsigned match_column_identifier (auto const & column_names, char const * c, auto column_offset) {
         auto const digital = python_isdigit(c);
         if (!digital) {
@@ -1171,7 +1171,7 @@ namespace csvsuite::cli {
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>);
         return date_s(tp); 
     }
-
+    /// String stream class with custom boolean value representation
     template <typename T>
     class bool_stringstream : public std::stringstream {
     public:
@@ -1182,7 +1182,7 @@ namespace csvsuite::cli {
             }        
         }
     };
-
+    /// Common template function to compose custom boolean value representation
     template <typename T, typename Q=void>
     inline std::string compose_bool_DRY (T const & elem) {
         static bool_stringstream<Q> ss;
@@ -1190,19 +1190,19 @@ namespace csvsuite::cli {
         ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
         return ss.str();
     }
-
+    /// Composes boolean value for printing
     template <typename T, typename Q=void>
     std::string compose_bool(T const & elem, std::any const &) {
         return compose_bool_DRY<T, Q>(elem);
     }
-
+    /// Override. Composes boolean value for printing
     template <typename T, typename Q=void>
     std::string compose_bool_1_arg(T const & elem) {
         return compose_bool_DRY<T, Q>(elem);
     }
-
+    /// To be documented
     struct in2csv_conversion_datetime;
-
+    /// Common template function to compose a datetime
     template <typename T, typename Q=void>             
     inline std::string compose_datetime_DRY(T const & elem) {
         if constexpr(std::is_same_v<Q,void>)
@@ -1213,17 +1213,17 @@ namespace csvsuite::cli {
         else
             return std::string("\"") + datetime_s_json(elem) + '"';
     }
-
+    /// Composes a datetime for printing
     template <typename T, typename Q=void>
     std::string compose_datetime(T const & elem, std::any const &) {
         return compose_datetime_DRY<T, Q>(elem);
     }
-
+    /// Composes a datetime for printing (alternative)
     template <typename T, typename Q=void>
     std::string compose_datetime_1_arg(T const & elem) {
         return compose_datetime_DRY<T, Q>(elem);
     }
-
+    /// Common template function to compose a date
     template <typename T, typename Q=void>
     inline std::string compose_date_DRY(T const & elem) {
         if constexpr(std::is_same_v<Q,void>)
@@ -1231,37 +1231,34 @@ namespace csvsuite::cli {
         else
             return std::string("\"") + date_s(elem) + '"';
     }
-
+    /// Composes a date for printing
     template <typename T, typename Q=void>
     std::string compose_date(T const & elem, std::any const &) {
         return compose_date_DRY<T, Q>(elem);
     }
-
-
+    /// Composes a date for printing
     template <typename T, typename Q=void>
     std::string compose_date_1_arg(T const & elem) {
         return compose_date_DRY<T, Q>(elem);
     }
-
+    /// Common template function to compose a timedelta
     template <typename T, typename Q=void>
     inline std::string compose_timedelta_DRY(T const & elem) {
         auto const timedelta = std::get<1>(elem.timedelta_tuple());
         return timedelta.find(',') != std::string::npos ? R"(")" + timedelta + '"' : timedelta;
     }
-
+    /// Composes a timedelta for printing
     template <typename T, typename Q=void>
     inline std::string compose_timedelta_1_arg(T const & elem) {
         return compose_timedelta_DRY<T, Q>(elem);
     }
-
+    /// Composes a timedelta for printing
     template <typename T, typename Q=void>
     inline std::string compose_timedelta(T const & elem, std::any const &) {
         return compose_timedelta_DRY<T, Q>(elem);
     }
-
     /// Returns optionally quoted cell string from a type-agnostic span (cell_span, not typed_span)
-    std::string compose_text(auto && span)
-        requires(std::is_same_v<std::decay_t<decltype(span)>, typename std::decay_t<decltype(span)>::reader_type::cell_span>) {
+    std::string compose_text(auto && span) requires(std::is_same_v<std::decay_t<decltype(span)>, typename std::decay_t<decltype(span)>::reader_type::cell_span>) {
         auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
         auto full = span.operator csv_co::cell_string();
         if (full.find_first_of(",\n") != std::string::npos)
@@ -1289,8 +1286,8 @@ namespace csvsuite::cli {
         else
             return e.str(); // unquoted via str()
     };
-
-    inline bool ostream_numeric_corner_cases(std::ostringstream & ss, auto const & rep, auto const & args) {
+    /// Composes a numeric corner cases for printing, returns false if the numeric is not a corner case
+    inline bool compose_numeric_corner_cases(std::ostringstream & ss, auto const & rep, auto const & args) {
         assert(!rep.is_null());
         ss.str({});
 
@@ -1318,7 +1315,7 @@ namespace csvsuite::cli {
         }
         return false;
     }
-
+    /// String stream class with custom numeric value representation
     class num_stringstream : public std::stringstream {
     public:
         explicit num_stringstream(std::string_view new_locale) {
@@ -1329,7 +1326,7 @@ namespace csvsuite::cli {
             tune_ostream(*this);
         }
     };
-
+    /// Builds and traces parts of a json output in a number of utilities
     class json_indenter {
     public:
         explicit json_indenter(int const indent) : indent(indent), indent_delta(indent) {}
