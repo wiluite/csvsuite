@@ -123,7 +123,7 @@ namespace csvstack::detail {
                 rows += r.rows();
                 header_fields.insert(header.begin(), header.end());
                 std::vector<std::string> string_header(header.size());
-                std::transform(header.begin(), header.end(), string_header.begin(), [](auto & elem) {return optional_quote(elem);});
+                std::transform(header.begin(), header.end(), string_header.begin(), [](auto & elem) {return compose_text(elem);});
                 headers.push_back(string_header);
             }, elem);
         }

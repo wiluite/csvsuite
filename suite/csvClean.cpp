@@ -23,13 +23,13 @@ namespace csvclean::detail {
 
     void print_span(auto & ostream, auto && span) {
 #if defined(TRY_TRANSFORM_UTF8_TO_ACTIVE_CODE_PAGE) && (TRY_TRANSFORM_UTF8_TO_ACTIVE_CODE_PAGE)
-        auto str = optional_quote(span);
+        auto str = compose_text(span);
         static encoding::acp_transformer t;
         // see c++ insights of how to pass span
         encoding::cp_transform(t, str);
         ostream << str;
 #endif
-        ostream << optional_quote(span);
+        ostream << compose_text(span);
     }
 
     void print_line (char delim, auto & ostream, auto const & spans) {

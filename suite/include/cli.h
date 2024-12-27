@@ -211,28 +211,6 @@ namespace csvsuite::cli {
             throw std::runtime_error("RequiredHeaderError: You cannot use --no-header-row with the -n or --names options.");
     }
 
-    // TODO: rename me
-    // TODO: add test
-    /// Returns optionally quoted cell string
-    std::string optional_quote(auto && span) {
-        auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
-        auto full = span.operator csv_co::cell_string();
-        if (full.find_first_of(",\n") != std::string::npos)
-            return full;
-        // Comment this in more details:
-        if constexpr('\n' != line_break) {
-            bool stay_quoted = false;
-            std::remove_const_t<decltype(std::string::npos)> it;
-            while ((it = full.find(line_break)) != std::string::npos) {
-                full.replace(it, 1, "\n");
-                stay_quoted = true;
-            }
-            if (stay_quoted)
-                return full;
-        }
-        return span.operator csv_co::unquoted_cell_string();
-    }
-
     /// Displays column names and indices with the -n/--names option
     template<class OS, class C, class Args>
     void print_header(OS & os, C &c, Args const &args) {
@@ -445,7 +423,7 @@ namespace csvsuite::cli {
         return true;
     }
 
-    /// Tunes an output stream with a decimal format like %.3f, %.4e, %.15g
+    /// Tunes an output stream with a specified decimal format, like %.3f, %.4e, %.15g
     static void tune_format(std::ostream & os, char const * fmt) {
         int prec;
         char float_type;
@@ -461,10 +439,10 @@ namespace csvsuite::cli {
         os.precision(prec);
     }
 
-    /// Tunes an output stream with the global locale and a decimal format
+    /// Tunes an output stream for the global locale with a specified decimal format
     template <typename ... facets>
     void tune_ostream(auto & os, char const * fmt = "%.3f") {
-        // global locale is supposed to set
+        // global locale is supposed to be already set
         os.imbue(std::locale(std::locale(), (new facets)...));
         tune_format(os, fmt);
     }
@@ -478,7 +456,6 @@ namespace csvsuite::cli {
     }
 
     namespace trim_policy {
-
         /// Trimming policy class used for cr-trailing strings   
         template<char const *list>
         struct trimming_trailing_cr {
@@ -500,8 +477,7 @@ namespace csvsuite::cli {
     }
 
     namespace trim_policy {
-
-        /// Trimming policy class used for the csv kit's -S option
+        /// Trimming policy class used for the -S option
         template<char const *list, char const *list2>
         struct trimming_init_space {
         public:
@@ -525,10 +501,12 @@ namespace csvsuite::cli {
         using init_space_trim = trimming_init_space<init_space_chars, crchar>;
     }
 
+    /// Alias of the reader type used for the most CSV readers instantiations
     using notrimming_reader_type = csv_co::reader<csvsuite::cli::trim_policy::crtrim>;
+    /// Alias of the reader type used for the skipping initial space CSV readers instantiations
     using skipinitspace_reader_type = csv_co::reader<csvsuite::cli::trim_policy::init_space_trim>;
 
-    /// Recodes a csv source text endcoding to UTF-8, if needed 
+    /// Recodes a CSV source text endcoding to the UTF-8 one, if required
     void recode_source(auto & reader, auto const & args) {
         if (args.encoding == "UTF-8")  {
             auto const check_result = encoding::is_source_utf8(reader);
@@ -546,6 +524,7 @@ namespace csvsuite::cli {
         }
     }
 
+    /// Overridden function. Recodes a CSV source text endcoding to the UTF-8 one, if required
     std::string recode_source(std::string && s, auto const & args) {
         if (args.encoding == "UTF-8")  {
             auto const check_result = encoding::is_source_utf8(s);
@@ -594,7 +573,7 @@ namespace csvsuite::cli {
         std::cout << "Unknown exception.\n";                                                         \
     }
 
-    /// Uniquely maps a column number to a letter
+    /// Consistently maps a column number to a letter
     static std::string letter_name(std::size_t column) {
         char const * const letters = "abcdefghijklmnopqrstuvwxyz";
         unsigned const count = std::strlen(letters);
@@ -607,6 +586,7 @@ namespace csvsuite::cli {
         return s ;
     }
 
+    /// Having a reader object, generates a range of column names
     auto generate_column_names(auto & reader) {
         using cell_span_type = typename std::decay_t<decltype(reader)>::cell_span;
         auto const col_num = reader.cols();
@@ -615,12 +595,6 @@ namespace csvsuite::cli {
         column_cells.reserve(col_num);
 
         static std::vector<std::string> letter_names (col_num);
-
-        if (col_num > letter_names.size()) {
-#if 0
-            std::cerr << "generate_column_names(): You would better not to call this function twice.\n";
-#endif
-        }
         letter_names.resize(col_num);
 
         unsigned i = 0;
@@ -768,7 +742,7 @@ namespace csvsuite::cli {
             checker.check(e);
     }
 
-    /// Dummy matrix class to wrap vector of vector of elements
+    /// A primitive helper matrix class to wrap vector of vector of elements
     template <typename ElemType>
     struct fixed_array_2d_replacement {
     private:
@@ -776,6 +750,7 @@ namespace csvsuite::cli {
     public:
         using table = std::vector<field_array>;
     protected:
+    public:
         table table_impl;
     public:
         explicit operator table& () {
@@ -791,10 +766,12 @@ namespace csvsuite::cli {
             return table_impl.cend();
         }
         auto begin() {
-            auto & impl_ref = table_impl; return impl_ref.begin();
+            auto & impl_ref = table_impl;
+            return impl_ref.begin();
         }
         auto end() {
-            auto & impl_ref = table_impl; return impl_ref.end();
+            auto & impl_ref = table_impl;
+            return impl_ref.end();
         }
 
         fixed_array_2d_replacement(auto rows, auto cols) : table_impl(rows, field_array(cols)) {}
@@ -804,8 +781,8 @@ namespace csvsuite::cli {
         [[nodiscard]] auto cols() const {
             return table_impl[0].size();
         }
-        fixed_array_2d_replacement(fixed_array_2d_replacement&&)  noexcept = default;
-        fixed_array_2d_replacement& operator=(fixed_array_2d_replacement&&)  noexcept = default;
+        fixed_array_2d_replacement(fixed_array_2d_replacement&&) noexcept = default;
+        fixed_array_2d_replacement& operator=(fixed_array_2d_replacement&&) noexcept = default;
     };
 
     static_assert(!std::is_copy_constructible_v<fixed_array_2d_replacement<std::string>>);
@@ -829,6 +806,7 @@ namespace csvsuite::cli {
         }
     }
 
+    /// Binds a apecified numeric locale to all kinds of cells
     void imbue_numeric_locale(auto & reader, auto const & args) {
         using reader_type = std::decay_t<decltype(reader)>;
 
@@ -839,6 +817,7 @@ namespace csvsuite::cli {
         quoted_elem_type::imbue_num_locale(cell_numeric_locale(args.num_locale.c_str()));
     }
 
+    /// Binds a apecified date and datetime parser to all kinds of cells
     void setup_date_parser_backend(auto & reader, auto const & args) {
         using reader_type = std::decay_t<decltype(reader)>;
 
@@ -851,6 +830,7 @@ namespace csvsuite::cli {
             quoted_elem_type::date_parser_backend_t::compiler_supported : quoted_elem_type::date_parser_backend_t::date_lib_supported);
     }
 
+    /// Specifies whether to take into account the leading zeros for numerics
     void setup_leading_zeroes_processing(auto & reader, auto const & args) {
         using reader_type = std::decay_t<decltype(reader)>;
 
@@ -861,6 +841,7 @@ namespace csvsuite::cli {
         quoted_elem_type::no_leading_zeroes(args.no_leading_zeroes);
     }
 
+    /// Creates a set of user-defined null values
     static void update_null_values(std::vector<std::string> & null_values) {
         csv_co::get_null_value_set().clear();
         for (auto & e: null_values) {
@@ -869,6 +850,7 @@ namespace csvsuite::cli {
         }
     }
 
+    /// The kinds of cell typifying process
     enum class typify_option {
         typify_with_precisions,
         typify_without_precisions,
@@ -891,9 +873,10 @@ namespace csvsuite::cli {
     using typify_without_precisions_and_blanks_result = std::tuple<std::vector<column_type>>;
     using typify_result = std::variant<typify_with_precisions_result, typify_without_precisions_result, typify_without_precisions_and_blanks_result>;
 
+    /// Detects types, blanks and precisions for every column
     template <typename Reader, typename Args>
     auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
-        // Detect types and blanks presence in columns, also imbue cell locale
+
         update_null_values(args.null_value);
 
         struct hibernator {
@@ -907,7 +890,7 @@ namespace csvsuite::cli {
         skip_lines(reader, args);
         auto header = obtain_header_and_<skip_header>(reader, args);
 
-        if (!reader.cols()) // alternatively : if (!reader.rows())
+        if (!reader.cols())
             throw std::runtime_error("Typify(). Columns == 0. Vain to do next actions!"); // well, vain to do rest things
 
         {
@@ -1060,11 +1043,13 @@ namespace csvsuite::cli {
             return std::tuple{types};
     }
 
+    /// Just simple and effective trimming a string
     inline auto trim_string = [](std::string & s) {
         s.erase(0, s.find_first_not_of(' '));
         s.erase(s.find_last_not_of(' ') + 1);
     };
 
+    /// Parses and checks column indentifiers given by user
     auto parse_column_identifiers(auto && ids, auto && column_names, auto && column_offset, auto && excl)->std::vector<unsigned> {
         if (column_names.empty())
             return {};
@@ -1108,6 +1093,7 @@ namespace csvsuite::cli {
         return result;
     }
 
+    /// To be documented
     unsigned match_column_identifier (auto const & column_names, char const * c, auto column_offset) {
         auto const digital = python_isdigit(c);
         if (!digital) {
@@ -1116,7 +1102,7 @@ namespace csvsuite::cli {
                 return std::distance(column_names.begin(), iter);
         }
         if (digital) {
-            int col = std::stoi(c) - column_offset;
+            int const col = std::stoi(c) - column_offset;
             if (col < 0)
                 throw ColumnIdentifierError("Column '", col + column_offset, "' is invalid. Columns are (default) 1-based.");
             if (static_cast<unsigned>(col) >= column_names.size())
@@ -1141,45 +1127,45 @@ namespace csvsuite::cli {
             throw ColumnIdentifierError("Column '", c, "' is invalid. It is neither an integer nor a column name. Column names are: ", column_names_string(column_names), ".");
         }
     }
-
+    /// Gets datetime time point from a cell span
     auto datetime_time_point(auto const & elem) {
         return std::get<1>(elem.datetime());  
     }
-
-    static auto datetime_s(date::sys_seconds const & tp) {   // get string from time_point (sys_seconds)
+    /// Gets datetime string from a time point (sys_seconds)
+    static auto datetime_s(date::sys_seconds const & tp) {
         std::stringstream ss;
         date::to_stream(ss, "%Y-%m-%d %H:%M:%S", tp); 
         return ss.str(); 
     }
-
+    /// Gets datetime string from a time point (sys_seconds), alternative representation
     static auto datetime_s_json(date::sys_seconds const & tp) {
         std::stringstream ss;
         date::to_stream(ss, "%Y-%m-%dT%H:%M:%S", tp);
         return ss.str();
     }
-
-    static auto datetime_s(auto const & elem) { // get string from csvsuite cell span
+    /// Gets datetime string from a cell span
+    static auto datetime_s(auto const & elem) {
         auto const tp = std::get<1>(elem.datetime());
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>); 
         return datetime_s(tp);
     }
-
-    static auto datetime_s_json(auto const & elem) { // get string from csvsuite cell span
+    /// Gets datetime string from a cell span, alternative representation
+    static auto datetime_s_json(auto const & elem) {
         auto const tp = std::get<1>(elem.datetime());
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>);
         return datetime_s_json(tp);
     }
-
+    /// Gets date time point from a cell span
     auto date_time_point(auto const & elem) {
         return std::get<1>(elem.date());  
     }
-
+    /// Gets date string from a time point (sys_seconds)
     static auto date_s(date::sys_seconds const & tp) {
         std::stringstream ss;
         date::to_stream(ss, "%Y-%m-%d", tp); 
         return ss.str(); 
     }
-
+    /// Gets date string from a cell span
     static auto date_s(auto const & elem) {
         auto const tp = std::get<1>(elem.date());
         static_assert(std::is_same_v<decltype(tp), date::sys_seconds const>);
@@ -1273,7 +1259,29 @@ namespace csvsuite::cli {
         return compose_timedelta_DRY<T, Q>(elem);
     }
 
-    inline auto compose_text = [](auto const & e) -> std::string {
+    /// Returns optionally quoted cell string from a type-agnostic span (cell_span, not typed_span)
+    std::string compose_text(auto && span)
+        requires(std::is_same_v<std::decay_t<decltype(span)>, typename std::decay_t<decltype(span)>::reader_type::cell_span>) {
+        auto constexpr line_break = std::decay_t<decltype(span)>::reader_type::line_break_type::value;
+        auto full = span.operator csv_co::cell_string();
+        if (full.find_first_of(",\n") != std::string::npos)
+            return full;
+        // TODO: use std and comment this in more details:
+        if constexpr('\n' != line_break) {
+            bool stay_quoted = false;
+            std::remove_const_t<decltype(std::string::npos)> it;
+            while ((it = full.find(line_break)) != std::string::npos) {
+                full.replace(it, 1, "\n");
+                stay_quoted = true;
+            }
+            if (stay_quoted)
+                return full;
+        }
+        return span.operator csv_co::unquoted_cell_string();
+    }
+
+    /// Returns optionally quoted cell string from a type-aware cell span (typed_span, not cell_span)
+    inline std::string compose_text(auto const & e) requires(std::decay_t<decltype(e)>::is_unquoted()) {
         using elem_type = std::decay_t<decltype(e)>;
         static_assert(elem_type::is_unquoted());
         if (e.raw_string_view().find_first_of(",\n") != std::string_view::npos)

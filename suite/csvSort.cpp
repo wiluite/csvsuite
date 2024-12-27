@@ -192,7 +192,7 @@ namespace csvsort {
 
             std::vector<std::string> string_header(header.size());
             std::transform(header.cbegin(), header.cend(), string_header.begin(), [&](auto & elem) {
-                return optional_quote(elem);
+                return compose_text(elem);
             });
 
             p.write(string_header, args);

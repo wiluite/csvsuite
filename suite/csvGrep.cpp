@@ -94,7 +94,7 @@ namespace csvgrep {
             printer p{oss_};
             // csvstack seems to have non-typed output
             std::vector<std::string> string_header(header.size());
-            std::transform(header.begin(), header.end(), string_header.begin(), [](auto & elem) {return optional_quote(elem);});
+            std::transform(header.begin(), header.end(), string_header.begin(), [](auto & elem) {return compose_text(elem);});
 
             p.write(string_header, args);
 

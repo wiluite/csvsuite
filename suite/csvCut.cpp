@@ -72,9 +72,9 @@ namespace csvcut {
                         }
                     }
                 }
-                os << optional_quote(row_span[ids.front()]);
+                os << compose_text(row_span[ids.front()]);
                 for (auto it = ids.cbegin() + 1; it != ids.cend(); ++it)
-                    os << delim << optional_quote(row_span[*it]);
+                    os << delim << compose_text(row_span[*it]);
                 os << '\n';
             };
 
