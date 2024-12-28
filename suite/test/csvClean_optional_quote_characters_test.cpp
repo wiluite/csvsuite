@@ -18,7 +18,7 @@ int main() {
 #endif
     "optional quote characters"_test = [] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "optional_quote_characters.csv"; maxfieldsize = max_unsigned_limit; }
+            Args() { file = "examples/optional_quote_characters.csv"; maxfieldsize = max_unsigned_limit; }
             bool dry_run {false};
         } args;
 

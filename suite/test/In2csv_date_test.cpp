@@ -50,21 +50,21 @@ int main() {
 
     "date format"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "test_date_format.csv"; date_fmt = R"(%d/%m/%Y)";}
+            Args() { file = "examples/test_date_format.csv"; date_fmt = R"(%d/%m/%Y)";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            assert_converted(cout_buffer.str(), "test_date_format_converted.csv");
+            assert_converted(cout_buffer.str(), "examples/test_date_format_converted.csv");
         }));
     };
 
     "numeric date format default"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "test_numeric_date_format.csv"; skip_init_space = true; date_fmt = R"(%Y%m%d)"; }
+            Args() { file = "examples/test_numeric_date_format.csv"; skip_init_space = true; date_fmt = R"(%Y%m%d)"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            assert_converted(cout_buffer.str(), "test_date_format_converted.csv");
+            assert_converted(cout_buffer.str(), "examples/test_date_format_converted.csv");
         }));
     };
 

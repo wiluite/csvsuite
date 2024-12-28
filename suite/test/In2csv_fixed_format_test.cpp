@@ -53,31 +53,31 @@ int main() {
 
     "fixed"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "testfixed"; schema = "testfixed_schema.csv"; }
+            Args() { file = "examples/testfixed"; schema = "examples/testfixed_schema.csv"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+            assert_converted(cout_buffer.str(), "examples/testfixed_converted.csv");
         }));
     };
 
     "fixed skip lines"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "testfixed_skip_lines"; schema = "testfixed_schema.csv"; skip_lines = 3; }
+            Args() { file = "examples/testfixed_skip_lines"; schema = "examples/testfixed_schema.csv"; skip_lines = 3; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+            assert_converted(cout_buffer.str(), "examples/testfixed_converted.csv");
         }));
     };
 
     "fixed too many skip lines"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "testfixed_skip_lines"; schema = "testfixed_schema.csv"; skip_lines = 30; }
+            Args() { file = "examples/testfixed_skip_lines"; schema = "examples/testfixed_schema.csv"; skip_lines = 30; }
         } args;
         try {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            assert_converted(cout_buffer.str(), "testfixed_converted.csv");
+            assert_converted(cout_buffer.str(), "examples/testfixed_converted.csv");
         } catch(std::exception const & ex) {
             expect(std::string(ex.what()) == "ValueError: Too many lines to skip.");
         }
@@ -85,7 +85,7 @@ int main() {
 
     "fixed no inference"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
+            Args() { file = "_"; format = "fixed"; schema = "examples/testfixed_schema_no_inference.csv"; no_inference = true; }
         } args;
         expect(nothrow([&] {
             std::istringstream iss("     1   2 3");
@@ -98,7 +98,7 @@ int main() {
 
     "schema decoder bad cases"_test = [&] {
         struct Args : in2csv_args {
-            Args() { file = "_"; format = "fixed"; schema = "testfixed_schema_no_inference.csv"; no_inference = true; }
+            Args() { file = "_"; format = "fixed"; schema = "examples/testfixed_schema_no_inference.csv"; no_inference = true; }
         } args;
 
         try {

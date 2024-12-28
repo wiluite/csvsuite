@@ -34,7 +34,7 @@ int main() {
 
     "runs"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "test_utf8.csv"; }
+            Args() { file = "examples/test_utf8.csv"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -48,7 +48,7 @@ int main() {
 
     "encoding"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "test_latin1.csv"; }
+            Args() { file = "examples/test_latin1.csv"; }
         } args;
 
         {
@@ -75,7 +75,7 @@ int main() {
     "sort string reverse"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "testxls_converted.csv"; columns = "1"; r = true; }
+            Args() { file = "examples/testxls_converted.csv"; columns = "1"; r = true; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -93,7 +93,7 @@ int main() {
     "sort date"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "testxls_converted.csv"; columns = "2"; date_fmt = "%Y-%m-%d";}
+            Args() { file = "examples/testxls_converted.csv"; columns = "2"; date_fmt = "%Y-%m-%d";}
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -111,7 +111,7 @@ int main() {
     "ignore case"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "test_ignore_case.csv"; date_fmt = "%Y-%m-%d"; ignore_case = true; }
+            Args() { file = "examples/test_ignore_case.csv"; date_fmt = "%Y-%m-%d"; ignore_case = true; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -129,7 +129,7 @@ int main() {
     "no blanks"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "blanks.csv"; }
+            Args() { file = "examples/blanks.csv"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -140,7 +140,7 @@ int main() {
     "blanks"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "blanks.csv"; blanks = true; }
+            Args() { file = "examples/blanks.csv"; blanks = true; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -151,7 +151,7 @@ int main() {
     "no header row"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "no_header_row.csv"; no_inference = true; no_header = true; }
+            Args() { file = "examples/no_header_row.csv"; no_inference = true; no_header = true; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -162,7 +162,7 @@ int main() {
     "no inference"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "test_literal_order.csv"; no_inference = true; columns = "1"; }
+            Args() { file = "examples/test_literal_order.csv"; no_inference = true; columns = "1"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -180,7 +180,7 @@ int main() {
     "sort_t_and_nulls"_test = [] {
         namespace tf = csvsuite::test_facilities;
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "sort_ints_nulls.csv"; columns = "2"; }
+            Args() { file = "examples/sort_ints_nulls.csv"; columns = "2"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -204,7 +204,7 @@ int main() {
 
     "sort timedelta"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "timedelta.csv"; columns = "2"; }
+            Args() { file = "examples/timedelta.csv"; columns = "2"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)
@@ -220,7 +220,7 @@ int main() {
 
     "max field size"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, tf::output_args, csvsort_specific_args {
-            Args() { file = "test_field_size_limit.csv"; maxfieldsize = 100; }
+            Args() { file = "examples/test_field_size_limit.csv"; maxfieldsize = 100; }
         } args;
 
         expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT(csvsort::sort)}));

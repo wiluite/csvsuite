@@ -19,7 +19,7 @@ int main() {
 
     "no header row"_test = [] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "no_header_row.csv"; }
+            Args() { file = "examples/no_header_row.csv"; }
             bool dry_run {false};
         } args;
 

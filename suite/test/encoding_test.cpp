@@ -80,7 +80,7 @@ int main() {
     };
 
     "reiconv_recode_source_from_shift-jis"_test = [] {
-        reader<> r {std::filesystem::path{"bjarne.csv"}};
+        reader<> r {std::filesystem::path{"examples/bjarne.csv"}};
         expect(r.size() == 18);
         expect(nothrow([&] { r = reader<>{recode_source_from(r, "CP932")};})); //sjis shift_jis shift-jis
         expect(r.size() == 18);
@@ -88,7 +88,7 @@ int main() {
     };
 
     "test latin1"_test = [] {
-        reader<> r {std::filesystem::path{"test_latin1.csv"}};
+        reader<> r {std::filesystem::path{"examples/test_latin1.csv"}};
         expect(r.size() == 17);
         expect(nothrow([&] { r = reader<>{recode_source_from(r, "latin1")};}));
         expect(r.size() == 18);

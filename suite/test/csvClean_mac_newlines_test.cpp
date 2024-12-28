@@ -21,7 +21,7 @@ int main() {
         // with native line-breaking.
 #if !defined (__APPLE__)
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "mac_newlines.csv"; }
+            Args() { file = "examples/mac_newlines.csv"; }
             bool dry_run {false};
         } args;
 

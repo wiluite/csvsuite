@@ -40,7 +40,7 @@ int main() {
         struct Args : sql2csv_specific_args {
             Args() {
                 encoding = "latin1";
-                query_file = "test.sql";
+                query_file = "examples/test.sql";
             }
         } args;
 
@@ -63,7 +63,7 @@ int main() {
     "file"_test = [] {
         struct Args : sql2csv_specific_args {
             Args() {
-                query_file = "test.sql";
+                query_file = "examples/test.sql";
             }
         } args;
 
@@ -76,7 +76,7 @@ int main() {
     "file with query"_test = [] {
         struct Args : sql2csv_specific_args {
             Args() {
-                query_file = "test.sql";
+                query_file = "examples/test.sql";
                 query = "select 6*9 as question";
             }
         } args;
@@ -93,7 +93,7 @@ int main() {
             Args() = default;
         } args;
 
-        stdin_redir sr("stdin_select");
+        stdin_redir sr("examples/stdin_select");
 
         expect(nothrow([&]{
             CALL_TEST_AND_REDIRECT_TO_COUT(sql2csv::sql2csv(args))
@@ -109,7 +109,7 @@ int main() {
             }
         } args;
 
-        stdin_redir sr("stdin_select");
+        stdin_redir sr("examples/stdin_select");
 
         expect(nothrow([&]{
             CALL_TEST_AND_REDIRECT_TO_COUT(sql2csv::sql2csv(args))
@@ -121,11 +121,11 @@ int main() {
     "stdin with file"_test = [] {
         struct Args : sql2csv_specific_args {
             Args() {
-                query_file = "test.sql";
+                query_file = "examples/test.sql";
             }
         } args;
 
-        stdin_redir sr("stdin_select");
+        stdin_redir sr("examples/stdin_select");
 
         expect(nothrow([&]{
             CALL_TEST_AND_REDIRECT_TO_COUT(sql2csv::sql2csv(args))
@@ -137,12 +137,12 @@ int main() {
     "stdin with file and query"_test = [] {
         struct Args : sql2csv_specific_args {
             Args() {
-                query_file = "test.sql";
+                query_file = "examples/test.sql";
                 query = "select 6*9 as question";
             }
         } args;
 
-        stdin_redir sr("stdin_select");
+        stdin_redir sr("examples/stdin_select");
 
         expect(nothrow([&]{
             CALL_TEST_AND_REDIRECT_TO_COUT(sql2csv::sql2csv(args))
@@ -213,7 +213,7 @@ int main() {
 
     "unicode"_test = [&csvsql] {
         db_file dbfile;
-        auto expected = csvsql(dbfile, "test_utf8.csv");
+        auto expected = csvsql(dbfile, "examples/test_utf8.csv");
         struct Args : sql2csv_specific_args {
             explicit Args(db_file & dbfile) {
                 db = "sqlite3://db=" + dbfile();
@@ -226,7 +226,7 @@ int main() {
 
     "no header row"_test = [&csvsql] {
         db_file dbfile;
-        auto expected = csvsql(dbfile, "dummy.csv");
+        auto expected = csvsql(dbfile, "examples/dummy.csv");
         struct Args : sql2csv_specific_args {
             explicit Args(db_file & dbfile) {
                 db = "sqlite3://db=" + dbfile();
@@ -241,7 +241,7 @@ int main() {
 
     "line numbers"_test = [&csvsql] {
         db_file dbfile;
-        auto expected = csvsql(dbfile, "dummy.csv");
+        auto expected = csvsql(dbfile, "examples/dummy.csv");
         struct Args : sql2csv_specific_args {
             explicit Args(db_file & dbfile) {
                 db = "sqlite3://db=" + dbfile();
@@ -256,7 +256,7 @@ int main() {
 
     "wildcard on sqlite"_test = [&csvsql] {
         db_file dbfile;
-        auto expected = csvsql(dbfile, "iris.csv");
+        auto expected = csvsql(dbfile, "examples/iris.csv");
         struct Args : sql2csv_specific_args {
             explicit Args(db_file & dbfile) {
                 db = "sqlite3://db=" + dbfile();

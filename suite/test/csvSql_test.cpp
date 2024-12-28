@@ -135,7 +135,7 @@ int main() {
     "create table"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
+                files = {"examples/testfixed_converted.csv"};
                 tables = "foo";
                 date_lib_parser = true;
             }
@@ -163,7 +163,7 @@ int main() {
     "no blanks"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"blanks.csv"};
+                files = {"examples/blanks.csv"};
                 tables = "foo";
             }
         } args;
@@ -188,7 +188,7 @@ int main() {
     "blanks"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"blanks.csv"};
+                files = {"examples/blanks.csv"};
                 tables = "foo";
                 blanks = true;
             }
@@ -214,7 +214,7 @@ int main() {
     "no inference"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
+                files = {"examples/testfixed_converted.csv"};
                 tables = "foo";
                 date_lib_parser = true;
                 no_inference = true;
@@ -243,7 +243,7 @@ int main() {
     "no header row"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"no_header_row.csv"};
+                files = {"examples/no_header_row.csv"};
                 tables = "foo";
                 no_header = true;
             }
@@ -266,7 +266,7 @@ int main() {
     "linenumbers"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"dummy.csv"};
+                files = {"examples/dummy.csv"};
                 tables = "foo";
                 linenumbers = true;
             }
@@ -316,7 +316,7 @@ int main() {
             Args() = default; // NOTE: now we do not use '_' placeholder to help. We read a csv file and pipe it with us.
         } args;
 
-        stdin_redir sr("piped_stdin");
+        stdin_redir sr("examples/piped_stdin");
 
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvsql::sql<notrimming_reader_type>(args)
@@ -330,11 +330,10 @@ int main() {
 )");
     };
 
-
     "stdin and filename"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"_", "dummy.csv"};
+                files = {"_", "examples/dummy.csv"};
             }
         } args;
 
@@ -352,7 +351,7 @@ int main() {
     "query"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"iris.csv", "irismeta.csv"};
+                files = {"examples/iris.csv", "examples/irismeta.csv"};
                 query = "SELECT m.usda_id, avg(i.sepal_length) AS mean_sepal_length FROM iris "
                         "AS i JOIN irismeta AS m ON (i.species = m.species) GROUP BY m.species";
             }
@@ -388,7 +387,7 @@ int main() {
     "query text"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
+                files = {"examples/testfixed_converted.csv"};
                 query = "SELECT text FROM testfixed_converted WHERE text LIKE \"Chicago%\"";
             }
         } args;
@@ -403,8 +402,8 @@ int main() {
     "query file"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
-                query = "test_query.sql";
+                files = {"examples/testfixed_converted.csv"};
+                query = "examples/test_query.sql";
             }
         } args;
 
@@ -420,8 +419,8 @@ int main() {
     "no UTF-8 query file"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
-                query = "test_query_1252.sql";
+                files = {"examples/testfixed_converted.csv"};
+                query = "examples/test_query_1252.sql";
             }
         } args;
 
@@ -431,8 +430,8 @@ int main() {
     "CP1252 query file"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
-                query = "test_query_1252.sql";
+                files = {"examples/testfixed_converted.csv"};
+                query = "examples/test_query_1252.sql";
                 encoding = "CP1252";
             }
         } args;
@@ -450,22 +449,22 @@ int main() {
     "empty query file"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"testfixed_converted.csv"};
-                query = "test_query_empty.sql";
+                files = {"examples/testfixed_converted.csv"};
+                query = "examples/test_query_empty.sql";
             }
         } args;
 
         try {
             CALL_TEST_AND_REDIRECT_TO_COUT( csvsql::sql<notrimming_reader_type>(args) )
         } catch (std::exception const & e) {
-            expect(std::string(e.what()).find("Query file 'test_query_empty.sql' exists, but it is empty.") != std::string::npos);
+            expect(std::string(e.what()).find("Query file 'examples/test_query_empty.sql' exists, but it is empty.") != std::string::npos);
         }
     };
 
     "query update"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             Args() {
-                files = {"dummy.csv"};
+                files = {"examples/dummy.csv"};
                 no_inference = true;
                 query = "UPDATE dummy SET a=10 WHERE a=1";
             }
@@ -499,7 +498,7 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             db_file dbfile;
             Args() {
-                files = {"dummy.csv"};
+                files = {"examples/dummy.csv"};
                 db = "sqlite3://db=" + dbfile();
                 insert = true;
                 before_insert = "SELECT 1; CREATE TABLE foobar (date DATE)";
@@ -522,7 +521,7 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             db_file dbfile;
             Args() {
-                files = {"dummy.csv"};
+                files = {"examples/dummy.csv"};
                 db = "sqlite3://db=" + dbfile();
                 insert = true;
                 unique_constraint = "a";
@@ -551,7 +550,7 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             db_file dbfile;
             Args() {
-                files = {"dummy.csv"};
+                files = {"examples/dummy.csv"};
                 db = "sqlite3://db=" + dbfile();
                 insert = true;
                 unique_constraint = "a";
@@ -574,7 +573,7 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             db_file dbfile;
             Args() {
-                files = {"foo1.csv"};
+                files = {"examples/foo1.csv"};
                 db = "sqlite3://db=" + dbfile();
                 insert = true;
                 tables = "foo";
@@ -587,7 +586,7 @@ int main() {
             )
         }
 
-        args.files = {"foo2.csv"};
+        args.files = {"examples/foo2.csv"};
         {
             bool catched = false;
             try {
@@ -604,7 +603,7 @@ int main() {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
             db_file dbfile;
             Args() {
-                files = {"foo1.csv"};
+                files = {"examples/foo1.csv"};
                 db = "sqlite3://db=" + dbfile();
                 insert = true;
                 tables = "foo";
@@ -613,7 +612,7 @@ int main() {
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvsql::sql<notrimming_reader_type>(args))
 
-        args.files = {"foo2.csv"};
+        args.files = {"examples/foo2.csv"};
         args.create_if_not_exists = true;
         expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT( csvsql::sql<notrimming_reader_type>(args)) }));
     };
@@ -875,7 +874,7 @@ try {
 
     "max field size"_test = [] {
         struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
-            Args() { files = {"test_field_size_limit.csv"}; maxfieldsize = 100;}
+            Args() { files = {"examples/test_field_size_limit.csv"}; maxfieldsize = 100;}
         } args;
 
         expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT(csvsql::sql<notrimming_reader_type>(args))}));

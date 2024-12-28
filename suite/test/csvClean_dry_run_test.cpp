@@ -20,7 +20,7 @@ int main() {
 #endif
     "dry_run"_test = [] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "bad.csv"; }
+            Args() { file = "examples/bad.csv"; }
             bool dry_run {true};
         } args;
 
@@ -46,7 +46,7 @@ int main() {
 
     "max field size"_test = [&] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "test_field_size_limit.csv";}
+            Args() { file = "examples/test_field_size_limit.csv";}
             bool dry_run {false};
         } args;
 
@@ -59,6 +59,7 @@ int main() {
 
         Z_CHECK(csvclean::clean, test_reader_r5, skip_lines::skip_lines_1, header::has_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
         Z_CHECK(csvclean::clean, test_reader_r6, skip_lines::skip_lines_1, header::no_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
+        std::filesystem::remove(std::filesystem::path{"test_field_size_limit_out.csv"});
     };
 
 

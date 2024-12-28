@@ -19,7 +19,7 @@ int main() {
 #endif
     "removes bom"_test = [] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "test_utf8_bom.csv"; maxfieldsize = max_unsigned_limit; }
+            Args() { file = "examples/test_utf8_bom.csv"; maxfieldsize = max_unsigned_limit; }
             bool dry_run {false};
         } args;
 

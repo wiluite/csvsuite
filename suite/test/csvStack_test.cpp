@@ -39,7 +39,7 @@ int main() {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
         } args;
 
-        args.files = std::vector<std::string>{"test_skip_lines.csv", "test_skip_lines.csv"};
+        args.files = std::vector<std::string>{"examples/test_skip_lines.csv", "examples/test_skip_lines.csv"};
         args.skip_lines = 3;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(
@@ -57,9 +57,9 @@ int main() {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
         } args;
 
-        std::ifstream ifs("test_skip_lines.csv");
+        std::ifstream ifs("examples/test_skip_lines.csv");
         stdin_subst new_cin(ifs);
-        args.files = std::vector<std::string>{"test_skip_lines.csv", "_"};
+        args.files = std::vector<std::string>{"examples/test_skip_lines.csv", "_"};
         args.skip_lines = 3;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(
@@ -77,7 +77,7 @@ int main() {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv"};
 
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
@@ -93,7 +93,7 @@ int main() {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv", "dummy_col_shuffled.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv", "examples/dummy_col_shuffled.csv"};
         {
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -106,7 +106,7 @@ int main() {
             expect("a,b,c\n1,2,3\n1,2,3\n" == cout_buffer.str());
         }
 
-        args.files = std::vector<std::string>{"dummy_col_shuffled.csv", "dummy.csv"};
+        args.files = std::vector<std::string>{"examples/dummy_col_shuffled.csv", "examples/dummy.csv"};
         {
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -124,7 +124,7 @@ int main() {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv", "dummy_col_shuffled_ragged.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv", "examples/dummy_col_shuffled_ragged.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         );
@@ -141,9 +141,9 @@ int main() {
         } args;
 
         {
-            std::ifstream ifs("dummy.csv");
+            std::ifstream ifs("examples/dummy.csv");
             stdin_subst new_cin(ifs);
-            args.files = std::vector<std::string>{"_", "dummy_col_shuffled_ragged.csv"};
+            args.files = std::vector<std::string>{"_", "examples/dummy_col_shuffled_ragged.csv"};
 
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -156,9 +156,9 @@ int main() {
             expect("a,b,c,d\n1,2,3,\n1,2,3,4\n" == cout_buffer.str());
         }
         {
-            std::ifstream ifs("dummy.csv");
+            std::ifstream ifs("examples/dummy.csv");
             stdin_subst new_cin(ifs);
-            args.files = std::vector<std::string>{"dummy_col_shuffled_ragged.csv", "_"};
+            args.files = std::vector<std::string>{"examples/dummy_col_shuffled_ragged.csv", "_"};
 
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -182,7 +182,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv", "dummy2.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv", "examples/dummy2.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -202,7 +202,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv", "dummy2.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv", "examples/dummy2.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -211,7 +211,7 @@ int main() {
 //      dummy.csv,1,2,3
 //      dummy2.csv,1,2,3
 
-        expect("path,a,b,c\ndummy.csv,1,2,3\ndummy2.csv,1,2,3\n" == cout_buffer.str());
+        expect("path,a,b,c\nexamples/dummy.csv,1,2,3\nexamples/dummy2.csv,1,2,3\n" == cout_buffer.str());
     };
 
     "no header row basic"_test = [] {
@@ -221,7 +221,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"no_header_row.csv", "no_header_row2.csv"};
+        args.files = std::vector<std::string>{"examples/no_header_row.csv", "examples/no_header_row2.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -241,9 +241,9 @@ int main() {
         } args;
 
         {
-            std::ifstream ifs("no_header_row.csv");
+            std::ifstream ifs("examples/no_header_row.csv");
             stdin_subst new_cin(ifs);
-            args.files = std::vector<std::string>{"_", "no_header_row2.csv"};
+            args.files = std::vector<std::string>{"_", "examples/no_header_row2.csv"};
 
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -256,9 +256,9 @@ int main() {
             expect("a,b,c\n1,2,3\n4,5,6\n" == cout_buffer.str());
         }
         {
-            std::ifstream ifs("no_header_row.csv");
+            std::ifstream ifs("examples/no_header_row.csv");
             stdin_subst new_cin(ifs);
-            args.files = std::vector<std::string>{"no_header_row2.csv", "_"};
+            args.files = std::vector<std::string>{"examples/no_header_row2.csv", "_"};
 
             CALL_TEST_AND_REDIRECT_TO_COUT(
                 csvstack::stack<notrimming_reader_type>(args)
@@ -282,7 +282,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"dummy.csv", "dummy3.csv"};
+        args.files = std::vector<std::string>{"examples/dummy.csv", "examples/dummy3.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -305,7 +305,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"no_header_row.csv", "no_header_row2.csv"};
+        args.files = std::vector<std::string>{"examples/no_header_row.csv", "examples/no_header_row2.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -314,7 +314,7 @@ int main() {
 //      no_header_row.csv,1,2,3
 //      no_header_row2.csv,4,5,6
 
-        expect("group,a,b,c\nno_header_row.csv,1,2,3\nno_header_row2.csv,4,5,6\n" == cout_buffer.str());
+        expect("group,a,b,c\nexamples/no_header_row.csv,1,2,3\nexamples/no_header_row2.csv,4,5,6\n" == cout_buffer.str());
     };
 
     "grouped filenames and named column"_test = [] {
@@ -326,7 +326,7 @@ int main() {
             }
         } args;
 
-        args.files = std::vector<std::string>{"no_header_row.csv", "no_header_row2.csv"};
+        args.files = std::vector<std::string>{"examples/no_header_row.csv", "examples/no_header_row2.csv"};
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
@@ -335,13 +335,13 @@ int main() {
 //      no_header_row.csv,1,2,3
 //      no_header_row2.csv,4,5,6
 
-        expect("hello,a,b,c\nno_header_row.csv,1,2,3\nno_header_row2.csv,4,5,6\n" == cout_buffer.str());
+        expect("hello,a,b,c\nexamples/no_header_row.csv,1,2,3\nexamples/no_header_row2.csv,4,5,6\n" == cout_buffer.str());
     };
 
 
     "max field size"_test = [] {
         struct Args : tf::common_args, tf::output_args, csvstack_specific_args {
-            Args() { files = std::vector<std::string>{"test_field_size_limit.csv"}; /*maxfieldsize = 100;*/ }
+            Args() { files = std::vector<std::string>{"examples/test_field_size_limit.csv"}; /*maxfieldsize = 100;*/ }
         } args;
 
         expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT(

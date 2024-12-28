@@ -49,7 +49,7 @@ int main() {
 
     "simple"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "dummy.csv"; }
+            Args() { file = "examples/dummy.csv"; }
         } args;
 
         notrimming_reader_type r(args.file);
@@ -75,7 +75,7 @@ int main() {
 
     "no blanks"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "blanks.csv"; }
+            Args() { file = "examples/blanks.csv"; }
         } args;
 
         notrimming_reader_type r(args.file);
@@ -105,7 +105,7 @@ int main() {
     "blanks"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "blanks.csv";
+                file = "examples/blanks.csv";
                 blanks = true;
             }
         } args;
@@ -143,7 +143,7 @@ int main() {
     "no header row"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "no_header_row.csv";
+                file = "examples/no_header_row.csv";
                 no_header = true;
             }
         } args;
@@ -172,7 +172,7 @@ int main() {
     "no inference"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "dummy.csv";
+                file = "examples/dummy.csv";
                 no_inference = true;
             }
         } args;
@@ -202,7 +202,7 @@ int main() {
     "indentation"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "dummy.csv";
+                file = "examples/dummy.csv";
                 indent = 4;
             }
         } args;
@@ -217,7 +217,7 @@ int main() {
     "keying"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "dummy.csv";
+                file = "examples/dummy.csv";
                 key = "a";
             }
         } args;
@@ -253,7 +253,7 @@ int main() {
     "duplicate keys"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "dummy3.csv";
+                file = "examples/dummy3.csv";
                 key = "a";
             }
         } args;
@@ -270,7 +270,7 @@ int main() {
     "geojson with id"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "test_geo.csv";
+                file = "examples/test_geo.csv";
                 lat = "latitude";
                 lon = "longitude";
                 key = "slug"; /*indent=1;*/}
@@ -314,7 +314,7 @@ int main() {
     "geojson point"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
             Args() {
-                file = "test_geo.csv";
+                file = "examples/test_geo.csv";
                 lat = "latitude";
                 lon = "longitude";
             }
@@ -336,7 +336,7 @@ int main() {
 
     "geojson with crs"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "test_geo.csv"; lat = "latitude"; lon = "longitude"; crs = "EPSG:4269";
+            Args() { file = "examples/test_geo.csv"; lat = "latitude"; lon = "longitude"; crs = "EPSG:4269";
             }
         } args;
 
@@ -355,7 +355,7 @@ int main() {
 
     "geojson with no bbox"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "test_geo.csv"; lat = "latitude"; lon = "longitude"; no_bbox = true;
+            Args() { file = "examples/test_geo.csv"; lat = "latitude"; lon = "longitude"; no_bbox = true;
             }
         } args;
 
@@ -370,7 +370,7 @@ int main() {
 
     "ndjson"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "testjson_converted.csv"; stream = true; }
+            Args() { file = "examples/testjson_converted.csv"; stream = true; }
         } args;
 
         notrimming_reader_type r(args.file);
@@ -388,7 +388,7 @@ R"({"text": "Chicago Reader", "float": 1.0, "datetime": "1971-01-01T04:14:00", "
 
     "ndjson streaming, no inference"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "testjson_converted.csv"; stream = true; no_inference = true; }
+            Args() { file = "examples/testjson_converted.csv"; stream = true; no_inference = true; }
         } args;
 
         notrimming_reader_type r(args.file);
@@ -406,7 +406,7 @@ R"({"text": "Chicago Reader", "float": "1.0", "datetime": "1971-01-01T04:14:00",
 
     "ndgeojson"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "test_geo.csv"; lat = "latitude"; lon = "longitude"; stream = true; date_fmt = "%m/%d/%y";
+            Args() { file = "examples/test_geo.csv"; lat = "latitude"; lon = "longitude"; stream = true; date_fmt = "%m/%d/%y";
             }
         } args;
 
@@ -437,7 +437,7 @@ R"({"type": "Feature", "properties": {"slug": "dcl", "title": "Downtown Coffee L
 
     "ndgeojson streaming, no inference"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "test_geo.csv"; lat = "latitude"; lon = "longitude"; stream = true; date_fmt = "%m/%d/%y"; no_inference = true;
+            Args() { file = "examples/test_geo.csv"; lat = "latitude"; lon = "longitude"; stream = true; date_fmt = "%m/%d/%y"; no_inference = true;
             }
         } args;
 
@@ -466,7 +466,7 @@ R"({"type": "Feature", "properties": {"slug": "dcl", "title": "Downtown Coffee L
 )");
 
         "max field size in geojson mode"_test = [&] {
-            args.file = "test_field_size_limit.csv";
+            args.file = "examples/test_field_size_limit.csv";
             args.lat = "Along";
             args.lon = "Boasting";
 
@@ -499,7 +499,7 @@ R"({"type": "Feature", "properties": {"slug": "dcl", "title": "Downtown Coffee L
 
     "max field size"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, csvjson_specific_args {
-            Args() { file = "test_field_size_limit.csv"; }
+            Args() { file = "examples/test_field_size_limit.csv"; }
         } args;
 
         notrimming_reader_type r(args.file);

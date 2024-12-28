@@ -18,7 +18,7 @@ int main() {
 #endif
     "bad skip lines"_test = [&] () mutable {
         struct Args : csvsuite::test_facilities::single_file_arg, csvsuite::test_facilities::common_args {
-            Args() { file = "bad_skip_lines.csv"; skip_lines = 3;}
+            Args() { file = "examples/bad_skip_lines.csv"; skip_lines = 3;}
             bool dry_run {false};
         } args;
 

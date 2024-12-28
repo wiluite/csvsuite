@@ -41,10 +41,10 @@ int main() {
         bool is1904 = false;
     };
 
-    struct in2csv_args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::output_args, in2csv_specific_args {};
+    struct In2csv_args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::output_args, in2csv_specific_args {};
 
     "exceptions"_test = [] {
-        struct Args : in2csv_args {
+        struct Args : In2csv_args {
             Args() = default;
         } args;
 
@@ -71,14 +71,14 @@ int main() {
         expect(throws<in2csv::detail::invalid_input_format>([&] {CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))}));
 
         args.format = "fixed";
-        args.schema = "schema.csv";
+        args.schema = "examples/absent_schema.csv";
         expect(throws<in2csv::detail::schema_file_not_found>([&] {CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))}));
 
-        args.schema = "foo2.csv";
+        args.schema = "examples/foo2.csv";
         expect(throws<in2csv::detail::file_not_found>([&] {CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))}));
 
-        args.file = "stdin_select"; // all is fine (format, schema and file) - no exception
-        args.schema = "testfixed_schema.csv";
+        args.file = "examples/stdin_select"; // all is fine (format, schema and file) - no exception
+        args.schema = "examples/testfixed_schema.csv";
         expect(nothrow([&] {CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))}));
 
         args.file = "";
@@ -96,39 +96,38 @@ int main() {
     bool locale_support = detect_locale_support();
     if (locale_support) {
         "locale"_test = [&] {
-            struct Args : in2csv_args {
-                Args() { file = "test_locale.csv"; num_locale = "de_DE"; }
+            struct Args : In2csv_args {
+                Args() { file = "examples/test_locale.csv"; num_locale = "de_DE"; }
             } args;
             expect(nothrow([&] {
                 CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-                expect(cout_buffer.str() == get_source("test_locale_converted.csv"));
+                expect(cout_buffer.str() == get_source("examples/test_locale_converted.csv"));
             }));
         };
     }
 
     "no blanks"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "blanks.csv"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/blanks.csv"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("blanks_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/blanks_converted.csv"));
         }));
     };
 
     "blanks"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "blanks.csv"; blanks = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/blanks.csv"; blanks = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("blanks.csv"));
+            expect(cout_buffer.str() == get_source("examples/blanks.csv"));
         }));
     };
 
     "null value"_test = [&] {
-        struct Args : in2csv_args {
-            // TODO : fixme with argument "\N"
+        struct Args : In2csv_args {
             Args() { file = "_"; format = "csv"; null_value = {R"(\N)"}; }
         } args;
 
@@ -140,8 +139,7 @@ int main() {
     };
 
     "null value blanks"_test = [&] {
-        struct Args : in2csv_args {
-            // TODO : fixme with argument "\N"
+        struct Args : In2csv_args {
             Args() { file = "_"; format = "csv"; null_value = {R"(\N)"}; blanks = true;}
         } args;
 
@@ -153,132 +151,132 @@ int main() {
     };
 
     "no leading zeroes"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_no_leading_zeroes.csv"; no_leading_zeroes = true;}
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_no_leading_zeroes.csv"; no_leading_zeroes = true;}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("test_no_leading_zeroes.csv"));
+            expect(cout_buffer.str() == get_source("examples/test_no_leading_zeroes.csv"));
         }));
     };
 
     "date format default"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_date_format.csv";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_date_format.csv";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("test_date_format.csv"));
+            expect(cout_buffer.str() == get_source("examples/test_date_format.csv"));
         }));
     };
 
     "numeric date format default"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_numeric_date_format.csv";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_numeric_date_format.csv";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("test_numeric_date_format.csv"));
+            expect(cout_buffer.str() == get_source("examples/test_numeric_date_format.csv"));
         }));
     };
 
     "date like number"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "date_like_number.csv";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/date_like_number.csv";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("date_like_number.csv"));
+            expect(cout_buffer.str() == get_source("examples/date_like_number.csv"));
         }));
     };
 
     "convert csv"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "testfixed_converted.csv";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/testfixed_converted.csv";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testfixed_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testfixed_converted.csv"));
         }));
     };
 
     "convert csv with skip lines"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_skip_lines.csv"; skip_lines = 3; no_inference = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_skip_lines.csv"; skip_lines = 3; no_inference = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("dummy.csv"));
+            expect(cout_buffer.str() == get_source("examples/dummy.csv"));
         }));
     };
     //TODO: fix me (memory error and so on...)
 #if defined(__MINGW32__)
     "convert dbf"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "testdbf.dbf";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/testdbf.dbf";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testdbf_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testdbf_converted.csv"));
         }));
     };
 #endif
 
     "convert json"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "testjson.json";}
+        struct Args : In2csv_args {
+            Args() { file = "examples/testjson.json";}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testjson_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testjson_converted.csv"));
         }));
     };
 
     "convert geojson"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_geojson.json"; format = "geojson"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_geojson.json"; format = "geojson"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("test_geojson.csv"));
+            expect(cout_buffer.str() == get_source("examples/test_geojson.csv"));
         }));
     };
 
     "convert ndjson"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "testjson_multiline.json"; format = "ndjson"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/testjson_multiline.json"; format = "ndjson"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testjson_multiline_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testjson_multiline_converted.csv"));
         }));
     };
 
     // TODO: FOR THIS ONE AND FOR THE NEXT ONE add tests with different data shifts absent at Python kit.
     "convert xls"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test.xls"; d_excel = "2"; dt_excel = "6"; num_locale = "C"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/test.xls"; d_excel = "2"; dt_excel = "6"; num_locale = "C"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testxls_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testxls_converted.csv"));
         }));
     };
 
     "convert xls with sheet"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testxls_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testxls_converted.csv"));
         }));
     };
 
     //TODO : do this test working with 'ʤ' represented in 1251, 1250, 1252 active pages in windows. Check this in Linux as well.
     "convert xls with unicode sheet"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xls"; sheet = "ʤ"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xls"; sheet = "ʤ"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -287,43 +285,43 @@ int main() {
     };
 
     "convert xls with skip lines"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_skip_lines.xls"; d_excel = "2"; dt_excel = "6"; skip_lines = 3; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_skip_lines.xls"; d_excel = "2"; dt_excel = "6"; skip_lines = 3; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testxls_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testxls_converted.csv"));
         }));
     };
 #if 1 // works with "store to misaligned address 0x6160000048ff for type ...." in zippy.hpp, fno-sanitize=alignment is the key
     "convert xlsx"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test.xlsx"; d_excel = "2"; dt_excel = "6"; is1904 = true;}
+        struct Args : In2csv_args {
+            Args() { file = "examples/test.xlsx"; d_excel = "2"; dt_excel = "6"; is1904 = true;}
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testxlsx_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testxlsx_converted.csv"));
         }));
     };
 
     "convert xlsx with sheet"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xlsx"; sheet = "data"; d_excel = "2"; dt_excel = "6"; is1904 = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xlsx"; sheet = "data"; d_excel = "2"; dt_excel = "6"; is1904 = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
             //TODO: fixme: do a byte-by-byte comparison, and allow the only 1 byte to be different
 #if 0
-            expect(cout_buffer.str().size() == get_source("testxlsx_converted.csv").size());
+            expect(cout_buffer.str().size() == get_source("examples/testxlsx_converted.csv").size());
 #endif
-            expect(cout_buffer.str().size() == get_source("testxlsx_converted.csv").size());
+            expect(cout_buffer.str().size() == get_source("examples/testxlsx_converted.csv").size());
         }));
     };
 #endif
 
     "convert xlsx with unicode sheet"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xlsx"; sheet = "ʤ"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xlsx"; sheet = "ʤ"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -332,18 +330,18 @@ int main() {
     };
 
     "convert xlsx with skip lines"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "test_skip_lines.xlsx"; d_excel = "2"; dt_excel = "6"; skip_lines = 3; is1904 = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/test_skip_lines.xlsx"; d_excel = "2"; dt_excel = "6"; skip_lines = 3; is1904 = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("testxlsx_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testxlsx_converted.csv"));
         }));
     };
 
     "names xls"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xls"; names = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xls"; names = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -352,8 +350,8 @@ int main() {
     };
 
     "names xlsx"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xlsx"; names = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xlsx"; names = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -362,18 +360,18 @@ int main() {
     };
 
     "csv no header"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "no_header_row.csv"; no_header = true; no_inference = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/no_header_row.csv"; no_header = true; no_inference = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(cout_buffer.str() == get_source("dummy.csv"));
+            expect(cout_buffer.str() == get_source("examples/dummy.csv"));
         }));
     };
 
     "csv no inference"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "dummy.csv"; no_inference = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/dummy.csv"; no_inference = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -382,8 +380,8 @@ int main() {
     };
 
     "xls no inference"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "dummy.xls"; no_inference = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/dummy.xls"; no_inference = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -392,8 +390,8 @@ int main() {
     };
 
     "xlsx no inference"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "dummy.xlsx"; no_inference = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/dummy.xlsx"; no_inference = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
@@ -402,7 +400,7 @@ int main() {
     };
 
     "geojson no inference"_test = [&] {
-        struct Args : in2csv_args {
+        struct Args : In2csv_args {
             Args() { file = "_"; format = "geojson"; no_inference = true; }
         } args;
         expect(nothrow([&] {
@@ -415,7 +413,7 @@ int main() {
     };
 
     "json no inference"_test = [&] {
-        struct Args : in2csv_args {
+        struct Args : In2csv_args {
             Args() { file = "_"; format = "json"; no_inference = true; }
         } args;
         expect(nothrow([&] {
@@ -428,7 +426,7 @@ int main() {
     };
 
     "ndjson no inference"_test = [&] {
-        struct Args : in2csv_args {
+        struct Args : In2csv_args {
             Args() { file = "_"; format = "ndjson"; no_inference = true; }
         } args;
         expect(nothrow([&] {
@@ -441,12 +439,12 @@ int main() {
     };
 
     "convert xls with write sheets"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(get_source("sheets_0.csv") == get_source("testxls_unicode_converted.csv"));
+            expect(get_source("sheets_0.csv") == get_source("examples/testxls_unicode_converted.csv"));
             expect(get_source("sheets_1.csv") ==
 R"(text,date,integer,boolean,float,datetime,empty_column,h
 Chicago Reader,24472.0,40.0,True,1.0,24472.17638888889,,
@@ -463,12 +461,12 @@ Unicode! Σ,,,,,,,
     };
 
     "convert xlsx with write sheets"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xlsx"; no_inference = true; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xlsx"; no_inference = true; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(get_source("sheets_0.csv") == get_source("testxlsx_unicode_converted.csv"));
+            expect(get_source("sheets_0.csv") == get_source("examples/testxlsx_unicode_converted.csv"));
             expect(get_source("sheets_1.csv") ==
 R"(text,date,integer,boolean,float,datetime,empty_column,h
 Chicago Reader,24472,40,True,1,24472.17638888889,,
@@ -485,12 +483,12 @@ Unicode! Σ,,,,,,,
     };
 
     "convert xls with write sheets with names"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; use_sheet_names = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; use_sheet_names = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(get_source("sheets_ʤ.csv") == get_source("testxls_unicode_converted.csv"));
+            expect(get_source("sheets_ʤ.csv") == get_source("examples/testxls_unicode_converted.csv"));
             expect(get_source("sheets_data.csv") ==
 R"(text,date,integer,boolean,float,datetime,empty_column,h
 Chicago Reader,24472.0,40.0,True,1.0,24472.17638888889,,
@@ -509,12 +507,12 @@ Unicode! Σ,,,,,,,
     };
 
     "convert xlsx with write sheets with names"_test = [&] {
-        struct Args : in2csv_args {
-            Args() { file = "sheets.xlsx"; no_inference = true; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; use_sheet_names = true; }
+        struct Args : In2csv_args {
+            Args() { file = "examples/sheets.xlsx"; no_inference = true; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; use_sheet_names = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            expect(get_source("sheets_ʤ.csv") == get_source("testxlsx_unicode_converted.csv"));
+            expect(get_source("sheets_ʤ.csv") == get_source("examples/testxlsx_unicode_converted.csv"));
             expect(get_source("sheets_data.csv") ==
 R"(text,date,integer,boolean,float,datetime,empty_column,h
 Chicago Reader,24472,40,True,1,24472.17638888889,,
