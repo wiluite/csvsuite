@@ -1,3 +1,8 @@
+///
+/// \file   suite/include/sql_utils/rowset-query_impl.h
+/// \author wiluite
+/// \brief  SQL Query printer.
+
 #pragma once
 
 namespace csvsuite::cli::SOCI {

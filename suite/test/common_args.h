@@ -1,7 +1,7 @@
 ///
-/// \file   test/common_args.h
+/// \file   suite/test/common_args.h
 /// \author wiluite
-/// \brief  Arguments fake classes useful for most small csv kit's tests.
+/// \brief  Argument fake classes useful for most tests.
 
 #pragma once
 

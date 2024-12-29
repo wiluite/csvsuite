@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvJoin.cpp
+/// \file   suite/csvJoin.cpp
 /// \author wiluite
 /// \brief  Execute a SQL-like join to merge CSV files.
 

@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_json.cpp
+/// \author wiluite
+/// \brief  Implementation of the json-to-csv converter.
+
 #include "../../include/in2csv/in2csv_json.h"
 #include <cli.h>
 #include <iostream>

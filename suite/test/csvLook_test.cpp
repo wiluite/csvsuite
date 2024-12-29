@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvLook_test.cpp
+/// \file   suite/test/csvLook_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvLook utility.
 

@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/include/reader-bridge-impl.h
+/// \file   suite/include/reader-bridge-impl.h
 /// \author wiluite
 /// \brief  Definitions of the typed_span template methods.
 

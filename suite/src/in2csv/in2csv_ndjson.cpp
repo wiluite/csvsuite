@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_ndjson.cpp
+/// \author wiluite
+/// \brief  Implementation of the ndjson-to-csv converter.
+
 #include "../../include/in2csv/in2csv_ndjson.h"
 #include <cli.h>
 #include <iostream>

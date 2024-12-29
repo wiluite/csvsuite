@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvStat_test.cpp
+/// \file   suite/test/csvStat_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvStat utility.
 

@@ -1,3 +1,8 @@
+///
+/// \file   suite/include/in2csv/in2csv_json.h
+/// \author wiluite
+/// \brief  Header of the json-to-csv converter.
+
 #pragma once
 
 #include "converter_client.h"

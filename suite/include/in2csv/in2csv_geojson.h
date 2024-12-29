@@ -1,11 +1,13 @@
+///
+/// \file   suite/include/in2csv/in2csv_geojson.h
+/// \author wiluite
+/// \brief  Header of the geojson-to-csv converter.
+
 #pragma once
 
 #include "converter_client.h"
 #include <memory>
 #include <filesystem>
-#if 0
-#include <vector>
-#endif
 
 namespace in2csv::detail {
 

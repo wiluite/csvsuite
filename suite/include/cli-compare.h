@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/include/cli-compare.h
+/// \file   suite/include/cli-compare.h
 /// \author wiluite
 /// \brief  All possible comparison operations, type-aware and type-independent.
 

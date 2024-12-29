@@ -1,5 +1,5 @@
 ///
-/// \file   test/strm_redir.h
+/// \file   suite/test/strm_redir.h
 /// \author wiluite
 /// \brief  A stream redirection class macro.
 

@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/In2csv.cpp
+/// \file   suite/In2csv.cpp
 /// \author wiluite
 /// \brief  Convert common, but less awesome, tabular data formats to CSV.
 
@@ -162,21 +162,6 @@ namespace in2csv {
             if (!std::filesystem::exists(fs::path{args.file}))
                 throw file_not_found(args.file.string());
         }
-#if 0
-        // TO NOTE in different strategies implementations
-        if filetype == 'csv':
-            kwargs.update(self.reader_kwargs)
-            kwargs['sniff_limit'] = sniff_limit
-
-        if filetype in ('xls', 'xlsx'):
-            kwargs['header'] = not self.args.no_header_row
-
-        if filetype not in ('dbf', 'geojson', 'json', 'ndjson'):  # csv, fixed, xls, xlsx
-            kwargs['skip_lines'] = self.args.skip_lines
-
-        if filetype != 'dbf':
-            kwargs['column_types'] = self.get_column_types()
-#endif
 
         using args_type = std::decay_t<decltype(args)>;
         using dbms_client_factory_type = dbms_client_factory<args_type>;

@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvsuite_core_test.cpp
+/// \file   suite/test/csvsuite_core_test.cpp
 /// \author wiluite
 /// \brief  Core functionality tests.
 

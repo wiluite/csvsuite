@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvJson_test.cpp
+/// \file   suite/test/csvJson_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvJson utility.
 

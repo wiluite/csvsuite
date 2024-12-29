@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvSort_test.cpp
+/// \file   suite/test/csvSort_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvSort utility.
 

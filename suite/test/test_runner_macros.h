@@ -1,7 +1,7 @@
 ///
-/// \file   test/test_runner_macros.h
+/// \file   suite/test/test_runner_macros.h
 /// \author wiluite
-/// \brief  Tests for the csvstat utility.
+/// \brief  Tests for the csvStat utility.
 
 #pragma once
 

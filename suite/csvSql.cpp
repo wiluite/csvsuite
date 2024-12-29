@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvSql.cpp
+/// \file   suite/csvSql.cpp
 /// \author wiluite
 /// \brief  Generate SQL statements for one or more CSV files, or execute those statements directly on a database, and execute one or more SQL queries.
 

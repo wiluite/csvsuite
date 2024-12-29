@@ -1,7 +1,7 @@
 ///
-/// \file   test/test_reader_macros.h
+/// \file   suite/test/test_reader_macros.h
 /// \author wiluite
-/// \brief  Different formal readers specially for tests.
+/// \brief  Different backup reader policies for tests.
 
 #pragma once
 

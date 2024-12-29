@@ -1,3 +1,8 @@
+///
+/// \file   suite/test/test_max_field_size_macros.h
+/// \author wiluite
+/// \brief  Several macro for maximum field size tests.
+
 #pragma once
 
 #define Z_CHECK(CALLFUNC, READER, SKIP_LINES, NO_HEADER, MAX_FIELD_SIZE, CALLRESULT) \

@@ -1,3 +1,8 @@
+///
+/// \file   suite/include/in2csv/in2csv_fixed.h
+/// \author wiluite
+/// \brief  Header of the fixed-to-csv converter.
+
 #pragma once
 
 #include "converter_client.h"
@@ -34,48 +39,44 @@ namespace in2csv::detail {
                 static std::locale loc("C");
                 elem_type::imbue_num_locale(loc);
                 reader.run_rows(
-                        [&](auto rowspan) {
-                            for (auto e : rowspan)
-                                columns.push_back(e.operator csv_co::unquoted_cell_string());
-                        }
-                        ,[&](auto rowspan) {
-                            unsigned col = 0;
-                            for (auto e : rowspan) {
-                                auto et {elem_type{e}};
-                                if (et.is_num()) {
-                                    auto const value = columns[col];
-                                    if (value == "column")
-                                        all[value].emplace_back(et.operator csv_co::unquoted_cell_string());
-                                    else
-                                        all[value].emplace_back(static_cast<unsigned>(et.num()));
-                                }
-                                else if (et.is_str()) {
-                                    auto const value = columns[col];
-                                    if (value != "start" and value != "length" )
-                                        all[value].push_back(et.operator csv_co::unquoted_cell_string());
-                                    else
-                                        throw std::runtime_error("A value of unsupported type '"
-                                            + et.operator csv_co::unquoted_cell_string() + "' for " + value + '.');
-                                }
+                    [&](auto rowspan) {
+                        for (auto e : rowspan)
+                            columns.push_back(e.operator csv_co::unquoted_cell_string());
+                    }
+                    ,[&](auto rowspan) {
+                        unsigned col = 0;
+                        for (auto e : rowspan) {
+                            auto et {elem_type{e}};
+                            if (et.is_num()) {
+                                auto const value = columns[col];
+                                if (value == "column")
+                                    all[value].emplace_back(et.operator csv_co::unquoted_cell_string());
                                 else
-                                    throw std::runtime_error("A value of unsupported type or a null value is in the schema file.");
-                                ++col;
+                                    all[value].emplace_back(static_cast<unsigned>(et.num()));
                             }
+                            else if (et.is_str()) {
+                                auto const value = columns[col];
+                                if (value != "start" and value != "length" )
+                                    all[value].push_back(et.operator csv_co::unquoted_cell_string());
+                                else
+                                    throw std::runtime_error("A value of unsupported type '"
+                                        + et.operator csv_co::unquoted_cell_string() + "' for " + value + '.');
+                            }
+                            else
+                                throw std::runtime_error("A value of unsupported type or a null value is in the schema file.");
+
+                            ++col;
                         }
+                    }
                 );
+
                 if (all.find("column") == all.end())
                     throw std::runtime_error("ValueError: A column named \"column\" must exist in the schema file.");
                 if (all.find("start") == all.end())
                     throw std::runtime_error("ValueError: A column named \"start\" must exist in the schema file.");
                 if (all.find("length") == all.end())
                     throw std::runtime_error("ValueError: A column named \"length\" must exist in the schema file.");
-#if 0
-                auto & names_ = all["column"];
-                auto & starts_ = all["start"];
-                auto & lengths_ = all["length"];
-                assert(names_.size() == starts_.size());
-                assert(names_.size() == lengths_.size());
-#endif
+
                 auto & nms = all["column"];
                 for (auto & nm : nms)
                     names_.push_back(std::get<0>(nm));

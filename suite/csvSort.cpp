@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvSort.cpp
+/// \file   suite/csvSort.cpp
 /// \author wiluite
 /// \brief  Sort CSV files.
 

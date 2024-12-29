@@ -1,8 +1,12 @@
+///
+/// \file   suite/src/in2csv/in2csv_csv.cpp
+/// \author wiluite
+/// \brief  Implementation of the csv-to-csv converter.
+
 #include "../../include/in2csv/in2csv_csv.h"
 #include <cli.h>
 #include <iostream>
-#include "common_datetime_excel.h"
-#include "common_time_point.h"
+#include "common.h"
 #include "header_printer.h"
 
 using namespace ::csvsuite::cli;

@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/include/enconding.h
+/// \file   suite/include/enconding.h
 /// \author wiluite
 /// \brief  Means for converting text from one encoding to another.
 

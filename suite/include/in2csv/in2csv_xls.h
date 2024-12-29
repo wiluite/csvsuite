@@ -1,3 +1,8 @@
+///
+/// \file   suite/include/in2csv/in2csv_xls.h
+/// \author wiluite
+/// \brief  Header of the xls-to-csv converter.
+
 #pragma once
 
 #include "converter_client.h"

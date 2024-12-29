@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvJoin_test.cpp
+/// \file   suite/test/csvJoin_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvJoin utility.
 

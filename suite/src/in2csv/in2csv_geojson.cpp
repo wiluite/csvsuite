@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_geojson.cpp
+/// \author wiluite
+/// \brief  Implementation of the geojson-to-csv converter.
+
 #include "../../include/in2csv/in2csv_geojson.h"
 #include <cli.h>
 #include "../../external/lib_geojson/geojson.hh"

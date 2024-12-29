@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/csvLook.cpp
+/// \file   suite/csvLook.cpp
 /// \author wiluite
 /// \brief  Render a CSV file in the console.
 

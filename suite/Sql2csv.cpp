@@ -1,5 +1,5 @@
 ///
-/// \file   utils/csvsuite/Sql2csv.cpp
+/// \file   suite/Sql2csv.cpp
 /// \author wiluite
 /// \brief  Execute an SQL query on a database and output the result to a CSV file.
 

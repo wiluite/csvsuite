@@ -1,5 +1,5 @@
 ///
-/// \file   test/Sql2csv_test.cpp
+/// \file   suite/test/Sql2csv_test.cpp
 /// \author wiluite
 /// \brief  Tests for the Sql2csv utility.
 

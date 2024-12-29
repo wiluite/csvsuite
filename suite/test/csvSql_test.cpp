@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvSql_test.cpp
+/// \file   suite/test/csvSql_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvSql utility.
 

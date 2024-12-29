@@ -1,9 +1,13 @@
+///
+/// \file   suite/src/in2csv/in2csv_xlsx.cpp
+/// \author wiluite
+/// \brief  Implementation of the xlsx-to-csv converter.
+
 #include "../../include/in2csv/in2csv_xlsx.h"
 #include <cli.h>
 #include <OpenXLSX.hpp>
 #include <iostream>
-#include "common_datetime_excel.h"
-#include "common_time_point.h"
+#include "common.h"
 #include "common_excel.h"
 
 using namespace ::csvsuite::cli;

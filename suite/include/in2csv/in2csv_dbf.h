@@ -1,3 +1,8 @@
+///
+/// \file   suite/include/in2csv/in2csv_dbf.h
+/// \author wiluite
+/// \brief  Header of the dbf-to-csv converter.
+
 #pragma once
 
 #include "converter_client.h"

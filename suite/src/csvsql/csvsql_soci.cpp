@@ -1,6 +1,7 @@
-//
-// Created by wiluite on 21.09.2024.
-//
+///
+/// \file   suite/src/csvsql/csvsql_soci.cpp
+/// \author wiluite
+/// \brief  Parts of the implementation of the csvSql utility based on soci library.
 
 namespace soci_client_ns {
     class table_creator {

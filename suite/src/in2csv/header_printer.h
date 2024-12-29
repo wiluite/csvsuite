@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/header_printer
+/// \author wiluite
+/// \brief  Prints header in all cases of conversion.
+
 #pragma once
 
 namespace {

@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_excel.h
+/// \author wiluite
+/// \brief  Common code for two excel-to-csv converter implementations.
+
 #pragma once
 
 namespace {

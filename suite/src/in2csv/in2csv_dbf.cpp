@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_dbf.cpp
+/// \author wiluite
+/// \brief  Implementation of the dbf-to-csv converter.
+
 #include "../../include/in2csv/in2csv_dbf.h"
 #include <cli.h>
 #include "../../external/dbf_lib/include/bool.h"

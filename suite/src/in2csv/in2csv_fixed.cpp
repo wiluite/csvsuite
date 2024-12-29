@@ -1,3 +1,8 @@
+///
+/// \file   suite/src/in2csv/in2csv_fixed.cpp
+/// \author wiluite
+/// \brief  Implementation of the fixed-to-csv converter.
+
 #include "../../include/in2csv/in2csv_fixed.h"
 #include <cli.h>
 

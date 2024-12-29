@@ -1,5 +1,5 @@
 ///
-/// \file   test/In2csv_fixed_format_test.cpp
+/// \file   suite/test/In2csv_fixed_format_test.cpp
 /// \author wiluite
 /// \brief  Additional tests for the In2csv utility (fixed format tests).
 

@@ -1,5 +1,5 @@
 ///
-/// \file   test/In2csv_test.cpp
+/// \file   suite/test/In2csv_test.cpp
 /// \author wiluite
 /// \brief  Tests for the In2csv utility.
 

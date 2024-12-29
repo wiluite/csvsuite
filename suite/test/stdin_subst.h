@@ -1,3 +1,8 @@
+///
+/// \file   suite/test/stdin_subst.h
+/// \author wiluite
+/// \brief  Different data pipe emulators.
+
 #pragma once
 #include <iostream>
 #include <mutex>

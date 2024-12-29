@@ -1,5 +1,5 @@
 ///
-/// \file   test/encoding_test.cpp
+/// \file   suite/test/encoding_test.cpp
 /// \author wiluite
 /// \brief  Text encodings tests.
 

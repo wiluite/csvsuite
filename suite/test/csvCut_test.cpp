@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvCut_test.cpp
+/// \file   suite/test/csvCut_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvCut utility.
 

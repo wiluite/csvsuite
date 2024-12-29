@@ -1,4 +1,4 @@
-/// \file   test/csvClean_mac_newlines_test.cpp
+/// \file   suite/test/csvClean_mac_newlines_test.cpp
 /// \author wiluite
 /// \brief  One of the tests for the csvClean utility.
 

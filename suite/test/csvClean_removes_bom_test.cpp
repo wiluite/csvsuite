@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvClean_removes_bom_test.cpp
+/// \file   suite/test/csvClean_removes_bom_test.cpp
 /// \author wiluite
 /// \brief  One of the tests for the csvClean utility.
 

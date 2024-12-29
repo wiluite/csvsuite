@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvClean_test_funcs.h
+/// \file   suite/test/csvClean_test_funcs.h
 /// \author wiluite
 /// \brief  Several test functions used in the csvClean utility tests.
 

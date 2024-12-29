@@ -1,5 +1,5 @@
 ///
-/// \file   test/csvGrep_test.cpp
+/// \file   suite/test/csvGrep_test.cpp
 /// \author wiluite
 /// \brief  Tests for the csvGrep utility.
 
