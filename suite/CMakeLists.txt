@@ -86,6 +86,11 @@ if (NOT _SANITY_CHECK)
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_CURRENT_BINARY_DIR}/external/ocilib/ociliba.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/ociliba.dll)
+            add_custom_command(
+                    TARGET csvSql POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy
+                    ${CMAKE_BINARY_DIR}/external_deps/local_sqlite3.dll
+                    ${CMAKE_CURRENT_BINARY_DIR}/local_sqlite3.dll)
         else()
             add_custom_command(
                     TARGET csvSql POST_BUILD
@@ -97,6 +102,11 @@ if (NOT _SANITY_CHECK)
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_CURRENT_BINARY_DIR}/external/ocilib/libociliba.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/libociliba.dll)
+            add_custom_command(
+                    TARGET csvSql POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy
+                    ${CMAKE_BINARY_DIR}/external_deps/liblocal_sqlite3.dll
+                    ${CMAKE_CURRENT_BINARY_DIR}/liblocal_sqlite3.dll)
         endif()
     endif()
 
@@ -114,12 +124,22 @@ if (NOT _SANITY_CHECK)
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/soci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/soci_core_4_1.dll)
+            add_custom_command(
+                    TARGET Sql2csv POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy
+                    ${CMAKE_BINARY_DIR}/external_deps/local_sqlite3.dll
+                    ${CMAKE_CURRENT_BINARY_DIR}/local_sqlite3.dll)
         else()
             add_custom_command(
                     TARGET Sql2csv POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_BINARY_DIR}/bin/libsoci_core_4_1.dll
                     ${CMAKE_CURRENT_BINARY_DIR}/libsoci_core_4_1.dll)
+            add_custom_command(
+                    TARGET Sql2csv POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy
+                    ${CMAKE_BINARY_DIR}/external_deps/liblocal_sqlite3.dll
+                    ${CMAKE_CURRENT_BINARY_DIR}/liblocal_sqlite3.dll)
         endif()
     endif()
 
