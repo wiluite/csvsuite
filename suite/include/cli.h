@@ -1184,7 +1184,7 @@ namespace csvsuite::cli {
     };
     /// Common template function to compose custom boolean value representation
     template <typename T, typename Q=void>
-    inline std::string compose_bool_DRY (T const & elem) {
+    std::string compose_bool_DRY (T const & elem) {
         static bool_stringstream<Q> ss;
         ss.rdbuf()->str("");
         ss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
