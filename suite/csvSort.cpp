@@ -144,7 +144,7 @@ namespace csvsort {
         skip_lines(reader, args);
         quick_check(reader, args);
 
-        auto header = obtain_header_and_<skip_header>(reader, args);
+        auto const header = obtain_header_and_<skip_header>(reader, args);
 
         if (args.names) {
             print_header(std::cout, header, args);
@@ -179,7 +179,13 @@ namespace csvsort {
                     std::sort(table.begin(), table.end(), sort_comparator(std::move(cfa), std::less<>()));
             }
             // Force detecting types for all rest (not-comparable) cells concurrently to reduce result output time
-            for_each(poolstl::par, table.begin(), table.end(), [&](auto &item) {
+            for_each(poolstl::par, table.begin(), table.end(), [&](
+#ifdef _MSC_VER
+                    std::decay_t<decltype(table[0])> & item
+#else
+                    auto & item
+#endif
+                    ) {
                 for (auto & elem : item) {
                     using UElemType = typename std::decay_t<decltype(elem)>::template rebind<csv_co::unquoted>::other;
                     elem.operator UElemType const&().type();
@@ -191,7 +197,13 @@ namespace csvsort {
             printer p(oss_);
 
             std::vector<std::string> string_header(header.size());
-            std::transform(header.cbegin(), header.cend(), string_header.begin(), [&](auto & elem) {
+            std::transform(header.cbegin(), header.cend(), string_header.begin(), [&](
+#ifdef _MSC_VER
+                    std::decay_t<decltype(reader)>::cell_span const & elem
+#else
+                    auto & elem
+#endif
+                    ) {
                 return compose_text(elem);
             });
 
