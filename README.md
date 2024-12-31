@@ -1,12 +1,11 @@
+**Documentation is UNDER CONSTRUCTION NOW.**
+
 # csvsuite
-Python's csvkit written in C++
+## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
 
-IT IS UNDER CONSTRUCTION NOW.
-
-## csvsuite (ala Python's csvkit)
 *    About
-*    [FAQ](#faq)
-*    [CSV kit](#CSV-kit)
+*    [Restrictions](#restrictions)
+*    [Tutorial](#tutorial)
 *    [Statistics performance](#statistics-performance)
 *    [Sorting performance](#sorting-performance)
 *    [SQL performance](#sql-performance)
@@ -14,50 +13,63 @@ IT IS UNDER CONSTRUCTION NOW.
 
 
 ### About
-Description goes here.
+_csvsuite_ is written to dramatically increase the speed of working with large amounts of data by taking advantage of
+the high-performance compiled programming language C++.
 
-### FAQ
+It is written on top of the [csv_co](https://github.com/wiluite/CSV_co) CSV reader and, where needed, with the help of
+the task-based parallelism library [transwarp](https://github.com/bloomen/transwarp) and the thread pool-based library
+[poolSTL](https://github.com/alugowski/poolSTL).
+It tries to reproduce the functionality of the [csvkit](https://csvkit.readthedocs.io/en/latest/) whenever possible.
 
-> Why?
+The goals for the reproduction were: to find out the complexity and limitations of the applicability of the C++
+ecosystem for broad universal tasks, where Python is good with its rich environment for data processing, text encoding,
+localization, and so on. It was also interesting to see the performance benefits of C++ applications in non-traditional
+areas. These utilities (from 14) seem to be almost fully operational at the moment:
+1) csvClean (ala [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html))
+2) csvCut (ala [csvcut](https://csvkit.readthedocs.io/en/latest/scripts/csvcut.html))
+3) csvGrep (ala [csvgrep](https://csvkit.readthedocs.io/en/latest/scripts/csvgrep.html))
+4) csvJoin (ala [csvjoin](https://csvkit.readthedocs.io/en/latest/scripts/csvjoin.html))
+5) csvJson (ala [csvjson](https://csvkit.readthedocs.io/en/latest/scripts/csvjson.html))
+6) csvLook (ala [csvlook](https://csvkit.readthedocs.io/en/latest/scripts/csvlook.html))
+7) csvSort (ala [csvsort](https://csvkit.readthedocs.io/en/latest/scripts/csvsort.html))
+8) csvStack (ala [csvstack](https://csvkit.readthedocs.io/en/latest/scripts/csvstack.html))
+9) csvStat (ala [csvstat](https://csvkit.readthedocs.io/en/latest/scripts/csvstat.html))
+10) csvSql (ala [csvsql](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html))
+11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
+12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
+<h4>Note: _csvsuite_ is in the active stage of development. But, as you will see, is already quite usable. Bug reports,
+scenarios that failed and so on are welcome.</h4>
 
-### CSV kit
+### Restrictions
+1) Your CSV sources must be RFC-4180-compliant. Fortunately, the overwhelming percentage of documents in the world
+adhere to this rule. If not, you can/should always resort to the csvClean (or even a more powerful one from the original
+package: [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case,
+this document just needs to be fixed.
+2) The only 2 of utilities of the Python's original are not implemented for not being too actual: csvformat, csvpy.
+3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following utility arguments are missing:
 
-Shortly: Small csv kit is shortened Python's csvkit with the speed of Rust's xsv (and even faster). It is written on top of the
-csv_co "parse engine" and, where needed, with the help of task-based parallelism library transwarp. It tries to reproduce the
-functionality of the csvkit whenever possible.
+	- **-d** DELIMITER, **--delimiter** DELIMITER
+	- **-t**, --tabs
+	- **-q** QUOTECHAR, **--quotechar** QUOTECHAR
+	- **-u** {0,1,2,3}, **--quoting** {0,1,2,3}
+	- **-b**, **--no-doublequote**
+	- **-y** SNIFF_LIMIT, **--snifflimit** SNIFF_LIMIT
 
-<h4>Note: small csv kit is in an early development stage and with code needing some revision. But it is already usable. 
-Bug reports, scenarios that failed and so on are very welcome.</h4>  
+   The remaining arguments (or even newly introduced by the _csvsuite_) are present and almost certainly implemented.
+When running, any utility tries to quickly check the strong tabular shape of your documents to match RFC-4180 and
+whistles if this is not the case.
+4) When handling date and datetime data types and their localization, the csvkit relies on the rich Python datetime
+library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
+The _csvsuite_, though, is tightly bound to the --date-format and --datetime-format arguments and works well only on
+those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
+argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
+consistency everywhere (on most platforms). For more info see tests located in the
+[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.
+5) The csvJson utility does not yet support geometry argument. Other possible restrictions are described below.
 
-The goals for the reproduction were: to find out the complexity and limitations of the applicability of the C++ ecosystem for broad
-universal tasks, where Python is good with its rich environment for data processing, encoding, localization, and so on. It was also
-interesting to see the performance benefits of C++ applications in non-traditional areas.  
-These utilities are currently implemented: csvclean, csvcut, csvgrep, csvjoin, csvjson, csvlook, csvsort, csvstack, csvstat. 
-
-#### Restrictions:  
-
-1) Things not implemented for now: in2csv, sql2csv, csvformat, csvpy, csvsql.
-
-2) Due to the fact that csv_co engine only supports RFC 4180, the following utility arguments are missing:
-	- <i>-d DELIMITER, --delimiter DELIMITER</i>  
-	- <i>-t, --tabs</i>   
-	- <i>-q QUOTECHAR, --quotechar QUOTECHAR</i>    
-	- <i>-u {0,1,2,3}, --quoting {0,1,2,3}</i>  
-	- <i>-b, --no-doublequote</i>  
-	- <i>-y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT</i>  
-	The remaining arguments must be present. Another thing is that they may accidentally remain unrealized at the moment.
-        When running, any utility tries to quickly check the equality of columns in your documents to match RFC 4180.
-        To ensure a document is valid there is special csvclean utility in csvkit and in here. 
-
-3) When handling date and datetime data types and their localization, csvkit relies on the rich Python datetime library. It also
-allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on. However, our tool in this sense
-is tightly bound to the --date-format and --datetime-format arguments and works well only on those platforms where this is
-supported by the environment/compiler/standard library. And the --date-lib-parser argument engages the special date library to
-improve the situation and ensure consistency everywhere. For more info see tests located in csvkit_core_test.cpp.
-
-4) Some utilities may not support composition/piping.
-5) csvjson does not support geometry option for right now. 
+### Tutorial
+To be started soon.
 
 ### Statistics performance
 There were measured the performances of three tools: [csvkit(1.5.0)'s csvstat](https://pypi.org/project/csvkit/), 
