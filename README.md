@@ -86,22 +86,33 @@ Just repeat the lessons from the original training:
 [1.3 - 1.8](https://csvkit.readthedocs.io/en/latest/tutorial/1_getting_started.html),
 [2.1 - 2.4](https://csvkit.readthedocs.io/en/latest/tutorial/2_examining_the_data.html),
 [3.1 - 3.4](https://csvkit.readthedocs.io/en/latest/tutorial/3_power_tools.html),
-[4.1 - 4.4](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works.
-Please pay attention to the following notes.  
+[4.1 - 4.4](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works,
+but first pay attention to the following notes.  
 
 **_Note 1._** Parts of utility names that reflect their purpose are capitalized here to avoid confusion between the
 _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their names correctly. See their names in the
 [About](#about) section.  
+
 **_Note 2._** In item 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
 number, not a date. If this is too important for you right now, then to improve it, run the following command instead of
 the one suggested:  
-`in2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv`  
+`In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv`  
 The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
 like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/), which do
 not guarantee that dates are correctly recognized, since Excel documents themselves do not have a date storage type. So
 you are facing the necessity to always specify which numeric columns and using which era you want to convert to dates or
 datetimes.  
-**_Note 3._**
+
+**_Note 3._** In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
+on the screen, unlike _csvStat_, which displays number separator according to the current global locale. This is because
+in the *csvkit* there is a difference between the locales according to which numbers are output in the two utilities.
+To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
+them. For example:  
+`csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US`  
+where -G option is a "Superseded global locale".  
+
+**_Note 4._**
+
 
 ### Statistics performance
 There were measured the performances of three tools: [csvkit(1.5.0)'s csvstat](https://pypi.org/project/csvkit/), 
