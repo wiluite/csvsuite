@@ -3,7 +3,7 @@
 # csvsuite
 ## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
 
-*    About
+*    [About](#about)
 *    [Restrictions](#restrictions)
 *    [Tutorial](#tutorial)
 *    [Statistics performance](#statistics-performance)
@@ -46,7 +46,9 @@ scenarios that failed and so on are welcome.</h4>
 adhere to this rule. If not, you can/should always resort to the csvClean (or even a more powerful one from the original
 package: [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case,
 this document just needs to be fixed.
-2) The only 2 of utilities of the Python's original are not implemented for not being too actual: csvformat, csvpy.
+2) The only 2 of utilities of the Python's original are not implemented for not being too actual:
+[csvformat](https://csvkit.readthedocs.io/en/latest/scripts/csvformat.html),
+[csvpy](https://csvkit.readthedocs.io/en/latest/scripts/csvpy.html).
 3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following utility arguments are missing:
 
 	- **-d** DELIMITER, **--delimiter** DELIMITER
@@ -66,10 +68,29 @@ those platforms where this is supported by the environment/compiler/standard lib
 argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
 consistency everywhere (on most platforms). For more info see tests located in the
 [csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.
-5) The csvJson utility does not yet support geometry argument. Other possible restrictions are described below.
+5) Other possible restrictions are described below.
 
 ### Tutorial
-To be started soon.
+### 1. Getting started
+#### 1.1. About this tutorial
+This tutorial should be almost exactly the same as the original tutorial.
+#### 1.2. Installing csvsuite
+The best way to install the tool is to simply download a required binary archive from the
+[release](https://github.com/wiluite/csvsuite/releases) page and unpack it. Then add the unpacked directory to the list
+of directories in which to search for commands, according to the rules for doing this for this particular operating
+system.
+
+#### 1.3. Remaining steps
+Just repeat the lessons from the original training:
+[1.3 - 1.8](https://csvkit.readthedocs.io/en/latest/tutorial/1_getting_started.html),
+[2.1 - 2.4](https://csvkit.readthedocs.io/en/latest/tutorial/2_examining_the_data.html),
+[3.1 - 3.4](https://csvkit.readthedocs.io/en/latest/tutorial/3_power_tools.html),
+[4.1 - 4.4](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works.
+Please pay attention to the following notes.  
+_Note 1._ Parts of words in utility names that reflect their purpose are capitalized here to avoid confusion between the
+_csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their names correctly. See their names in the
+[About](#about) section.
+
 
 ### Statistics performance
 There were measured the performances of three tools: [csvkit(1.5.0)'s csvstat](https://pypi.org/project/csvkit/), 
