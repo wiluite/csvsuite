@@ -204,13 +204,13 @@ int main(int argc, char * argv[]) {
         sql2csv::sql2csv(args);
     }
     catch (soci::soci_error const & e) {
-        std::cout << e.get_error_message() << std::endl;
+        std::cerr << e.get_error_message() << std::endl;
     }
     catch (std::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (...) {
-        std::cout << "Unknown exception.\n";
+        std::cerr << "Unknown exception.\n";
     }
 }
 

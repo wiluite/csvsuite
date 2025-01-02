@@ -113,7 +113,7 @@ namespace in2csv::detail::xls {
             for (auto i = 0u; i < pwb->sheets.count; i++) {
                 if (!pwb->sheets.sheet[i].name)
                     continue;
-                result.push_back(pwb->sheets.sheet[i].name);
+                result.emplace_back(pwb->sheets.sheet[i].name);
             }
             return result;
         };
@@ -238,7 +238,7 @@ namespace in2csv::detail::xls {
         try {
             convert_impl(a);
         }  catch (ColumnIdentifierError const& e) {
-            std::cout << e.what() << '\n';
+            std::cerr << e.what() << '\n';
         }
     }
 }

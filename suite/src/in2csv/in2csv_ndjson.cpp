@@ -147,7 +147,7 @@ namespace in2csv::detail::ndjson {
                             total_rows++;
                             for (auto & e : result_header)
                                 if (csv_map[e].size() != total_rows)
-                                    csv_map[e].push_back("");
+                                    csv_map[e].emplace_back("");
 
                         });
                     }

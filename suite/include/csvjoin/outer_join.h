@@ -75,7 +75,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 struct {
                     bool no_header;
                     unsigned skip_lines;
-                } tmp_args(args.no_header, args.skip_lines);
+                } tmp_args{args.no_header, args.skip_lines};
 
                 if (std::holds_alternative<reader_fake<reader_type>>(this_source)) {
                     auto & this_reader = std::get<1>(this_source);

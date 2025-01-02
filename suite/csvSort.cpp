@@ -214,7 +214,7 @@ namespace csvsort {
                 std::cout << oss.str();
 
         }  catch (ColumnIdentifierError const& e) {
-            std::cout << e.what() << '\n';
+            std::cerr << e.what() << '\n';
         }
 
     }

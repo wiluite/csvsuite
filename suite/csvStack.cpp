@@ -269,10 +269,10 @@ int main(int argc, char * argv[]) {
             csvstack::stack<skipinitspace_reader_type>(args);
     }
     catch (std::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (...) {
-        std::cout << "Unknown exception.\n";
+        std::cerr << "Unknown exception.\n";
     }
 }
 #endif

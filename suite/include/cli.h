@@ -567,10 +567,10 @@ namespace csvsuite::cli {
         }                                                                                            \
     }                                                                                                \
     catch (std::exception const & e) {                                                               \
-        std::cout << e.what() << std::endl;                                                          \
+        std::cerr << e.what() << std::endl;                                                          \
     }                                                                                                \
     catch (...) {                                                                                    \
-        std::cout << "Unknown exception.\n";                                                         \
+        std::cerr << "Unknown exception.\n";                                                         \
     }
 
     /// Consistently maps a column number to a letter

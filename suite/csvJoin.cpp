@@ -133,12 +133,12 @@ namespace csvjoin::detail {
                 if (args.linenumbers)
                     os << "line_number,";
 
-                auto optionally_quoted = [](std::ostream & os, auto const & elem)->std::ostream& {
+                auto optionally_quoted = [](std::ostream & os_, auto const & elem)->std::ostream& {
                     if (elem.find(',') != std::string::npos)
-                        os << std::quoted(elem);
+                        os_ << std::quoted(elem);
                     else
-                        os << elem;
-                    return os;
+                        os_ << elem;
+                    return os_;
                 };
                 std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
                     optionally_quoted(os, elem) << ',';
@@ -386,16 +386,16 @@ int main(int argc, char * argv[])
             args.std_input = read_standard_input(args);
         join_wrapper(args);
     } catch (notrimming_reader_type::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (skipinitspace_reader_type::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (std::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (...) {
-        std::cout << "Unknown exception.\n";
+        std::cerr << "Unknown exception.\n";
     }
     return 0;
 }

@@ -134,7 +134,7 @@ namespace in2csv::detail::csv {
             }
 
         }  catch (ColumnIdentifierError const& e) {
-            std::cout << e.what() << '\n';
+            std::cerr << e.what() << '\n';
         }
     }
 }

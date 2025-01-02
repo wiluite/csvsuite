@@ -66,7 +66,7 @@ namespace in2csv::detail::xlsx {
             std::string tmp_file = "temporary_xlsx_file.xlsx";
             std::shared_ptr<XLDocument> ptr;
         public:
-            xldocument_holder(impl_args const & a) : ptr (
+            explicit xldocument_holder(impl_args const & a) : ptr (
                 [&a, this] {
                     if (a.file.empty() or a.file == "_") {
                         std::string WB;
@@ -93,7 +93,7 @@ namespace in2csv::detail::xlsx {
                     delete descriptor;
                 }
             ) {}
-            operator XLDocument& () {
+            explicit operator XLDocument& () {
                 return *ptr;
             }
         } doc(a);
@@ -216,7 +216,7 @@ namespace in2csv::detail::xlsx {
         try {
             convert_impl(a);
         }  catch (ColumnIdentifierError const& e) {
-            std::cout << e.what() << '\n';
+            std::cerr << e.what() << '\n';
         }
     }
 }

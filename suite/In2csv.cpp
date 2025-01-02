@@ -193,10 +193,10 @@ int main(int argc, char * argv[]) {
         in2csv::in2csv(args);
     }
     catch (std::exception const & e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
     catch (...) {
-        std::cout << "Unknown exception.\n";
+        std::cerr << "Unknown exception.\n";
     }
 }
 
