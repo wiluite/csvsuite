@@ -740,7 +740,7 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         {   // year is y instead of Y
             a.date_fmt = R"(%d/%m/%y)";
             a.datetime_fmt = R"(%d/%m/%Y %I:%M:%S %p)";
-            yet_one_reader_type r("a\n01/02/24\n"); // FIXME: to change format we must change reader type
+            yet_one_reader_type r("a\n01/02/24\n"); // 'FIXME' was fixed
             auto [types, blanks] = std::get<1>(typify(r, a, typify_option::typify_without_precisions));
             expect(types.size() == 1);
             expect (types[0] == column_type::date_t);

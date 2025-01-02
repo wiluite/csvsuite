@@ -262,6 +262,54 @@ Release/test.exe
 * [In2csv](#in2csv)
 * [Sql2csv](#sql2csv)
 #### In2csv
+##### Description
+Converts various tabular data formats into CSV.
+
+Converting fixed width requires that you provide a schema file with the “-s” option. The schema file should have the
+following format:  
+
+_column,start,length  
+name,0,30  
+birthday,30,10  
+age,40,3_  
+
+The header line is required though the columns may be in any order:
+
+Usage: In2csv arg_0  [options...]  
+arg_0 : The file of a specified format to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:  
+-z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]  
+-e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]  
+-S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]  
+-H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]  
+-K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]  
+-v,--verbose : A flag to toggle verbose. [implicit: "true", default: false]
+-l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]  
+--zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]  
+-Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]  
+-L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]  
+--blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]  
+--null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]  
+--date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]  
+--datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]  
+--no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]  
+-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
+-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
+-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
+-n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
+--sheet : The name of the Excel sheet to operate on. [default: ]  
+--write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  
+--use-sheet-names : Use the sheet names as file names when --write-sheets is set. [implicit: "true", default: false]  
+--encoding-xls : Specify the encoding of the input XLS file. [default: UTF-8]  
+--d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
+--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
+--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
+-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
+--date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]  
+--ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]  
+--help : print help [implicit: "true", default: false]  
+
 #### Sql2csv
 
 
