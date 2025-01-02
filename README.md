@@ -10,7 +10,7 @@
 *    [Sorting performance](#sorting-performance)
 *    [SQL performance](#sql-performance)
 *    [Build All](#build-all)
-
+*    [Reference](#reference)
 
 ### About
 _csvsuite_ is written to dramatically increase the speed of working with large amounts of data by taking advantage of
@@ -89,11 +89,11 @@ Just repeat the lessons from the original training:
 [4.1 - 4.4](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works,
 but first pay attention to the following notes.  
 
-**_Note 1._** Parts of utility names that reflect their purpose are capitalized here to avoid confusion between the
+**_Note 1._** Parts of utility names that reflect their purpose are capitalized to avoid confusion between the
 _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their names correctly. See their names in the
 [About](#about) section.  
 
-**_Note 2._** In item 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
+**_Note 2._** In paragraph 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
 number, not a date. If this is too important for you right now, then to improve it, run the following command instead of
 the one suggested:  
 `In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv`  
@@ -109,9 +109,16 @@ in the *csvkit* there is a difference between the locales according to which num
 To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
 them. For example:  
 `csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US`  
+or  
+`csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8`  
 where -G option is a "Superseded global locale".  
 
 **_Note 4._**
+In the _csvStat_ utility, "Most common values" with the same number of repetitions may not be the same as in the
+original utility, due to different sorting algorithms. To display more data, use the --freq-count option.
+
+**_Note 5._** In paragraph 3.3 you must use: `--db sqlite3://leso.db` instead of `--db sqlite:///leso.db`. For more
+details, see the description of the --db option in the utilities [csvSql](#csvsql) and [Sql2csv](#sql2csv).
 
 
 ### Statistics performance
@@ -239,9 +246,48 @@ cd build/test
 ```
 _Then, run all tests:_
 ```bash
-ctest.exe -j 6 
+ctest.exe -j 1 
 ```
 _Or run a particular test (still staying in the test directory):_
 ```bash
 Release/test.exe
 ```
+### Reference
+*    [Input](#input)
+*    [Processing](#processing)
+*    [Output and Analysis](#output-and-analysis)
+
+
+#### Input
+* [In2csv](#in2csv)
+* [Sql2csv](#sql2csv)
+#### In2csv
+#### Sql2csv
+
+
+#### Processing
+* [csvClean](#csvclean)
+* [csvCut](#csvcut)
+* [csvGrep](#csvgrep)
+* [csvJoin](#csvjoin)
+* [csvSort](#csvsort)
+* [csvStack](#csvstack)
+
+#### csvClean
+#### csvCut
+#### csvGrep
+#### csvJoin
+#### csvSort
+#### csvStack
+
+
+#### Output and Analysis
+* [csvJson](#csvjson)
+* [csvLook](#csvlook)
+* [csvSql](#csvsql)
+* [csvStat](#csvstat)
+
+#### csvJson
+#### csvLook
+#### csvSql
+#### csvStat
