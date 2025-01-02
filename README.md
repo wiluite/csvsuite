@@ -86,8 +86,8 @@ Just repeat the lessons from the original training:
 [1.3 - 1.8](https://csvkit.readthedocs.io/en/latest/tutorial/1_getting_started.html),
 [2.1 - 2.4](https://csvkit.readthedocs.io/en/latest/tutorial/2_examining_the_data.html),
 [3.1 - 3.4](https://csvkit.readthedocs.io/en/latest/tutorial/3_power_tools.html),
-[4.1 - 4.4](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works,
-but first pay attention to the following notes.  
+[4.1](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works,
+but first pay attention to the following notes for changes for you to do.  
 
 **_Note 1._** Parts of utility names that reflect their purpose are capitalized to avoid confusion between the
 _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their names correctly. See their names in the
