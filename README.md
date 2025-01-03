@@ -288,7 +288,6 @@ The header line is required though the columns may be in any order:
 
 Options:  
 
-	--help : print help [implicit: "true", default: false]   
 	-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
 	-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
 	-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
@@ -301,6 +300,7 @@ Options:
 	--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
 	--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
 	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
+	--help : print help [implicit: "true", default: false]
 
 Some command-line flags only pertain to specific input formats.  
 
@@ -356,6 +356,23 @@ Options:
     -e,--encoding : Specify the encoding of the input query file. [default: UTF-8]
 	-H,--no-header-row : Do not output column names. [implicit: "true", default: false]
 	--help : print help [implicit: "true", default: false]
+
+**Examples**
+
+Load sample data into a table using [csvSql](#csvsql) and then query it using _Sql2csv_:
+
+	csvSql --db "sqlite3://dummy.db" --tables "test" --insert dummy.csv
+	Sql2csv --db "sqlite3://dummy.db" --query "select * from test"
+
+alternatively:
+
+	csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert dummy.csv
+	Sql2csv --db "sqlite3://dbname=dummy.db" --query "select * from test"
+
+To access databases, the *csvsuite* uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
+Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this case, you must specify the value for the --db
+option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).
+
 
 
 #### Processing
