@@ -1282,10 +1282,22 @@ namespace csvsuite::cli {
         using elem_type = std::decay_t<decltype(e)>;
         static_assert(elem_type::is_unquoted());
         if (e.raw_string_view().find_first_of(",\n") != std::string_view::npos)
-            return e;       // convertion to std::string: "Unquoted, please turn quoted!"
+            return e;       // conversion to std::string: "Unquoted, please turn quoted!"
         else
             return e.str(); // unquoted via str()
-    };
+    }
+
+    /// Returns optionally quoted string from a given string
+    inline std::string compose_text(auto const & s) requires(std::is_same_v<std::decay_t<decltype(s)>, std::string>) {
+        if (s.find_first_of(",\n") != std::string::npos) {
+            std::ostringstream oss;
+            oss << std::quoted(s);
+            return oss.str();
+        }
+        else
+            return s;
+    }
+
     /// Composes a numeric corner cases for printing, returns false if the numeric is not a corner case
     inline bool compose_numeric_corner_cases(std::ostringstream & ss, auto const & rep, auto const & args) {
         assert(!rep.is_null());

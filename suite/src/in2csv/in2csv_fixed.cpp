@@ -73,7 +73,7 @@ namespace in2csv::detail::fixed {
                     auto piece = std::string(_.begin() + b, _.begin() + e + b);
                     piece.erase(0, piece.find_first_not_of(' '));
                     piece.erase(piece.find_last_not_of(' ') + 1);
-                    std::cout << piece << (i < s_dec.names().size() - 1 ? "," : "");
+                    std::cout << compose_text(piece) << (i < s_dec.names().size() - 1 ? "," : "");
                 }
                 std::cout << '\n';
             }
