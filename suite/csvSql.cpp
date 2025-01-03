@@ -223,8 +223,6 @@ namespace csvsql::detail {
         public:
             void direct(auto & reader, typify_with_precisions_result const & value, std::string const & dialect, auto const & header) {
                 auto [types, blanks, precisions] = value;
-                auto index = 0ull;
-
                 // re-fill precisions with varchar lengths if needed
 
                 if (dynamic_cast<varchar_precision*>(printer_map[dialect].get())) {
@@ -242,8 +240,13 @@ namespace csvsql::detail {
                         }
                     });
                 }
+
+                auto index = 0ull;
                 for (auto e : types) {
-                    printer_map[dialect]->print_name(header[index].operator csv_co::cell_string());
+                    auto header_cell_name = header[index].operator csv_co::cell_string();
+                    if (header_cell_name.empty())
+                        header_cell_name = csvsuite::cli::letter_name(index) + "_name_fix";
+                    printer_map[dialect]->print_name(header_cell_name);
                     std::visit([&](auto & arg) {
                         printer_map[dialect]->print(arg, blanks[index], precisions[index]);
                     }, tag_map[e]);
@@ -256,7 +259,10 @@ namespace csvsql::detail {
                 auto [types] = value;
                 auto index = 0ull;
                 for (auto e : types) {
-                    printer_map[dialect]->print_name(header[index].operator csv_co::cell_string());
+                    auto header_cell_name = header[index].operator csv_co::cell_string();
+                    if (header_cell_name.empty())
+                        header_cell_name = csvsuite::cli::letter_name(index) + "_name_fix";
+                    printer_map[dialect]->print_name(header_cell_name);
                     std::visit([&](auto & arg) {
                         printer_map[dialect]->print(arg);
                     }, tag_map[e]);
@@ -317,6 +323,13 @@ namespace csvsql::detail {
             skip_lines(reader, args);
             auto const header = obtain_header_and_<skip_header>(reader, args);
             header_ = header_to_strings<csv_co::unquoted>(header);
+
+            unsigned field_count = 0;
+            for (auto & e : header_) {
+                if (e.empty())
+                    e = csvsuite::cli::letter_name(field_count) + "_name_fix";
+                ++field_count;
+            }
 
             print_director print_director_(args, table_names);
             std::visit([&](auto & arg) {
