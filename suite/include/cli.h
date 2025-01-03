@@ -149,7 +149,7 @@ namespace csvsuite::cli {
         bool & verbose = flag("v,verbose", "A flag to toggle verbose.");
         bool & linenumbers = flag("l,linenumbers", "Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key.");
         bool & zero = flag ("zero","When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering.");
-        bool &check_integrity = flag("Q,quick-check", "Quickly check the CSV source for matrix shape").set_default(true);
+        bool &check_integrity = flag("Q,quick-check", "Quickly check the CSV source for matrix shape.").set_default(true);
     };
 
     /// Common arguments for single-file utilities
