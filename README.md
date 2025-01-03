@@ -42,32 +42,36 @@ areas. These utilities (from 14) seem to be almost fully operational at the mome
 scenarios that failed and so on are welcome.</h4>
 
 ### Restrictions
-1) Your CSV sources must be RFC-4180-compliant. Fortunately, the overwhelming percentage of documents in the world
-adhere to this rule. If not, you can/should always resort to the csvClean (or even a more powerful one from the original
-package: [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case,
-this document just needs to be fixed.
+1) Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
+overwhelming percentage of documents in the world adhere to this rule. If not, you can/should always resort to the
+csvClean (or even a more powerful one from the original package:
+[csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case, this
+document just needs to be fixed.
 2) The only 2 of utilities of the Python's original are not implemented for not being too actual:
 [csvformat](https://csvkit.readthedocs.io/en/latest/scripts/csvformat.html),
 [csvpy](https://csvkit.readthedocs.io/en/latest/scripts/csvpy.html).
 3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following utility arguments are missing:
 
-	- **-d** DELIMITER, **--delimiter** DELIMITER
-	- **-t**, --tabs
-	- **-q** QUOTECHAR, **--quotechar** QUOTECHAR
-	- **-u** {0,1,2,3}, **--quoting** {0,1,2,3}
-	- **-b**, **--no-doublequote**
-	- **-y** SNIFF_LIMIT, **--snifflimit** SNIFF_LIMIT
+
+	-d DELIMITER, --delimiter DELIMITER
+	-t, --tabs
+	-q QUOTECHAR, --quotechar QUOTECHAR
+	-u {0,1,2,3}, --quoting {0,1,2,3}
+	-b, --no-doublequote
+	-y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT
 
    The remaining arguments (or even newly introduced by the _csvsuite_) are present and almost certainly implemented.
-When running, any utility tries to quickly check the strong tabular shape of your documents to match RFC-4180 and
-whistles if this is not the case.
+When running, any utility tries to quickly check the strong tabular shape of your documents to match [RFC-4180] and
+whistles if this is not the case.  
+
 4) When handling date and datetime data types and their localization, the csvkit relies on the rich Python datetime
 library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
 The _csvsuite_, though, is tightly bound to the --date-format and --datetime-format arguments and works well only on
 those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
 argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
 consistency everywhere (on most platforms). For more info see tests located in the
-[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.
+[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.  
+
 5) Other possible restrictions are described below.
 
 ### Tutorial
@@ -95,8 +99,10 @@ _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their
 
 **_Note 2._** In paragraph 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
 number, not a date. If this is too important for you right now, then to improve it, run the following command instead of
-the one suggested:  
-`In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv`  
+the one suggested:
+
+	In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv
+
 The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
 like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/), which do
 not guarantee that dates are correctly recognized, since Excel documents themselves do not have a date storage type. So
@@ -107,10 +113,12 @@ datetimes.
 on the screen, unlike _csvStat_, which displays number separator according to the current global locale. This is because
 in the *csvkit* there is a difference between the locales according to which numbers are output in the two utilities.
 To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
-them. For example:  
-`csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US`  
+them. For example:
+
+	csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US
 or  
-`csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8`  
+	
+	csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8  
 where -G option is a "Superseded global locale".  
 
 **_Note 4._**
@@ -268,10 +276,10 @@ Converts various tabular data formats into CSV.
 Converting fixed width requires that you provide a schema file with the “-s” option. The schema file should have the
 following format:  
 
-_column,start,length  
-name,0,30  
-birthday,30,10  
-age,40,3_  
+	column,start,length  
+	name,0,30  
+	birthday,30,10  
+	age,40,3  
 
 The header line is required though the columns may be in any order:
 
@@ -302,37 +310,37 @@ See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
 Convert the 2000 census geo headers file from fixed-width to CSV and from latin-1 encoding to utf8:  
 
-`In2csv -e iso-8859-1 -f fixed -s examples/realdata/census_2000/census2000_geo_schema.csv examples/realdata/census_2000/usgeo_excerpt.upl`
+	In2csv -e iso-8859-1 -f fixed -s examples/realdata/census_2000/census2000_geo_schema.csv examples/realdata/census_2000/usgeo_excerpt.upl
 
 Convert an Excel .xls file:  
 
-`In2csv examples/test.xls`  
+	In2csv examples/test.xls  
 
 Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
-`In2csv ./FY09_EDU_Recipients_by_State.csv -L en_US.utf-8`  
+	In2csv ./FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
 Unlike the _csvkit_, which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
 explicitly, since the _csvsuite_ uses the C/Posix locale by default.
 
 Fetch csvkit’s open issues from the GitHub API, convert the JSON response into a CSV and write it to a file:  
 
-_This example cannot be demonstrated at the moment because the [jsoncons](https://github.com/danielaparker/jsoncons)
-underlying the conversion does not know how to map nested json documents to csv._
+	This example cannot be demonstrated at the moment because the [jsoncons](https://github.com/danielaparker/jsoncons)
+	underlying the conversion does not know how to map nested json documents to csv.
 
 Convert a DBase DBF file to an equivalent CSV:  
 
-`In2csv examples/testdbf.dbf`  
+	In2csv examples/testdbf.dbf  
 
 **Troubleshooting**  
 
 If an error like the following occurs when providing an input file in one of the formats:  
 
-`The document has 1 column at ` _NNN_ `row...`  
+	The document has 1 column at NNN row...  
 
 Then the input file might have initial rows before the header and data rows. You can skip such rows with --skip-lines
 (-K):  
 
-`in2csv --skip-lines 3 examples/test_skip_lines.csv`
+	in2csv --skip-lines 3 examples/test_skip_lines.csv
 
 #### Sql2csv
 ##### Description
@@ -378,17 +386,17 @@ Options:
 #### csvStat
 
 ### Arguments common to all tools
--z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]  
--e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]  
--S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]  
--H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]  
--K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]  
--l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]  
---zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]  
--Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]  
--L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]  
---blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]  
---null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]  
---date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]  
---datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]  
---no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]  
+	-z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]  
+	-e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]  
+	-S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]  
+	-H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]  
+	-K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]  
+	-l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]  
+	--zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]  
+	-Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]  
+	-L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]  
+	--blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]  
+	--null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]  
+	--date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]  
+	--datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]  
+	--no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]  
