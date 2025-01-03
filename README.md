@@ -319,7 +319,19 @@ _This example cannot be demonstrated at the moment because the [jsoncons](https:
 underlying the conversion does not know how to map nested json documents to csv._
 
 Convert a DBase DBF file to an equivalent CSV:  
-`In2csv examples/testdbf.dbf`
+
+`In2csv examples/testdbf.dbf`  
+
+**Troubleshooting**  
+
+If an error like the following occurs when providing an input file in one of the formats:  
+
+`The document has 1 column at ` _NNN_ `row...`  
+
+Then the input file might have initial rows before the header and data rows. You can skip such rows with --skip-lines
+(-K):  
+
+`in2csv --skip-lines 3 examples/test_skip_lines.csv`
 
 #### Sql2csv
 
