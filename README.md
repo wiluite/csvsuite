@@ -275,23 +275,24 @@ age,40,3_
 
 The header line is required though the columns may be in any order:
 
-Usage: In2csv arg_0  [options...]  
-arg_0 : The file of a specified format to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+	Usage: In2csv arg_0  [options...]  
+	arg_0 : The file of a specified format to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
 
 Options:  
---help : print help [implicit: "true", default: false]   
--f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
--s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
--k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
--n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
---sheet : The name of the Excel sheet to operate on. [default: ]  
---write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  
---use-sheet-names : Use the sheet names as file names when --write-sheets is set. [implicit: "true", default: false]  
---encoding-xls : Specify the encoding of the input XLS file. [default: UTF-8]  
---d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
---dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
---is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
--I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
+
+	--help : print help [implicit: "true", default: false]   
+	-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
+	-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
+	-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
+	-n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
+	--sheet : The name of the Excel sheet to operate on. [default: ]  
+	--write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  
+	--use-sheet-names : Use the sheet names as file names when --write-sheets is set. [implicit: "true", default: false]  
+	--encoding-xls : Specify the encoding of the input XLS file. [default: UTF-8]  
+	--d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
+	--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
+	--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
+	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
 
 Some command-line flags only pertain to specific input formats.  
 
@@ -334,6 +335,19 @@ Then the input file might have initial rows before the header and data rows. You
 `in2csv --skip-lines 3 examples/test_skip_lines.csv`
 
 #### Sql2csv
+##### Description
+Executes arbitrary commands against a SQL database and outputs the results as a CSV:  
+
+	Usage: Sql2csv arg_0  [options...]  
+	arg_0 : The FILE to use as SQL query. If it and --query are omitted, the query is piped data via STDIN. [default: ]  
+
+Options:
+
+	--db : If present, a 'soci' connection string to use to directly execute generated SQL on a database. [default: ]
+	--query : The SQL query to execute. Overrides FILE and STDIN. [default: ]
+    -e,--encoding : Specify the encoding of the input query file. [default: UTF-8]
+	-H,--no-header-row : Do not output column names. [implicit: "true", default: false]
+	--help : print help [implicit: "true", default: false]
 
 
 #### Processing
