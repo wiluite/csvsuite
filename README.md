@@ -72,7 +72,12 @@ argument engages the special [date](https://github.com/HowardHinnant/date) libra
 consistency everywhere (on most platforms). For more info see tests located in the
 [csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.  
 
-5) Other possible restrictions are described below.
+5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
+somewhere (for example MinGW/Windows), you will not be able to work with localization.  
+
+6) Other restrictions and some substitutions are presented in section [Reference](#reference), when describing
+utilities.
+
 
 ### Tutorial
 ### 1. Getting started
