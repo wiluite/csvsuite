@@ -323,9 +323,9 @@ Convert an Excel .xls file:
 
 Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
-	In2csv ./FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
+	In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
 Unlike the _csvkit_, which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
-explicitly, since the _csvsuite_ uses the C/Posix locale by default.
+explicitly, since the utility uses the C/Posix locale by default.
 
 Fetch csvkit’s open issues from the GitHub API, convert the JSON response into a CSV and write it to a file:  
 
@@ -369,16 +369,29 @@ Load sample data into a table using [csvSql](#csvsql) and then query it using _S
 	csvSql --db "sqlite3://dummy.db" --tables "test" --insert dummy.csv
 	Sql2csv --db "sqlite3://dummy.db" --query "select * from test"
 
-alternatively:
+alternatively (too verbose):
 
 	csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert dummy.csv
 	Sql2csv --db "sqlite3://dbname=dummy.db" --query "select * from test"
 
 To access databases, the *csvsuite* uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
-Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this case, you must specify the value for the --db
-option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).
+Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this particular case, you must specify the value
+for the --db option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).  
 
+Load data about financial aid recipients into PostgreSQL. 
 
+    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+Again, you must specify en_US (or en_US.utf-8) locale explicitly, since the utility uses the C/Posix locale by default.
+Otherwise, the numeric columns will not be recognized as such and the database table will end up with text values.
+
+Then find the three states that received the most, while also filtering out empty rows:  
+
+    Sql2csv --db "postgresql://dbname=databasename user=username password=pswrd" --query "select * from fy09 where \"State Name\" != '' order by fy09.\"TOTAL\" limit 3"
+
+You can even use it as a simple SQL calculator (in this example an in-memory SQLite database is used as the default):
+
+    Sql2csv --query "select 300 * 47 % 14 * 27 + 7000"
 
 #### Processing
 * [csvClean](#csvclean)
