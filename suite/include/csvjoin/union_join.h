@@ -1,7 +1,7 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
 /// Performs the union join
-auto union_join = [&cycle_cleanup, &deq, &args]() {
+auto union_join = [&cycle_cleanup, &deq] {
     while (deq.size() > 1) {
         std::size_t rows = 0u;
         std::size_t cols = 0u;
