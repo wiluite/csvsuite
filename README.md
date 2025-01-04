@@ -402,6 +402,47 @@ You can even use it as a simple SQL calculator (in this example an in-memory SQL
 * [csvStack](#csvstack)
 
 #### csvClean
+##### Description
+Reports and fixes common errors in a CSV file.
+
+    Usage: csvClean arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    -n,--dry-run : Do not create output files. Information about what would have been done will be printed to STDERR. [implicit: "true", default: false]
+    --help : print help [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+This utility currently has very basic functionality.
+See [changelog](https://csvkit.readthedocs.io/en/latest/changelog.html) for what was done for original csvclean in 2.0.0,
+and what you will not see here. Please use original
+[csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html#) utility to fix sophisticated problems in your
+documents, until csvClean gains similar functionality.
+
+**Examples**
+
+Report rows that have a different number of columns than the header row:
+
+    $ csvClean test/examples/bad.csv -n
+    Line 1: Expected 3 columns, found 4 columns
+    Line 2: Expected 3 columns, found 2 columns
+
+Fix this document:
+
+    $ csvClean test/examples/bad.csv
+    2 errors logged to bad_err.csv
+
+    $ cat bad_out.csv
+    column_a,column_b,column_c
+    0,mixed types.... uh oh,17
+
+    $ cat bad_err.csv
+    line_number,msg,column_a,column_b,column_c
+    1,"Expected 3 columns, found 4 columns",1,27,,I'm too long!
+    2,"Expected 3 columns, found 2 columns",,I'm too short!
+
 #### csvCut
 #### csvGrep
 #### csvJoin
