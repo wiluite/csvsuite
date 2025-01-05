@@ -323,7 +323,7 @@ Convert an Excel .xls file:
 
 Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
-	In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
+	In2csv examples/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
 Unlike the _csvkit_, which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
 explicitly, since the utility uses the C/Posix locale by default.
 
@@ -380,7 +380,7 @@ for the --db option as the library expects it: see [connections](https://soci.so
 
 Load data about financial aid recipients into PostgreSQL. 
 
-    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/FY09_EDU_Recipients_by_State.csv
 
 Again, you must specify en_US (or en_US.utf-8) locale explicitly, since the utility uses the C/Posix locale by default.
 Otherwise, the numeric columns will not be recognized as such and the database table will end up with text values.
@@ -444,6 +444,71 @@ Fix this document:
     2,"Expected 3 columns, found 2 columns",,I'm too short!
 
 #### csvCut
+##### Description
+Filters and truncates CSV files. Like the Unix “cut” command, but for tabular data:
+
+    Usage: csvcut arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -n,--names : Display column names and indices from the input CSV and exit. [implicit: "true", default: false]
+    -c,--columns : A comma-separated list of column indices, names or ranges to be extracted, e.g. "1,id,3-5". [default: all columns]
+    -C,--not-columns : A comma-separated list of column indices, names or ranges to be excluded, e.g. "1,id,3-5". [default: no columns]
+    -x,--delete-empty-rows : After cutting delete rows which are completely empty. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+**Examples**
+
+Print the indices and names of all columns:
+
+    $ csvcut -n examples/FY09_EDU_Recipients_by_State.csv
+    1: State Name
+    2: State Abbreviate
+    3: Code
+    4: Montgomery GI Bill-Active Duty
+    5: Montgomery GI Bill- Selective Reserve
+    6: Dependents' Educational Assistance
+    7: Reserve Educational Assistance Program
+    8: Post-Vietnam Era Veteran's Educational Assistance Program
+    9: TOTAL
+    10:
+
+Print only the names of all columns, by removing the indices with the _cut_ command:
+
+    $ csvcut -n examples/FY09_EDU_Recipients_by_State.csv | cut -c6-
+    State Name
+    State Abbreviate
+    Code
+    Montgomery GI Bill-Active Duty
+    Montgomery GI Bill- Selective Reserve
+    Dependents' Educational Assistance
+    Reserve Educational Assistance Program
+    Post-Vietnam Era Veteran's Educational Assistance Program
+    TOTAL
+
+Extract the first and third columns:
+
+    csvcut -c 1,3 examples/FY09_EDU_Recipients_by_State.csv
+
+Extract columns named “TOTAL” and “State Name” (in that order):
+
+    csvcut -c TOTAL,"State Name" examples/FY09_EDU_Recipients_by_State.csv
+
+Add line numbers to a file, making no other changes:
+
+    csvcut -l examples/FY09_EDU_Recipients_by_State.csv
+
+Display a column’s unique values:
+
+    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
+
+Or:
+
+    csvcut -c 1 examples/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+
 #### csvGrep
 #### csvJoin
 #### csvSort
