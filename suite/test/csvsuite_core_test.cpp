@@ -414,8 +414,215 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
                 reader<>::typed_span<unquoted>::case_insensitivity(false);
             }
         };
+    };
 
+    "compose_numeric(typed_span)"_test = [&locale_support] {
+        cell_string cs;
+        struct args {
+            bool no_header = false;
+            std::string num_locale = "C";
+        } a;
 
+        {
+            cs = R"( " +01e-10  " )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "1e-10");
+        }
+        {
+            cs = R"( " -01  " )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-01");
+        }
+        {
+            cs = R"( " -0  " )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-0");
+        }
+        {
+            cs = R"( 0  )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == " 0  "); // exception of the output rule.
+        }
+        {
+            cs = R"( 1  )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "1");
+        }
+        {
+            cs = R"(-1.123456789012345  )";
+            reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-1.123456789012345  ");
+        }
+        {
+            cs = R"( " +01e-10  " )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "1e-10");
+        }
+        {
+            cs = R"( " -01  " )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-01");
+        }
+        {
+            cs = R"( " -0  " )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-0");
+        }
+        {
+            cs = R"( 0  )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "0");
+        }
+        {
+            cs = R"( 1  )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "1");
+        }
+        {
+            cs = R"( -1.123456789012345  )";
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+            expect(span.is_num());
+            std::ostringstream oss;
+            compose_numeric(oss, span, a);
+            expect(oss.str() == "-1.123456789012345");
+        }
+        if (locale_support) {
+            a.num_locale = "en_US";
+            std::locale en_US_locale("en_US");
+            reader<>::typed_span<unquoted>::imbue_num_locale(en_US_locale);
+            {
+                cs = R"( " +01e-10  " )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "1e-10");
+            }
+            {
+                cs = R"( " -01  " )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-01");
+            }
+            {
+                cs = R"( " -0  " )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-0");
+            }
+            {
+                cs = R"( 0  )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == " 0  "); // exception of the output rule.
+            }
+            {
+                cs = R"( 1  )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "1");
+            }
+            {
+                cs = R"(-1,123,456,789,012.678 )";
+                reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-1123456789012.678 ");
+            }
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted>::imbue_num_locale(en_US_locale);
+            {
+                cs = R"( " +01e-10  " )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "1e-10");
+            }
+            {
+                cs = R"( " -01  " )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-01");
+            }
+            {
+                cs = R"( " -0  " )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-0");
+            }
+            {
+                cs = R"( 0  )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "0");
+            }
+            {
+                cs = R"( 1  )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "1");
+            }
+            {
+                cs = R"( -1,123,456,789,012.678  )";
+                reader<csv_co::trim_policy::alltrim>::typed_span<unquoted> span{reader<csv_co::trim_policy::alltrim>::cell_span{cs}};
+                expect(span.is_num());
+                std::ostringstream oss;
+                compose_numeric(oss, span, a);
+                expect(oss.str() == "-1123456789012.678");
+            }
+            // Return old locale
+            reader<csv_co::trim_policy::alltrim>::typed_span<unquoted>::imbue_num_locale(loc);
+        }
     };
 
     "generate column names"_test = [] {
@@ -898,5 +1105,4 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         expect(r.cols() == 1);
         expect(r.rows() == 3);
     };
-
 }

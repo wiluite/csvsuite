@@ -110,8 +110,7 @@ namespace {
                 , [&](elem_type const & e) {
                     static std::ostringstream ss;
                     typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
-                    if (!compose_numeric_corner_cases(ss, another_rep, args))
-                        ss << another_rep.str();
+                    compose_numeric(ss, another_rep, args);
                     return ss.str();
                 }
                 , compose_datetime_1_arg<elem_type, in2csv_conversion_datetime>

@@ -1279,8 +1279,7 @@ namespace csvsuite::cli {
 
     /// Returns optionally quoted cell string from a type-aware cell span (typed_span, not cell_span)
     inline std::string compose_text(auto const & e) requires(std::decay_t<decltype(e)>::is_unquoted()) {
-        using elem_type = std::decay_t<decltype(e)>;
-        static_assert(elem_type::is_unquoted());
+        static_assert(std::decay_t<decltype(e)>::is_unquoted());
         if (e.raw_string_view().find_first_of(",\n") != std::string_view::npos)
             return e;       // conversion to std::string: "Unquoted, please turn quoted!"
         else
@@ -1300,6 +1299,7 @@ namespace csvsuite::cli {
 
     /// Composes a numeric corner cases for printing, returns false if the numeric is not a corner case
     inline bool compose_numeric_corner_cases(std::ostringstream & ss, auto const & rep, auto const & args) {
+        static_assert(std::decay_t<decltype(rep)>::is_unquoted());
         assert(!rep.is_null());
         ss.str({});
 
@@ -1322,11 +1322,34 @@ namespace csvsuite::cli {
         if (args.num_locale != "C") {
             std::string s = rep.str();
             rep.to_C_locale(s);
-            ss << s;
+            auto const pos = s.find_first_not_of(R"( +0)");
+            if (pos == 0 or pos == std::string::npos) {
+                ss << s;
+            } else {
+                auto const end_pos = s.find_last_not_of(' ');
+                assert(end_pos != std::string::npos);
+                ss << std::string_view(s.data() + pos, end_pos - pos + 1);
+            }
             return true;
         }
         return false;
     }
+    /// Composes a numeric for printing
+    void compose_numeric(std::ostringstream & ss, auto const & rep, auto const & args) {
+        static_assert(std::decay_t<decltype(rep)>::is_unquoted());
+        if (!compose_numeric_corner_cases(ss, rep, args)) {
+            auto const pos = rep.raw_string_view().find_first_not_of(R"( "+0)");
+            if (pos == 0 or pos == std::string_view::npos)
+                ss << rep.str();
+            else {
+                auto const sv = rep.raw_string_view();
+                auto const end_pos = sv.find_last_not_of(R"( ")");
+                assert(end_pos != std::string_view::npos);
+                ss << std::string_view(sv.data() + pos, end_pos - pos + 1);
+            }
+        }
+    }
+
     /// String stream class with custom numeric value representation
     class num_stringstream : public std::stringstream {
     public:
