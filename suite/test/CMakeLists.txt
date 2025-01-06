@@ -214,8 +214,8 @@ add_custom_command(
 add_custom_command(
         TARGET csvStat_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/suite/test/examples/FY09_EDU_Recipients_by_State.csv
-        ${CMAKE_CURRENT_BINARY_DIR}/examples/FY09_EDU_Recipients_by_State.csv)
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/realdata/FY09_EDU_Recipients_by_State.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/realdata/FY09_EDU_Recipients_by_State.csv)
 add_custom_command(
         TARGET csvStat_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
@@ -459,8 +459,8 @@ add_custom_command(
 add_custom_command(
         TARGET csvGrep_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/suite/test/examples/FY09_EDU_Recipients_by_State.csv
-        ${CMAKE_CURRENT_BINARY_DIR}/examples/FY09_EDU_Recipients_by_State.csv)
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/realdata/FY09_EDU_Recipients_by_State.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/realdata/FY09_EDU_Recipients_by_State.csv)
 add_custom_command(
         TARGET csvGrep_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

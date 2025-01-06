@@ -400,7 +400,7 @@ Decode error: simdutf can't decode byte 0xa9 in position 16.
         struct Args : tf::single_file_arg, tf::common_args, tf::type_aware_args, tf::spread_args, csvstat_specific_args {
             // TODO:provide in csvstat the num_locale cell state many times in the session
             Args() {
-                file = "examples/FY09_EDU_Recipients_by_State.csv";
+                file = "examples/realdata/FY09_EDU_Recipients_by_State.csv";
                 columns = "TOTAL";
                 num_locale = "en_US";
                 mean = true;

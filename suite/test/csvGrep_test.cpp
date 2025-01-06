@@ -155,7 +155,7 @@ int main() {
 
     "string match"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
-            Args() { file = "examples/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; }
+            Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; }
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvgrep::grep)
@@ -170,7 +170,7 @@ int main() {
 
     "string match with line numbers"_test = [] {
         struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
-            Args() { file = "examples/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; linenumbers = true;}
+            Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; linenumbers = true;}
         } args;
 
         CALL_TEST_AND_REDIRECT_TO_COUT(csvgrep::grep)
