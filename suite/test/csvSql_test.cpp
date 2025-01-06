@@ -132,8 +132,10 @@ int main() {
         bool check_integrity = {true};
     };
 
+    struct csvSql_args : tf::common_args, tf::type_aware_args, csvsql_specific_args {};
+
     "create table"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 tables = "foo";
@@ -161,7 +163,7 @@ int main() {
     };
 
     "no blanks"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/blanks.csv"};
                 tables = "foo";
@@ -186,7 +188,7 @@ int main() {
     };
 
     "blanks"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/blanks.csv"};
                 tables = "foo";
@@ -212,7 +214,7 @@ int main() {
     };
 
     "no inference"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 tables = "foo";
@@ -241,7 +243,7 @@ int main() {
     };
 
     "no header row"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/no_header_row.csv"};
                 tables = "foo";
@@ -264,7 +266,7 @@ int main() {
     };
 
     "linenumbers"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/dummy.csv"};
                 tables = "foo";
@@ -287,7 +289,7 @@ int main() {
     };
 
     "stdin"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 tables = "foo";
                 files = {"_"};
@@ -312,7 +314,7 @@ int main() {
     };
 
     "piped stdin"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() = default; // NOTE: now we do not use '_' placeholder to help. We read a csv file and pipe it with us.
         } args;
 
@@ -331,7 +333,7 @@ int main() {
     };
 
     "stdin and filename"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_", "examples/dummy.csv"};
             }
@@ -349,7 +351,7 @@ int main() {
     };
 
     "query"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/iris.csv", "examples/irismeta.csv"};
                 query = "SELECT m.usda_id, avg(i.sepal_length) AS mean_sepal_length FROM iris "
@@ -367,7 +369,7 @@ int main() {
     };
 
     "query empty"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 query = "SELECT 1";
@@ -385,7 +387,7 @@ int main() {
     };
 
     "query text"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 query = "SELECT text FROM testfixed_converted WHERE text LIKE \"Chicago%\"";
@@ -400,7 +402,7 @@ int main() {
     };
 
     "query file"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 query = "examples/test_query.sql";
@@ -417,7 +419,7 @@ int main() {
     };
 
     "no UTF-8 query file"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 query = "examples/test_query_1252.sql";
@@ -428,7 +430,7 @@ int main() {
     };
 
     "CP1252 query file"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 query = "examples/test_query_1252.sql";
@@ -447,7 +449,7 @@ int main() {
     };
 
     "empty query file"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/testfixed_converted.csv"};
                 query = "examples/test_query_empty.sql";
@@ -462,7 +464,7 @@ int main() {
     };
 
     "query update"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"examples/dummy.csv"};
                 no_inference = true;
@@ -495,7 +497,7 @@ int main() {
 
     "before and after insert"_test = [] {
         // Longer test
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             db_file dbfile;
             Args() {
                 files = {"examples/dummy.csv"};
@@ -518,7 +520,7 @@ int main() {
     };
 
     "no prefix unique constraint"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             db_file dbfile;
             Args() {
                 files = {"examples/dummy.csv"};
@@ -547,7 +549,7 @@ int main() {
     };
 
     "prefix unique constraint"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             db_file dbfile;
             Args() {
                 files = {"examples/dummy.csv"};
@@ -570,7 +572,7 @@ int main() {
     };
 
     "no create-if-not-exists"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             db_file dbfile;
             Args() {
                 files = {"examples/foo1.csv"};
@@ -600,7 +602,7 @@ int main() {
     };
 
     "create-if-not-exists"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             db_file dbfile;
             Args() {
                 files = {"examples/foo1.csv"};
@@ -618,7 +620,7 @@ int main() {
     };
 
     "batch_bulk_inserter"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -635,7 +637,7 @@ int main() {
     };
 
     "comma containing string cells"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -651,7 +653,7 @@ int main() {
 try {
 #if defined(SOCI_HAVE_SQLITE3)
     "Sqlite3 date, datetime, timedelta"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -698,7 +700,7 @@ try {
 //TODO: datetime type's NULLs MUST BE URGENTLY FIXED!
 #if defined(SOCI_HAVE_MYSQL)
     "MySQL all types, bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -729,7 +731,7 @@ try {
 
 #if defined(SOCI_HAVE_MARIADB)
     "MariaDB all types, bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -760,7 +762,7 @@ try {
 
 #if defined(SOCI_HAVE_POSTGRESQL)
     "PostgreSQL date, datetime, timedelta, bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -790,7 +792,7 @@ try {
 
 #if defined(SOCI_HAVE_FIREBIRD)
     "Firebird date, datetime, timedelta, bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -819,7 +821,7 @@ try {
 
 #if defined(SOCI_HAVE_ORACLE)
     "Oracle all types and null values, non-bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -842,7 +844,7 @@ try {
         }
     };
     "Oracle all types and null values, bulk insert"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() {
                 files = {"_"};
                 insert = true;
@@ -873,7 +875,7 @@ try {
 #endif
 
     "max field size"_test = [] {
-        struct Args : tf::common_args, tf::type_aware_args, csvsql_specific_args {
+        struct Args : csvSql_args {
             Args() { files = {"examples/test_field_size_limit.csv"}; maxfieldsize = 100;}
         } args;
 

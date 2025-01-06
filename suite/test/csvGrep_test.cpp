@@ -37,8 +37,10 @@ int main() {
         bool any {};
     };
 
+    struct csvGrep_args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {};
+
     "skip lines"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/test_skip_lines.csv"; skip_lines = 3; columns = "1"; match = "1"; }
         } args;
 
@@ -51,7 +53,7 @@ int main() {
     };
 
     "match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "1"; match = "1"; }
         } args;
 
@@ -64,7 +66,7 @@ int main() {
     };
 
     "any match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "1,2,3"; match = "1"; any = true; }
         } args;
 
@@ -77,7 +79,7 @@ int main() {
     };
 
     "match utf8"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/test_utf8.csv"; columns = "3"; match = "ʤ"; any = true; }
         } args;
 
@@ -90,7 +92,7 @@ int main() {
     };
 
     "match utf8_bom"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/test_utf8_bom.csv"; columns = "3"; match = "ʤ"; any = true; }
         } args;
 
@@ -103,7 +105,7 @@ int main() {
     };
 
     "no match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "1"; match = "NO MATCH"; }
         } args;
 
@@ -115,7 +117,7 @@ int main() {
     };
 
     "invert match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "1"; match = "NO MATCH"; invert = true; }
         } args;
 
@@ -128,7 +130,7 @@ int main() {
     };
 
     "re match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "3"; regex = "^(3|9)$"; }
         } args;
 
@@ -141,7 +143,7 @@ int main() {
     };
 
     "re match utf8"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/test_utf8.csv"; columns = "3"; regex = "ʤ"; }
         } args;
 
@@ -154,7 +156,7 @@ int main() {
     };
 
     "string match"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; }
         } args;
 
@@ -169,7 +171,7 @@ int main() {
     };
 
     "string match with line numbers"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; linenumbers = true;}
         } args;
 
@@ -184,7 +186,7 @@ int main() {
     };
 
     "match with linenumbers"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/dummy.csv"; columns = "1"; match = "1"; linenumbers = true; }
         } args;
 
@@ -197,7 +199,7 @@ int main() {
     };
 
     "max field size"_test = [] {
-        struct Args : tf::single_file_arg, tf::common_args, tf::spread_args, tf::output_args, csvgrep_specific_args {
+        struct Args : csvGrep_args {
             Args() { file = "examples/test_field_size_limit.csv"; columns = "1"; match = "1"; maxfieldsize = 100;}
         } args;
 
