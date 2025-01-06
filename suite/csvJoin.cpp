@@ -29,8 +29,6 @@ namespace csvjoin {
         bool &date_lib_parser = flag("date-lib-parser", "Use date library as Dates and DateTimes parser backend instead compiler-supported").set_default(true);
         bool & asap = flag("ASAP","Print result output stream as soon as possible.").set_default(true);
 
-        std::string std_input;
-
         void welcome() final {
             std::cout << "\nExecute a SQL-like join to merge CSV files on a specified column or columns.\n\n";
         }
@@ -341,16 +339,22 @@ namespace csvjoin {
         std::variant<std::deque<notrimming_reader_or_fake_type>, std::deque<skipinitspace_reader_or_fake_type>> variants;
 
         auto fill_deque = [&args, &variants, source_type](auto & deq) {
-            if (args.files.empty()) {
-#if !defined(BOOST_UT_DISABLE_MODULE)
-                deq.emplace_back(std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type> {args.std_input});
-#endif
-            } else {
+
+            using real_reader_t = std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>;
+
+            if (args.files.empty())
+                deq.emplace_back(real_reader_t{read_standard_input(args)});
+            else {
                 for (auto && elem : args.files)
-                    if (source_type == csvjoin_source_option::csvjoin_file_source)
-                        deq.emplace_back(std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type> {std::filesystem::path{elem}});
+                    if (source_type == csvjoin_source_option::csvjoin_file_source) {
+                        auto r = elem != "_" ? real_reader_t{std::filesystem::path{elem}} : real_reader_t{read_standard_input(args)}; 
+                        recode_source(r, args);
+                        skip_lines(r, args);
+                        quick_check(r, args);
+                        deq.emplace_back(std::move(r));
+                    }
                     else
-                        deq.emplace_back(std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>{elem});
+                        deq.emplace_back(real_reader_t{elem});
             }
             if (args.right_join)
                 std::reverse(deq.begin(), deq.end());
@@ -379,22 +383,10 @@ int main(int argc, char * argv[])
         args.print();
 
     OutputCodePage65001 ocp65001;
-
     try {
-        if (args.files.empty())
-            args.std_input = read_standard_input(args);
         join_wrapper(args);
-    } catch (notrimming_reader_type::exception const & e) {
+    } catch (std::exception const & e) {
         std::cerr << e.what() << std::endl;
-    }
-    catch (skipinitspace_reader_type::exception const & e) {
-        std::cerr << e.what() << std::endl;
-    }
-    catch (std::exception const & e) {
-        std::cerr << e.what() << std::endl;
-    }
-    catch (...) {
-        std::cerr << "Unknown exception.\n";
     }
     return 0;
 }
