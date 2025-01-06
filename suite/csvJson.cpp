@@ -10,22 +10,23 @@
 using namespace ::csvsuite::cli;
 
 namespace csvjson::detail {
+
     template <std::size_t Int_Prec>
-    inline std::string carefully_adjusted_number(auto const & elem) {
-        static num_stringstream ss;
-        static auto default_prec = ss.precision();
-        ss.rdbuf()->str("");
+    inline std::string carefully_adjusted_number(auto const & elem, auto const & args) {
         auto const value = elem.num();
-        if (std::trunc(value) == value)
-            ss << std::setprecision(Int_Prec);
-        else {
-            auto s = elem.str();
-            trim_string(s);
-            auto pos = s.find('.');
-            ss << std::setprecision(pos != std::string::npos ? s.size() - pos - 1 : default_prec);
+        if (std::trunc(value) == value) {
+            static num_stringstream ss;
+            ss.rdbuf()->str("");
+            ss << std::setprecision(Int_Prec) << value;
+            return ss.str();
         }
-        ss << value;
-        return ss.str();
+        else {
+            using elem_type = std::decay_t<decltype(elem)>;
+            typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = elem;
+            static std::ostringstream ss;
+            compose_numeric(ss, another_rep, args);
+            return ss.str();
+        }
     }
 
     std::string compose_text(auto const & elem) {
@@ -134,31 +135,67 @@ namespace csvjson {
             std::array<check_dup_func, static_cast<std::size_t>(column_type::sz) - 1> type2key_check_func {
                     [&](auto const & elem) {
                         return check_dup_func_impl(elem
-                                , [&] {return (elem.is_boolean(), static_cast<bool>(elem.unsafe())); }
-                                , [&] (auto & value) {
-                                    std::ostringstream oss;
-                                    oss.imbue(std::locale(std::locale("C"), new custom_boolean_facet));
-                                    oss << std::boolalpha << value;
-                                    return oss.str();
-                                }
+                            , [&elem] {
+                                return (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
+                            }
+                            , [] (auto & value) {
+                                std::ostringstream oss;
+                                oss.imbue(std::locale(std::locale("C"), new custom_boolean_facet));
+                                oss << std::boolalpha << value;
+                                return oss.str();
+                            }
                         );
                     }
                     , [&](auto const & elem) {
-                        return check_dup_func_impl(elem, [&] { return elem.num(); }, [&elem] (auto &) { return carefully_adjusted_number<0>(elem); });
-                    }
-                    , [&](auto const & elem) {
-                        return check_dup_func_impl(elem, [&] {return datetime_time_point(elem); }, [&] (auto & value) { return datetime_s_json(value); });
-                    }
-                    , [&](auto const & elem) {
-                        return check_dup_func_impl(elem, [&] {return date_time_point(elem); }, [] (auto & value) { return date_s(value); });
+                        return check_dup_func_impl(elem
+                            , [&elem] {
+                                return elem.num();
+                            }
+                            , [&elem, &args] (auto &) {
+                                return carefully_adjusted_number<0>(elem, args);
+                            }
+                        );
                     }
                     , [&](auto const & elem) {
                         return check_dup_func_impl(elem
-                                , [&] { return elem.timedelta_seconds(); }
-                                , [] (auto & value) { std::ostringstream oss; oss << std::quoted(time_storage().str(value)); return oss.str();});
+                            , [&elem] {
+                                return datetime_time_point(elem);
+                            }
+                            , [] (auto & value) {
+                                return datetime_s_json(value);
+                            }
+                        );
                     }
                     , [&](auto const & elem) {
-                        return check_dup_func_impl(elem, [&] {return compose_text(elem); }, [&elem] (auto &) { return compose_text(elem); });
+                        return check_dup_func_impl(elem
+                            , [&elem] {
+                                return date_time_point(elem);
+                            }
+                            , [] (auto & value) {
+                                return date_s(value);
+                            }
+                        );
+                    }
+                    , [&](auto const & elem) {
+                        return check_dup_func_impl(elem
+                            , [&elem] {
+                                return elem.timedelta_seconds();
+                            }
+                            , [] (auto & value) {
+                                std::ostringstream oss; 
+                                oss << std::quoted(time_storage().str(value));
+                                return oss.str();
+                            }
+                        );
+                    }
+                    , [&](auto const & elem) {
+                        return check_dup_func_impl(elem
+                            , [&elem] {
+                                return compose_text(elem);
+                            }, [&elem] (auto &) {
+                                return compose_text(elem);
+                            }
+                        );
                     }
             };
 
@@ -174,7 +211,7 @@ namespace csvjson {
                 compose_bool_1_arg<elem_type,json_rep>
                 , [&](auto const & elem) {
                     assert(!elem.is_null());
-                    return carefully_adjusted_number<1u>(elem);
+                    return carefully_adjusted_number<1u>(elem, args);
                 }
                 , compose_datetime_1_arg<elem_type,json_rep>
                 , compose_date_1_arg<elem_type,json_rep>
@@ -226,7 +263,9 @@ namespace csvjson {
                     oss << std::boolalpha << (elem.is_boolean(), static_cast<bool>(elem.unsafe()));
                     return oss.str();
                 }
-                , [] (auto & elem) { return carefully_adjusted_number<0>(elem); }
+                , [&] (auto & elem) {
+                    return carefully_adjusted_number<0>(elem, args);
+                }
                 , [] (auto & elem) { return datetime_s_json(elem); }
                 , [] (auto & elem) { return date_s(elem); }
                 , [] (auto & elem) {
@@ -366,10 +405,11 @@ namespace csvjson {
                             indenter.inc_indent();
                             to_stream(oss
                                 , indenter.add_indent()
-                                , carefully_adjusted_number<1u>(n_s_args.min_lon_elem), ", ", indenter.add_indent()
-                                , carefully_adjusted_number<1u>(n_s_args.min_lat_elem), ", ", indenter.add_indent()
-                                , carefully_adjusted_number<1u>(n_s_args.max_lon_elem), ", ", indenter.add_indent()
-                                , carefully_adjusted_number<1u>(n_s_args.max_lat_elem));
+                                , carefully_adjusted_number<1u>(n_s_args.min_lon_elem, args), ", ", indenter.add_indent()
+                                , carefully_adjusted_number<1u>(n_s_args.min_lat_elem, args), ", ", indenter.add_indent()
+                                , carefully_adjusted_number<1u>(n_s_args.max_lon_elem, args), ", ", indenter.add_indent()
+                                , carefully_adjusted_number<1u>(n_s_args.max_lat_elem, args)
+                                );
                             indenter.dec_indent();
                             to_stream(oss, indenter.add_indent(), "], ");
                         }
@@ -502,13 +542,13 @@ namespace csvjson {
                 };
 
                 struct geometry_printer {
-                    explicit geometry_printer(json_indenter const &indenter, bool is_stream, elem_type const & lon, elem_type const & lat) /*: indenter(indenter)*/ {
-                        bool const geometry_is_null = is_stream and (!lon.is_num() or !lat.is_num());
+                    explicit geometry_printer(json_indenter const &indenter, args_type const & args, elem_type const & lon, elem_type const & lat) {
+                        bool const geometry_is_null = args.stream and (!lon.is_num() or !lat.is_num());
                         if (!geometry_is_null) {
                             to_stream(oss, indenter.add_indent(), R"("geometry": {)");
                             indenter.inc_indent();
                             {
-                                coordinates_printer cp(indenter, lon, lat);
+                                coordinates_printer cp(indenter, args, lon, lat);
                             }
                             indenter.dec_indent();
                             to_stream(oss, indenter.add_indent(), '}');
@@ -517,13 +557,12 @@ namespace csvjson {
                     }
                 private:
                     struct coordinates_printer {
-                        coordinates_printer(json_indenter const &indenter, elem_type const & lon, elem_type const & lat) {
+                        coordinates_printer(json_indenter const &indenter, args_type const & args, elem_type const & lon, elem_type const & lat) {
                             to_stream(oss, indenter.add_indent(), R"("type": "Point")", ", ");
                             to_stream(oss, indenter.add_indent(), R"("coordinates": [)");
                             indenter.inc_indent();
-                            to_stream(oss, indenter.add_indent(), carefully_adjusted_number<1u>(lon), ", ");
-                            to_stream(oss, indenter.add_indent(), carefully_adjusted_number<1u>(lat));
-
+                            to_stream(oss, indenter.add_indent(), carefully_adjusted_number<1u>(lon, args), ", ");
+                            to_stream(oss, indenter.add_indent(), carefully_adjusted_number<1u>(lat, args));
                             indenter.dec_indent();
                             to_stream(oss, indenter.add_indent(), ']');
                         }
@@ -541,7 +580,7 @@ namespace csvjson {
                     }
                     static const key_args kargs {args, types, blanks, key_column};
                     key_printer kp(indenter, std::get<2>(llk), kargs);
-                    geometry_printer gp(indenter, args.stream, std::get<0>(llk), std::get<1>(llk));
+                    geometry_printer gp(indenter, args, std::get<0>(llk), std::get<1>(llk));
                 }
 
                 if (++row != rows and !args.stream)
