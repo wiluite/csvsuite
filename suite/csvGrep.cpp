@@ -65,7 +65,7 @@ namespace csvgrep {
         using namespace csv_co;
 
         skip_lines(reader, args);
-
+        quick_check(reader, args);
         auto const header = obtain_header_and_<skip_header>(reader, args);
         check_max_size(reader, args, header, init_row{1});
 

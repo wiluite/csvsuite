@@ -503,13 +503,59 @@ Add line numbers to a file, making no other changes:
 
 Display a column’s unique values:
 
-    csvcut -c 1 examples/realdata/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
+    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
 
 Or:
 
     csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
 
 #### csvGrep
+##### Description
+Filter tabular data to only those rows where certain columns contain a given value or match a regular expression:
+
+    Usage: csvGrep arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -n,--names : Display column names and indices from the input CSV and exit. [implicit: "true", default: false]
+    -c,--columns : A comma-separated list of column indices, names or ranges to be searched, e.g. "1,id,3-5". [default: none]
+    -m,--match : A string to search for. [default: ]
+    -r,--regex : A regular expression to match. [default: ]
+    --r-icase : Character matching should be performed without regard to case. [implicit: "true", default: false]
+    -f,--file : A path to a file. For each row, if any line in the file (stripped of line separators) is an exact match of the cell value, the row matches. [default: ]
+    -i,--invert-match : Select non-matching rows, instead of matching rows. [implicit: "true", default: false]
+    -a,--any-match : Select rows in which any column matches, instead of all columns. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
+
+NOTE: Even though ‘-m’, ‘-r’, and ‘-f’ are listed as “optional” arguments, you must specify one of them.  
+
+NOTE: the C++ standard only requires conformance to the POSIX regular expression syntax(which does not include Perl
+extensions like this one) and conformance to the ECMAScript regular expression specification (with minor exceptions, per
+ISO 14882-2011§28.13), which is described in ECMA-262, §15.10.2. ECMAScript's regular expression grammar **does not**
+include the use of modifiers in the form of the (?) syntax.
+This is why there is the --r-icase option if you need the case-insensitive comparision.
+
+**Examples**
+
+Search for the row relating to Illinois:
+
+    csvgrep -c 1 -m ILLINOIS examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+Search for rows relating to states with names beginning with the letter “I”:
+
+    csvgrep -c 1 -r "^I" examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+Search for rows that do not contain an empty state cell:
+
+    csvgrep -c 1 -r "^$" -i examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+Perform a case-insensitive search:
+
+    csvgrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
+
 #### csvJoin
 #### csvSort
 #### csvStack
