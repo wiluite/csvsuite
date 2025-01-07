@@ -147,8 +147,8 @@ namespace csvgrep {
                 const std::regex expr(args.regex, regex_constants);
 
                 search_and_output([&](auto const & span, auto idx) {
-                    return (std::regex_match(span[idx].operator cell_string(), expr) or
-                            std::regex_match(span[idx].operator unquoted_cell_string(), expr));
+                    return (std::regex_search(span[idx].operator cell_string(), expr) or
+                            std::regex_search(span[idx].operator unquoted_cell_string(), expr));
                 });
 
             } else

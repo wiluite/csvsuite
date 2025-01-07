@@ -155,6 +155,22 @@ int main() {
         expect("foo,bar,baz\n4,5,ʤ\n" == cout_buffer.str());
     };
 
+    "re match case-insensitive"_test = [] {
+        struct Args : csvGrep_args {
+            Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; r_icase = true; regex = "^illi"; }
+        } args;
+
+        CALL_TEST_AND_REDIRECT_TO_COUT(csvgrep::grep)
+
+//      State Name,State Abbreviate,Code,Montgomery GI Bill-Active Duty,Montgomery GI Bill- Selective Reserve,Dependents' Educational Assistance,Reserve Educational Assistance Program,Post-Vietnam Era Veteran's Educational Assistance Program,TOTAL,
+//      ILLINOIS,IL,17,"15,659","2,491","2,025","1,770",19,"21,964",
+
+        expect("State Name,State Abbreviate,Code,Montgomery GI Bill-Active Duty,Montgomery GI Bill- Selective Reserve,Dependents' Educational Assistance"
+               ",Reserve Educational Assistance Program,Post-Vietnam Era Veteran's Educational Assistance Program,TOTAL,\n"
+               "ILLINOIS,IL,17,\"15,659\",\"2,491\",\"2,025\",\"1,770\",19,\"21,964\",\n" == cout_buffer.str());
+
+    };
+
     "string match"_test = [] {
         struct Args : csvGrep_args {
             Args() { file = "examples/realdata/FY09_EDU_Recipients_by_State.csv"; columns = "1"; match = "ILLINOIS"; }
