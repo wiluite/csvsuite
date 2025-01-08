@@ -599,6 +599,37 @@ Add a single column to the right of a CSV:
     **Not supported. Will be supported soon.**
 
 #### csvSort
+##### Description
+Sort CSV files. Like the Unix “sort” command, but for tabular data:
+
+    Usage: csvSort arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -n,--names : Display column names and indices from the input CSV and exit. [implicit: "true", default: false]
+    -c,--columns : A comma-separated list of column indices, names or ranges to sort by, e.g. "1,id,3-5". [default: all columns]
+    -r,--reverse : Sort in descending order. [implicit: "true", default: false]
+    -i,--ignore-case : Perform case-independent sorting. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    -p,--parallel-sort : Use parallel sort. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: There has been introduced the --parallel-sort option to speed up the operation.
+
+**Examples**
+
+Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the national locale):
+
+    csvsort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+View the five states with the most individuals claiming veteran’s education benefits (don't forget to specify the
+national locale):
+
+    csvcut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsort -r -c 2 -L en_US | head -n 5
+
 #### csvStack
 
 
