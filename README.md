@@ -653,7 +653,7 @@ Join a set of files for different years:
 Add a single column to the left of a CSV:  
     **Not supported. Will be supported soon.** But as a workaroud you may do:
 
-    csvstack -n NEWCOL -g " , " examples/dummy.csv
+    csvstack -n NEWCOL -g " " examples/dummy.csv
 
 #### Output and Analysis
 * [csvJson](#csvjson)
