@@ -342,16 +342,20 @@ namespace csvjoin {
 
             using real_reader_t = std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>;
 
+            auto prepare_and_deliver_data = [&deq, &args](auto && r) {
+                recode_source(r, args);
+                skip_lines(r, args);
+                quick_check(r, args);
+                deq.emplace_back(std::move(r));
+            };
+
             if (args.files.empty())
-                deq.emplace_back(real_reader_t{read_standard_input(args)});
+                prepare_and_deliver_data(real_reader_t{read_standard_input(args)});
             else {
                 for (auto && elem : args.files)
                     if (source_type == csvjoin_source_option::csvjoin_file_source) {
-                        auto r = elem != "_" ? real_reader_t{std::filesystem::path{elem}} : real_reader_t{read_standard_input(args)}; 
-                        recode_source(r, args);
-                        skip_lines(r, args);
-                        quick_check(r, args);
-                        deq.emplace_back(std::move(r));
+                        auto r = elem != "_" ? real_reader_t{std::filesystem::path{elem}} : real_reader_t{read_standard_input(args)};
+                        prepare_and_deliver_data(r);
                     }
                     else
                         deq.emplace_back(real_reader_t{elem});
