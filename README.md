@@ -631,7 +631,29 @@ national locale):
     csvcut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsort -r -c 2 -L en_US | head -n 5
 
 #### csvStack
+##### Description
+Stack up the rows from multiple CSV files, optionally adding a grouping value to each row:
+    
+    Usage: csvstack arg_0  [options...]
+    arg_0 : The CSV files to operate on. [default: unknown]
 
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -g,--groups : A comma-separated list of values to add as "grouping factors", one per CSV being stacked. These are added to the output as a new column. You may specify a name for the new column using the -n flag. [default: ]
+    -n,--group-name : A name for the grouping column, e.g. "year". Only used when also specifying -g. [default: ]
+    --filenames : Use the filename of each input file as its grouping value. When specified, -g will be ignored. [implicit: "true", default: false]
+
+**Examples**
+
+Join a set of files for different years:
+    
+    csvstack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
+
+Add a single column to the left of a CSV:  
+    **Not supported. Will be supported soon.** But as a workaroud you may do:
+
+    csvstack -n NEWCOL -g " , " examples/dummy.csv
 
 #### Output and Analysis
 * [csvJson](#csvjson)
