@@ -891,7 +891,7 @@ namespace csvsuite::cli {
         auto header = obtain_header_and_<skip_header>(reader, args);
 
         if (!reader.cols())
-            throw std::runtime_error("Typify(). Columns == 0. Vain to do next actions!"); // well, vain to do rest things
+            throw std::runtime_error("Typify(). No data rows."); // well, vain to do rest things
 
         {
             max_field_size_checker size_checker(reader, args, header.size(), init_row{1});

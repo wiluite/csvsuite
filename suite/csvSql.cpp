@@ -435,12 +435,14 @@ namespace csvsql::detail {
         virtual void querying() = 0;
     };
 
+    static constexpr char const * const sqlite3_memory_string = "sqlite3://db=:memory:";
+
     template <class ReaderType2, class Args2>
     struct soci_client : dbms_client {
         soci_client(readers_manager<ReaderType2> & r_man, Args2 & args, std::vector<std::string> const & table_names)
         : r_man(r_man), args(args), table_names(table_names) {
             if (args.db.empty())
-                this->args.db = "sqlite3://db=:memory:";
+                this->args.db = sqlite3_memory_string;
             session = std::make_unique<soci::session>(this->args.db);
         }
         void task() override {
@@ -449,10 +451,10 @@ namespace csvsql::detail {
                 try {
                     create_table_composer composer(reader, args, table_names);
                     table_creator{args, *session};
-                    if (args.insert or (args.db == "sqlite3://db=:memory:" and !args.query.empty()))
+                    if (args.insert or (args.db == sqlite3_memory_string and !args.query.empty()))
                         table_inserter(args, *session, composer).insert(args, reader);
                 } catch(std::exception & e) {
-                    if (std::string(e.what()).find("Vain to do next actions") != std::string::npos)
+                    if (std::string(e.what()).find("No data rows") != std::string::npos)
                         continue;
                     throw;
                 }
