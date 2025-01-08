@@ -13,7 +13,7 @@ namespace csvstack::detail {
     struct Args final : ARGS_positional_files {
 
         std::string & groups = kwarg("g,groups", "A comma-separated list of values to add as \"grouping factors\", one per CSV being stacked. These are "
-            "added to the output as a new column. You may specify a name for the new column using the -n flag.").set_default("");
+            "added to the output as a new column. You may specify a name for the new column using the -n flag.").set_default("empty");
         std::string & group_name = kwarg("n,group-name", "A name for the grouping column, e.g. \"year\". Only used when also specifying -g.").set_default("");
         bool & filenames = flag("filenames", "Use the filename of each input file as its grouping value. When specified, -g will be ignored.");
         bool & asap = flag("ASAP","Print result output stream as soon as possible.").set_default(true);
@@ -103,6 +103,8 @@ namespace csvstack::detail {
 
 //TODO: -no-table option
     auto parse_groups (auto && groups) {
+        if (groups.empty())
+            return std::vector<std::string> {{""}};
         std::istringstream stream (groups);
         std::vector<std::string> result;
         for (std::string word; std::getline(stream,word,',') ;)
@@ -139,12 +141,12 @@ namespace csvstack::detail {
             max_field_size_checker size_checker(r, args, r.cols(), init_row{args.no_header ? 1u : 2u});
             r.run_rows([&](auto & row_span) {
                 check_max_size(row_span, size_checker);
-                if (!args.groups.empty() or args.filenames)
+                if (args.groups != "empty" or args.filenames)
                     table[row_idx][0] = args.filenames ? args.files[0] : group_names[0];
 
                 auto col_idx = 0;
                 for (auto & elem : row_span)
-                    table[row_idx][(!args.groups.empty() or args.filenames ? 1 : 0) + col_idx++] = elem;
+                    table[row_idx][(args.groups != "empty" or args.filenames ? 1 : 0) + col_idx++] = elem;
                 row_idx++;
             });
             r_man.get_readers().pop_front();
@@ -165,7 +167,7 @@ namespace csvstack::detail {
                 max_field_size_checker size_checker(r, args, cols, init_row{args.no_header ? 1u : 2u});
                 r.run_rows([&](auto & row_span) {
                     check_max_size(row_span, size_checker);
-                    if (!args.groups.empty() or args.filenames)
+                    if (args.groups != "empty" or args.filenames)
                         table[row_idx][0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
 
                     auto col_idx = 0;
@@ -183,7 +185,7 @@ namespace csvstack::detail {
     auto fill_replace_vec(auto const & headers, auto & replace_vec, auto const & args) {
         std::vector<std::string> final_header = {headers[0].begin(),headers[0].end()};
 
-        if (!args.groups.empty() or args.filenames)
+        if (args.groups != "empty" or args.filenames)
             final_header.insert(final_header.begin(), args.group_name.empty() ? "group" : args.group_name);
 
         for_each(headers.begin()+1, headers.end(), [&](auto & header) {
@@ -227,7 +229,7 @@ namespace csvstack {
         using namespace csv_co;
         using namespace detail;
         std::vector<std::string> group_names;
-        if (!args.groups.empty()) {
+        if (args.groups != "empty") {
             group_names = parse_groups(args.groups);
             if (group_names.size() != args.files.size())
                 throw std::runtime_error("The number of grouping values must be equal to the number of CSV files being stacked.");
@@ -240,7 +242,7 @@ namespace csvstack {
 
         std::vector<unsigned> replace_vec;
         auto const header = fill_replace_vec(headers, replace_vec, args);
-        std::vector<std::vector<std::string>> t (rows, std::vector<std::string>(cols + (args.groups.empty() && !args.filenames ? 0 : 1)));
+        std::vector<std::vector<std::string>> t (rows, std::vector<std::string>(cols + (args.groups == "empty" && !args.filenames ? 0 : 1)));
         put_rest(r_man, put_first(r_man, args, t, group_names), args, t, replace_vec, group_names);
         std::ostringstream oss;
         std::ostream & oss_ = args.asap ? std::cout : oss;

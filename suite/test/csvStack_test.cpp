@@ -29,7 +29,7 @@ int main() {
 #endif
     struct csvstack_specific_args {
         std::vector<std::string> files;
-        std::string groups;
+        std::string groups = "empty";
         std::string group_name;
         bool filenames {false};
         bool check_integrity = {true};

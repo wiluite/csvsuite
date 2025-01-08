@@ -640,7 +640,7 @@ Stack up the rows from multiple CSV files, optionally adding a grouping value to
 Options:
 
     --help : print help [implicit: "true", default: false]
-    -g,--groups : A comma-separated list of values to add as "grouping factors", one per CSV being stacked. These are added to the output as a new column. You may specify a name for the new column using the -n flag. [default: ]
+    -g,--groups : A comma-separated list of values to add as "grouping factors", one per CSV being stacked. These are added to the output as a new column. You may specify a name for the new column using the -n flag. [default: empty]
     -n,--group-name : A name for the grouping column, e.g. "year". Only used when also specifying -g. [default: ]
     --filenames : Use the filename of each input file as its grouping value. When specified, -g will be ignored. [implicit: "true", default: false]
 
