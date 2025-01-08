@@ -117,7 +117,8 @@ namespace csvgrep {
                 return hits != 0;
             };
 
-            std::function<bool(typename std::decay_t<decltype(reader)>::row_span, std::function<bool(typename std::decay_t<decltype(reader)>::row_span, unsigned)>)> func;
+            using row_span_type = typename std::decay_t<decltype(reader)>::row_span;
+            std::function<bool(row_span_type, std::function<bool(row_span_type, unsigned)>)> func;
 
             if (args.any)
                 func = any_hits;

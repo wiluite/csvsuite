@@ -556,7 +556,48 @@ Perform a case-insensitive search:
 
     csvgrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
 
+Remove comment rows:  
+    **This example can not be demonstrated due to the _csvsuite_ does not support non-tabular forms.**
+
+Get the indices of the columns that contain matching text (\x1e is the Record Separator (RS) character):  
+    **This example can not be demonstrated due to the _csvsuite_ does not support the csvformat utility.**
+
 #### csvJoin
+##### Description
+Merges two or more CSV tables together using a method analogous to SQL JOIN operation. By default, it performs an inner
+join, but full outer, left outer, and right outer are also available via flags. Key columns are specified with the -c
+flag (either a single column which exists in all tables, or a comma-separated list of columns with one corresponding to
+each). If the columns flag is not provided then the tables will be merged “sequentially”, that is they will be merged in
+row order with no filtering:
+
+    Usage: csvJoin arg_0  [options...]
+    arg_0 : The CSV files to operate on. [default: unknown]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -c,--columns : The column name(s) on which to join. Should be either one name (or index) or a comma-separated list with one name (or index) for each file, in the same order that the files were specified. May also be left unspecified, in which case the two files will be joined sequentially without performing any matching. [default: ]
+    --outer : Perform a full outer join, rather than the default inner join. [implicit: "true", default: false]
+    --honest-outer : Typify outer joins result before printing. [implicit: "true", default: false]
+    --left : Perform a left outer join, rather than the default inner join. If more than two files are provided this will be executed as a sequence of left outer joins, starting at the left. [implicit: "true", default: false]
+    --right : Perform a right outer join, rather than the default inner join. If more than two files are provided this will be executed as a sequence of right outer joins, starting at the right. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
+
+NOTE: There has been introduced the --honest-outer option here. Well, the _csvkit_ does not recalculate types after the
+last join, which is necessary in some cases.
+
+**Examples**
+
+    csvjoin -c 1 examples/join_a.csv examples/join_b.csv
+
+Add two empty columns to the right of a CSV:  
+    **Not supported. Will be supported soon.**  
+
+Add a single column to the right of a CSV:  
+    **Not supported. Will be supported soon.**
+
 #### csvSort
 #### csvStack
 

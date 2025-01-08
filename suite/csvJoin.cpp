@@ -304,7 +304,7 @@ namespace csvjoin::detail {
             throw std::runtime_error("You must provide join column names when performing an outer join.");
 
         if (!args.outer_join and args.honest_outer_join)
-            throw std::runtime_error("You cannot provide houter flag without outer joins.");
+            throw std::runtime_error("You cannot provide honest-outer flag without outer joins.");
     }
     auto get_join_column_names (auto const & args) {
         std::vector<std::string> join_column_names;
