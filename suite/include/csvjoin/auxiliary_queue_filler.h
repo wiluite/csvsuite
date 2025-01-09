@@ -10,7 +10,12 @@ try {
         skip_lines(this_reader, args);
         quick_check(this_reader, args);
 
-        ts_n_blanks.push_back(std::get<1>(::csvsuite::cli::typify(this_reader, args, typify_option::typify_without_precisions)));
+        try {
+            ts_n_blanks.push_back(std::get<1>(::csvsuite::cli::typify(this_reader, args, typify_option::typify_without_precisions)));
+        } catch (no_body_exception const & e) {
+            std::tuple tup(std::vector<column_type>{e.columns(), column_type::bool_t}, std::vector<unsigned char>{e.columns(), 1});
+            ts_n_blanks.push_back(tup);
+        }
         skip_lines(this_reader, args);
         auto const header = obtain_header_and_<skip_header>(this_reader, args);
 

@@ -64,7 +64,7 @@ document just needs to be fixed.
 When running, any utility tries to quickly check the strong tabular shape of your documents to match [RFC-4180] and
 whistles if this is not the case.  
 
-4) When handling date and datetime data types and their localization, the csvkit relies on the rich Python datetime
+4) When handling date and datetime data types and their localization, the _csvkit_ relies on the rich Python datetime
 library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
 The _csvsuite_, though, is tightly bound to the --date-format and --datetime-format arguments and works well only on
 those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
@@ -501,6 +501,14 @@ Add line numbers to a file, making no other changes:
 
     csvcut -l examples/realdata/FY09_EDU_Recipients_by_State.csv
 
+Extract a column that may not exist in all files:
+
+    echo d, | csvjoin examples/dummy.csv _ | csvcut -c d
+
+    echo d, | csvjoin examples/join_no_header_row.csv _ | csvcut -c d
+
+NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
+
 Display a column’s unique values:
 
     csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
@@ -593,10 +601,15 @@ last join, which is necessary in some cases.
     csvjoin -c 1 examples/join_a.csv examples/join_b.csv
 
 Add two empty columns to the right of a CSV:  
-    **Not supported. Will be supported soon.**  
+
+    echo , | csvjoin examples/dummy.csv _
 
 Add a single column to the right of a CSV:  
-    **Not supported. Will be supported soon.**
+
+    echo "new-column" | csvjoin examples/dummy.csv _
+
+NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
+
 
 #### csvSort
 ##### Description
