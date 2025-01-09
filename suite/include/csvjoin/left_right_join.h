@@ -34,34 +34,47 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
 
                 auto & other_reader = std::get<0>(other_source);
 
-                compromise_table_MxN other(other_reader, args);
-                auto compare_fun = compose_compare_function();
-                std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
-                cache_values(other);
+                try {
+                    compromise_table_MxN other(other_reader, args);
+                    auto compare_fun = compose_compare_function();
+                    std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
+                    cache_values(other);
 
-                arg.run_rows([&](auto &span) {
-                    auto key = elem_t{span[c_ids[0]]};
-                    const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                    if (p.first != p.second)
-                        for (auto next = p.first; next != p.second; ++next) {
-                            std::vector<std::string> join_vec;
+                    arg.run_rows([&](auto &span) {
+                        auto key = elem_t{span[c_ids[0]]};
+                        const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                        if (p.first != p.second)
+                            for (auto next = p.first; next != p.second; ++next) {
+                                std::vector<std::string> join_vec;
 
-                            join_vec.reserve(span.size() + next->size() - 1);
-                            join_vec.assign(span.begin(), span.end());
-                            join_vec.insert(join_vec.end(), next->begin(), next->begin() + c_ids[1]);
-                            join_vec.insert(join_vec.end(), next->begin() + c_ids[1] + 1, next->end());
-                            impl.add(std::move(join_vec));
-                        }
-                    else
-                        impl.add(std::move(compose_distinct_record(span)));
-                });
+                                join_vec.reserve(span.size() + next->size() - 1);
+                                join_vec.assign(span.begin(), span.end());
+                                join_vec.insert(join_vec.end(), next->begin(), next->begin() + c_ids[1]);
+                                join_vec.insert(join_vec.end(), next->begin() + c_ids[1] + 1, next->end());
+                                impl.add(std::move(join_vec));
+                            }
+                        else
+                            impl.add(std::move(compose_distinct_record(span)));
+                    });
+                }
+                catch (typename reader_type::implementation_exception const &) {}
+                catch (no_body_exception const & e) {
+                    try {
+                        arg.run_rows([&](auto &span) {
+                            impl.add(std::move(compose_distinct_record(span)));
+                        });
+                    } catch (typename reader_type::implementation_exception const &) {}
+                }
+
             }, this_source);
         } else {
-            std::visit([&impl, &compose_distinct_record](auto &&arg) {
-                arg.run_rows([&](auto &span) {
-                    impl.add(std::move(compose_distinct_record(span)));
-                });
-            }, deq.front());
+            try {
+                std::visit([&impl, &compose_distinct_record](auto &&arg) {
+                    arg.run_rows([&](auto &span) {
+                        impl.add(std::move(compose_distinct_record(span)));
+                    });
+                }, deq.front());
+            } catch (typename reader_type::implementation_exception const &) {}
         }
         cycle_cleanup();
         deq.push_front(std::move(impl));
