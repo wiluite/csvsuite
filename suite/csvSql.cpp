@@ -453,10 +453,8 @@ namespace csvsql::detail {
                     table_creator{args, *session};
                     if (args.insert or (args.db == sqlite3_memory_string and !args.query.empty()))
                         table_inserter(args, *session, composer).insert(args, reader);
-                } catch(std::exception & e) {
-                    if (std::string(e.what()).find("No data rows") != std::string::npos)
-                        continue;
-                    throw;
+                } catch(no_body_exception const & e) {
+                    continue;
                 }
             }
         }

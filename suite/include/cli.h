@@ -873,6 +873,13 @@ namespace csvsuite::cli {
     using typify_without_precisions_and_blanks_result = std::tuple<std::vector<column_type>>;
     using typify_result = std::variant<typify_with_precisions_result, typify_without_precisions_result, typify_without_precisions_and_blanks_result>;
 
+    struct no_body_exception : std::runtime_error {
+        no_body_exception(char const * const message, unsigned cols) : std::runtime_error(message), cols(cols) {}
+        unsigned columns() const {return cols;}
+    private:
+        unsigned cols;
+    };
+
     /// Detects types, blanks and precisions for every column
     template <typename Reader, typename Args>
     auto typify(Reader & reader, Args const & args, typify_option option) -> typify_result {
@@ -891,7 +898,7 @@ namespace csvsuite::cli {
         auto header = obtain_header_and_<skip_header>(reader, args);
 
         if (!reader.cols())
-            throw std::runtime_error("Typify(). No data rows."); // well, vain to do rest things
+            throw no_body_exception("Typify(). No data rows.", static_cast<unsigned>(header.size()));
 
         {
             max_field_size_checker size_checker(reader, args, header.size(), init_row{1});
