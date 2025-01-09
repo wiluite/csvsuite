@@ -5,7 +5,13 @@ auto concat_headers = [&headers](unsigned excl_v_idx = static_cast<unsigned>(-1)
     unsigned const h0_size = headers[0].size();
     std::replace_copy_if(headers[1].begin(), headers[1].end(), std::back_inserter(headers[0]),
         [&](auto const & n) {
-            if (!std::count(headers[0].cbegin(), headers[0].cend(), n))
+
+            auto is_empty = [](std::string s) {
+                std::erase(s,' ');
+                return s.empty();
+            };
+
+            if (is_empty(n) or !std::count(headers[0].cbegin(), headers[0].cend(), n))
                 return false;
 
             auto mangled_number = 2u;
