@@ -320,12 +320,14 @@ namespace csvsuite::cli::compare {
             hibernator h(reader, args);
             skip_lines(reader, args);
             auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
-            auto const field_array_size = obtain_header_and_<skip_header>(reader, args).size();
-            impl = std::make_unique<table>(rest_rows, field_array(field_array_size));
+            auto const header_size = obtain_header_and_<skip_header>(reader, args).size();
+            if (!rest_rows)
+                throw no_body_exception("compromise_table_MxN constructor. No data rows.", static_cast<unsigned>(header_size));
+
+            impl = std::make_unique<table>(rest_rows, field_array(header_size));
 
             std::size_t row = 0;
             auto & impl_ref = *impl;
-
             reader.run_rows([&] (auto & row_span) {
                 unsigned i = 0;
                 for (auto & elem : row_span)
