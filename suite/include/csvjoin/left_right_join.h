@@ -58,7 +58,7 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                     });
                 }
                 catch (typename reader_type::implementation_exception const &) {}
-                catch (no_body_exception const & e) {
+                catch (no_body_exception const &) {
                     try {
                         arg.run_rows([&](auto &span) {
                             impl.add(std::move(compose_distinct_record(span)));

@@ -46,7 +46,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     });
                 }
                 catch (typename reader_type::implementation_exception const &) {}
-                catch (no_body_exception const & e) {}
+                catch (no_body_exception const &) {}
 
             }, this_source);
         }

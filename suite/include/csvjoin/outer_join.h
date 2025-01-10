@@ -45,27 +45,38 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                 auto & other_reader = std::get<0>(other_source);
 
-                constexpr bool skip_to_first_line_after_fill = true;
-                compromise_table_MxN<reader_type, args_type, skip_to_first_line_after_fill> other(other_reader, args);
-                auto compare_fun = compose_compare_function();
+                try {
+                    constexpr bool skip_to_first_line_after_fill = true;
+                    compromise_table_MxN<reader_type, args_type, skip_to_first_line_after_fill> other(other_reader, args);
+                    auto compare_fun = compose_compare_function();
 
-                std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
-                cache_values(other);
+                    std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
+                    cache_values(other);
 
-                arg.run_rows([&](auto &span) {
-                    auto key = elem_t{span[c_ids[0]]};
-                    const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                    if (p.first != p.second)
-                        for (auto next = p.first; next != p.second; ++next) {
-                            std::vector<std::string> join_vec;
-                            join_vec.reserve(span.size() + next->size());
-                            join_vec.assign(span.begin(), span.end());
-                            join_vec.insert(join_vec.end(), next->begin(), next->end());
-                            impl.add(std::move(join_vec));
-                        }
-                    else
-                        impl.add(std::move(compose_distinct_left_part(span)));
-                });
+                    arg.run_rows([&](auto &span) {
+                        auto key = elem_t{span[c_ids[0]]};
+                        const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                        if (p.first != p.second)
+                            for (auto next = p.first; next != p.second; ++next) {
+                                std::vector<std::string> join_vec;
+                                join_vec.reserve(span.size() + next->size());
+                                join_vec.assign(span.begin(), span.end());
+                                join_vec.insert(join_vec.end(), next->begin(), next->end());
+                                impl.add(std::move(join_vec));
+                            }
+                        else
+                            impl.add(std::move(compose_distinct_left_part(span)));
+                    });
+                }
+                catch (typename reader_type::implementation_exception const &) {}
+                catch (no_body_exception const &) {
+                    try {
+                        arg.run_rows([&](auto &span) {
+                            impl.add(std::move(compose_distinct_left_part(span)));
+                        });
+                    } catch (typename reader_type::implementation_exception const &) {}
+                }
+
             }, this_source);
 
             // Here, outer join right table
@@ -86,30 +97,49 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 } else
                     tmp_reader = std::move(std::get<0>(this_source));
 
-                compromise_table_MxN this_(tmp_reader, tmp_args);
-                auto compare_fun = compose_symmetric_compare_function();
-                std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
-                cache_values(this_);
+                try {
+                    compromise_table_MxN this_(tmp_reader, tmp_args);
+                    auto compare_fun = compose_symmetric_compare_function();
+                    std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
+                    cache_values(this_);
 
-                arg.run_rows([&](auto &span) {
-                    auto key = elem_t{span[c_ids[1]]};
-                    const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                    if (p.first == p.second) {
-                        impl.add(std::move(compose_distinct_right_part(span)));
-                        recalculate_types_blanks = true;
-                    }
-                });
+                    arg.run_rows([&](auto &span) {
+                        auto key = elem_t{span[c_ids[1]]};
+                        const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                        if (p.first == p.second) {
+                            impl.add(std::move(compose_distinct_right_part(span)));
+                            if (!recalculate_types_blanks)
+                                recalculate_types_blanks = true;
+                        }
+                    });
+                }
+                catch (typename reader_type::implementation_exception const &) {}
+                catch (no_body_exception const &) {
+                    try {
+                        arg.run_rows([&](auto &span) {
+                            impl.add(std::move(compose_distinct_right_part(span)));
+                            if (!recalculate_types_blanks)
+                                recalculate_types_blanks = true;
+                        });
+                    } catch (typename reader_type::implementation_exception const &) {}
+                }
+
             }, other_source);
         } else {
             std::visit([&](auto &&arg) {
-                arg.run_rows([&impl, &compose_distinct_left_part](auto &span) {
-                    impl.add(std::move(compose_distinct_left_part(span)));
-                });
+                try {
+                    arg.run_rows([&impl, &compose_distinct_left_part](auto &span) {
+                        impl.add(std::move(compose_distinct_left_part(span)));
+                    });
+                } catch (typename reader_type::implementation_exception const &) {}
             }, deq.front());
+
             std::visit([&](auto &&arg) {
-                arg.run_rows([&impl, &compose_distinct_right_part](auto &span) {
-                    impl.add(std::move(compose_distinct_right_part(span)));
-                });
+                try {
+                    arg.run_rows([&impl, &compose_distinct_right_part](auto &span) {
+                        impl.add(std::move(compose_distinct_right_part(span)));
+                    });
+                } catch (typename reader_type::implementation_exception const &) {}
             }, deq[1]);
             recalculate_types_blanks = true;
         }
