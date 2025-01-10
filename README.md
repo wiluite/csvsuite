@@ -447,7 +447,7 @@ Fix this document:
 ##### Description
 Filters and truncates CSV files. Like the Unix “cut” command, but for tabular data:
 
-    Usage: csvcut arg_0  [options...]
+    Usage: csvCut arg_0  [options...]
     arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
 
 Options:
@@ -464,7 +464,7 @@ See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
 Print the indices and names of all columns:
 
-    $ csvcut -n examples/realdata/FY09_EDU_Recipients_by_State.csv
+    $ csvCut -n examples/realdata/FY09_EDU_Recipients_by_State.csv
     1: State Name
     2: State Abbreviate
     3: Code
@@ -478,7 +478,7 @@ Print the indices and names of all columns:
 
 Print only the names of all columns, by removing the indices with the _cut_ command:
 
-    $ csvcut -n examples/realdata/FY09_EDU_Recipients_by_State.csv | cut -c6-
+    $ csvCut -n examples/realdata/FY09_EDU_Recipients_by_State.csv | cut -c6-
     State Name
     State Abbreviate
     Code
@@ -491,31 +491,31 @@ Print only the names of all columns, by removing the indices with the _cut_ comm
 
 Extract the first and third columns:
 
-    csvcut -c 1,3 examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -c 1,3 examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Extract columns named “TOTAL” and “State Name” (in that order):
 
-    csvcut -c TOTAL,"State Name" examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -c TOTAL,"State Name" examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Add line numbers to a file, making no other changes:
 
-    csvcut -l examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -l examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Extract a column that may not exist in all files:
 
-    echo d, | csvjoin examples/dummy.csv _ | csvcut -c d
+    echo d, | csvJoin examples/dummy.csv _ | csvCut -c d
 
-    echo d, | csvjoin examples/join_no_header_row.csv _ | csvcut -c d
+    echo d, | csvJoin examples/join_no_header_row.csv _ | csvCut -c d
 
 NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
 
 Display a column’s unique values:
 
-    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
+    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
 
 Or:
 
-    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
 
 #### csvGrep
 ##### Description
@@ -550,19 +550,19 @@ This is why there is the --r-icase option if you need the case-insensitive compa
 
 Search for the row relating to Illinois:
 
-    csvgrep -c 1 -m ILLINOIS examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -m ILLINOIS examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Search for rows relating to states with names beginning with the letter “I”:
 
-    csvgrep -c 1 -r "^I" examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^I" examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Search for rows that do not contain an empty state cell:
 
-    csvgrep -c 1 -r "^$" -i examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^$" -i examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Perform a case-insensitive search:
 
-    csvgrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Remove comment rows:  
     **This example can not be demonstrated due to the _csvsuite_ does not support non-tabular forms.**
@@ -598,18 +598,17 @@ last join, which is necessary in some cases.
 
 **Examples**
 
-    csvjoin -c 1 examples/join_a.csv examples/join_b.csv
+    csvJoin -c 1 examples/join_a.csv examples/join_b.csv
 
 Add two empty columns to the right of a CSV:  
 
-    echo , | csvjoin examples/dummy.csv _
+    echo , | csvJoin examples/dummy.csv _
 
 Add a single column to the right of a CSV:  
 
-    echo "new-column" | csvjoin examples/dummy.csv _
+    echo "new-column" | csvJoin examples/dummy.csv _
 
 NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
-
 
 #### csvSort
 ##### Description
@@ -636,18 +635,18 @@ NOTE: There has been introduced the --parallel-sort option to speed up the opera
 
 Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the national locale):
 
-    csvsort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvSort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 View the five states with the most individuals claiming veteran’s education benefits (don't forget to specify the
 national locale):
 
-    csvcut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsort -r -c 2 -L en_US | head -n 5
+    csvCut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSort -r -c 2 -L en_US | head -n 5
 
 #### csvStack
 ##### Description
 Stack up the rows from multiple CSV files, optionally adding a grouping value to each row:
     
-    Usage: csvstack arg_0  [options...]
+    Usage: csvStack arg_0  [options...]
     arg_0 : The CSV files to operate on. [default: unknown]
 
 Options:
@@ -661,12 +660,12 @@ Options:
 
 Join a set of files for different years:
     
-    csvstack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
+    csvStack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
 
 Add a single column to the left of a CSV:  
     **Not supported. Will be supported soon.** But as a workaroud you may do:
 
-    csvstack -n NEWCOL -g " " examples/dummy.csv
+    csvStack -n NEWCOL -g " " examples/dummy.csv
 
 #### Output and Analysis
 * [csvJson](#csvjson)
@@ -675,6 +674,96 @@ Add a single column to the left of a CSV:
 * [csvStat](#csvstat)
 
 #### csvJson
+##### Description
+Converts a CSV file into JSON or GeoJSON (depending on flags):
+
+    Usage: csvJson arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -i,--indent : Indent the output JSON this many spaces. Disabled by default. [default: -2147483648]
+    -k,--key : Output JSON as an object keyed by a given column, KEY, rather than as an array. All column values must be unique. If --lat and --lon are specified, this column is used as the GeoJSON Feature ID. [default: ]
+    --lat : A column index or name containing a latitude. Output will be GeoJSON instead of JSON. Requires --lon. [default: ]
+    --lon : A column index or name containing a longitude. Output will be GeoJSON instead of JSON. Requires --lat. [default: ]
+    --type : A column index or name containing a GeoJSON type. Output will be GeoJSON instead of JSON. Requires --lat and --lon. [default: ]
+    --geometry : A column index or name containing a GeoJSON geometry. Output will be GeoJSON instead of JSON. Requires --lat and --lon. [default: ]
+    --crs : A coordinate reference system string to be included with GeoJSON output. Requires --lat and --lon. [default: ]
+    --no-bbox : Disable the calculation of a bounding box. [implicit: "true", default: false]
+    --stream : Output JSON as a stream of newline-separated objects, rather than an as an array. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format) when parsing the input. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: --geometry option for now is not supported.
+
+**Examples**  
+
+Convert veteran’s education dataset to JSON keyed by state abbreviation (again, do not forget to specify the locale):
+
+    $ csvJson -k "State Abbreviate" -i 4 examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US
+    {
+        "AL": {
+            "State Name": "ALABAMA",
+            "State Abbreviate": "AL",
+            "Code": 1.0,
+            "Montgomery GI Bill-Active Duty": 6718.0,
+            "Montgomery GI Bill- Selective Reserve": 1728.0,
+            "Dependents' Educational Assistance": 2703.0,
+            "Reserve Educational Assistance Program": 1269.0,
+            "Post-Vietnam Era Veteran's Educational Assistance Program": 8.0,
+            "TOTAL": 12426.0,
+            "": null
+        },
+        "...": {
+            "...": "..."
+        }
+    }
+
+Convert locations of public art into GeoJSON:
+
+    $ csvJson --date-format=%m/%d/%y --lat latitude --lon longitude --k slug --crs EPSG:4269 -i 4 test/examples/test_geo.csv
+    {
+        "type": "FeatureCollection",
+        "bbox": [
+            -95.334619,
+            32.299076986939205,
+            -95.250699,
+            32.351434
+        ],
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "title": "Downtown Coffee Lounge",
+                    "description": "In addition to being the only coffee shop in downtown Tyler, DCL also features regular exhibitions of work by local artists.",
+                    "address": "200 West Erwin Street",
+                    "type": "Gallery",
+                    "last_seen_date": "2012-03-30"
+                },
+                "id": "dcl",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                    -95.30181,
+                    32.35066
+                    ]
+                }
+            },
+            {
+                ...
+            },
+        ],
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "EPSG:4269"
+            }
+        }
+    }
+
+
 #### csvLook
 #### csvSql
 #### csvStat
