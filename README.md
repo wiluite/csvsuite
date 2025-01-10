@@ -293,6 +293,7 @@ The header line is required though the columns may be in any order:
 
 Options:  
 
+    --help : print help [implicit: "true", default: false]
 	-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
 	-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
 	-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
@@ -304,8 +305,7 @@ Options:
 	--d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
 	--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
 	--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
-	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
-	--help : print help [implicit: "true", default: false]
+	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
 
 Some command-line flags only pertain to specific input formats.  
 
@@ -633,12 +633,12 @@ NOTE: There has been introduced the --parallel-sort option to speed up the opera
 
 **Examples**
 
-Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the national locale):
+Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the numeric locale):
 
     csvSort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 View the five states with the most individuals claiming veteran’s education benefits (don't forget to specify the
-national locale):
+numeric locale):
 
     csvCut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSort -r -c 2 -L en_US | head -n 5
 
@@ -700,7 +700,8 @@ NOTE: --geometry option for now is not supported.
 
 **Examples**  
 
-Convert veteran’s education dataset to JSON keyed by state abbreviation (again, do not forget to specify the locale):
+Convert veteran’s education dataset to JSON keyed by state abbreviation (again, do not forget to specify the numeric
+locale):
 
     $ csvJson -k "State Abbreviate" -i 4 examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US
     {
@@ -765,21 +766,67 @@ Convert locations of public art into GeoJSON:
 
 
 #### csvLook
+##### Description
+Renders a CSV to the command line in a Markdown-compatible, fixed-width format:
+
+    Usage: csvLook arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --max-rows : The maximum number of rows to display before truncating the data. [default: 4294967295]
+    --max-columns : The maximum number of columns to display before truncating the data. [default: 4294967295]
+    --max-column-width : Truncate all columns to at most this width. The remainder will be replaced with ellipsis. [default: 4294967295]
+    --max-precision : The maximum number of decimal places to display. The remainder will be replaced with ellipsis. [default: 3]
+    --no-number-ellipsis : Disable the ellipsis if --max-precision is exceeded. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    -G,--glob-locale : Superseded global locale. [default: C]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: Unlike the *csvkit*, where this utility can ignore extra or missing cells in the absence of a strictly tabular
+form, the csvLook, like all other utilities in the _csvsuite_, will simply report this by default (see the 
+[-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the csvClean utility or its
+original.  
+
+NOTE: There has been introduced -G,--glob-locale option, superseded global locale for numerics, for you to still see
+separator signs in your numbers. Do not mix it with still existent -L option, which is the "input" locale for numerics.
+
+**Examples**
+
+Basic use:
+
+    csvLook examples/testfixed_converted.csv
+
+A final operation when piping through other tools:
+
+    csvCut -c 9,1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvLook
+
+To ignore extra cells:  
+_not supported, see notation above._
+
+To ignore missing cells:  
+_not supported, see notation above._
+
+
 #### csvSql
 #### csvStat
 
 ### Arguments common to all tools
-	-z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]  
-	-e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]  
-	-S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]  
-	-H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]  
-	-K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]  
-	-l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]  
-	--zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]  
-	-Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]  
-	-L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]  
-	--blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]  
-	--null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]  
-	--date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]  
-	--datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]  
-	--no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]  
+
+    -z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]
+    -e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]
+    -S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]
+    -H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]
+    -K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]
+    -l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]
+    --zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]
+    -Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]
+    -L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]
+    --blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]
+    --null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]
+    --date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]
+    --datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]
+    --no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]
+    --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
+    --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
