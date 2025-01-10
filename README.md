@@ -70,7 +70,9 @@ The _csvsuite_, though, is tightly bound to the --date-format and --datetime-for
 those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
 argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
 consistency everywhere (on most platforms). For more info see tests located in the
-[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.  
+[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module. For
+complete info see [formatting section](https://howardhinnant.github.io/date/date.html#from_stream_formatting) of the
+documentation.
 
 5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
 somewhere (for example MinGW/Windows), you will not be able to work with localization.  
