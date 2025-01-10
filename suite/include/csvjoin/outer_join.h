@@ -5,11 +5,13 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
     assert (!args.left_join and !args.right_join and args.outer_join);
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
-        auto const & [types0, _] = ts_n_blanks[0];
-        auto const & [types1, __] = ts_n_blanks[1];
+        auto & [types0, blanks0] = ts_n_blanks[0];
+        auto & [types1, blanks1] = ts_n_blanks[1];
 #else
-        auto const & types0 = std::get<0>(ts_n_blanks[0]);
-        auto const & types1 = std::get<0>(ts_n_blanks[1]);
+        auto & types0 = std::get<0>(ts_n_blanks[0]);
+        auto & types1 = std::get<0>(ts_n_blanks[1]);
+        auto & blanks0 = std::get<1>(ts_n_blanks[0]);
+        auto & blanks1 = std::get<1>(ts_n_blanks[1]);
 #endif
         reader_fake<reader_type> impl{0, 0};
 
@@ -32,7 +34,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
         };
 
         bool recalculate_types_blanks = false;
-        if (can_compare(types0, types1)) {
+        if (can_compare(types0, types1, blanks0, blanks1)) {
             using namespace ::csvsuite::cli::compare;
             using elem_t = typename reader_type::template typed_span<quoted>;
 
