@@ -379,12 +379,16 @@ int main(int argc, char * argv[])
     if (args.verbose)
         args.print();
 
+    auto const begin = std::chrono::high_resolution_clock::now();
     OutputCodePage65001 ocp65001;
     try {
         join_wrapper(args);
     } catch (std::exception const & e) {
         std::cerr << e.what() << std::endl;
     }
+    auto const end = std::chrono::high_resolution_clock::now();
+    std::cout << "Execution Time : " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() << " ms \n";
+
     return 0;
 }
 #endif //BOOST_UT_DISABLE_MODULE
