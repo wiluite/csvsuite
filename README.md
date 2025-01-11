@@ -70,7 +70,9 @@ The _csvsuite_, though, is tightly bound to the --date-format and --datetime-for
 those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
 argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
 consistency everywhere (on most platforms). For more info see tests located in the
-[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module.  
+[csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module. For
+complete info see [formatting section](https://howardhinnant.github.io/date/date.html#from_stream_formatting) of the
+documentation.
 
 5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
 somewhere (for example MinGW/Windows), you will not be able to work with localization.  
@@ -293,6 +295,7 @@ The header line is required though the columns may be in any order:
 
 Options:  
 
+    --help : print help [implicit: "true", default: false]
 	-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
 	-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
 	-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
@@ -304,8 +307,7 @@ Options:
 	--d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
 	--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
 	--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
-	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]  
-	--help : print help [implicit: "true", default: false]
+	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
 
 Some command-line flags only pertain to specific input formats.  
 
@@ -447,7 +449,7 @@ Fix this document:
 ##### Description
 Filters and truncates CSV files. Like the Unix “cut” command, but for tabular data:
 
-    Usage: csvcut arg_0  [options...]
+    Usage: csvCut arg_0  [options...]
     arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
 
 Options:
@@ -464,7 +466,7 @@ See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
 Print the indices and names of all columns:
 
-    $ csvcut -n examples/realdata/FY09_EDU_Recipients_by_State.csv
+    $ csvCut -n examples/realdata/FY09_EDU_Recipients_by_State.csv
     1: State Name
     2: State Abbreviate
     3: Code
@@ -478,7 +480,7 @@ Print the indices and names of all columns:
 
 Print only the names of all columns, by removing the indices with the _cut_ command:
 
-    $ csvcut -n examples/realdata/FY09_EDU_Recipients_by_State.csv | cut -c6-
+    $ csvCut -n examples/realdata/FY09_EDU_Recipients_by_State.csv | cut -c6-
     State Name
     State Abbreviate
     Code
@@ -491,31 +493,31 @@ Print only the names of all columns, by removing the indices with the _cut_ comm
 
 Extract the first and third columns:
 
-    csvcut -c 1,3 examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -c 1,3 examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Extract columns named “TOTAL” and “State Name” (in that order):
 
-    csvcut -c TOTAL,"State Name" examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -c TOTAL,"State Name" examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Add line numbers to a file, making no other changes:
 
-    csvcut -l examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvCut -l examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Extract a column that may not exist in all files:
 
-    echo d, | csvjoin examples/dummy.csv _ | csvcut -c d
+    echo d, | csvJoin examples/dummy.csv _ | csvCut -c d
 
-    echo d, | csvjoin examples/join_no_header_row.csv _ | csvcut -c d
+    echo d, | csvJoin examples/join_no_header_row.csv _ | csvCut -c d
 
 NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
 
 Display a column’s unique values:
 
-    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
+    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | sed 1d | sort | uniq
 
 Or:
 
-    csvcut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
 
 #### csvGrep
 ##### Description
@@ -550,19 +552,19 @@ This is why there is the --r-icase option if you need the case-insensitive compa
 
 Search for the row relating to Illinois:
 
-    csvgrep -c 1 -m ILLINOIS examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -m ILLINOIS examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Search for rows relating to states with names beginning with the letter “I”:
 
-    csvgrep -c 1 -r "^I" examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^I" examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Search for rows that do not contain an empty state cell:
 
-    csvgrep -c 1 -r "^$" -i examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^$" -i examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Perform a case-insensitive search:
 
-    csvgrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvGrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 Remove comment rows:  
     **This example can not be demonstrated due to the _csvsuite_ does not support non-tabular forms.**
@@ -598,18 +600,17 @@ last join, which is necessary in some cases.
 
 **Examples**
 
-    csvjoin -c 1 examples/join_a.csv examples/join_b.csv
+    csvJoin -c 1 examples/join_a.csv examples/join_b.csv
 
 Add two empty columns to the right of a CSV:  
 
-    echo , | csvjoin examples/dummy.csv _
+    echo , | csvJoin examples/dummy.csv _
 
 Add a single column to the right of a CSV:  
 
-    echo "new-column" | csvjoin examples/dummy.csv _
+    echo "new-column" | csvJoin examples/dummy.csv _
 
 NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
-
 
 #### csvSort
 ##### Description
@@ -634,20 +635,20 @@ NOTE: There has been introduced the --parallel-sort option to speed up the opera
 
 **Examples**
 
-Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the national locale):
+Sort the veteran’s education benefits table by the “TOTAL” column (don't forget to specify the numeric locale):
 
-    csvsort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvSort -c 9 -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 View the five states with the most individuals claiming veteran’s education benefits (don't forget to specify the
-national locale):
+numeric locale):
 
-    csvcut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsort -r -c 2 -L en_US | head -n 5
+    csvCut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSort -r -c 2 -L en_US | head -n 5
 
 #### csvStack
 ##### Description
 Stack up the rows from multiple CSV files, optionally adding a grouping value to each row:
     
-    Usage: csvstack arg_0  [options...]
+    Usage: csvStack arg_0  [options...]
     arg_0 : The CSV files to operate on. [default: unknown]
 
 Options:
@@ -661,12 +662,12 @@ Options:
 
 Join a set of files for different years:
     
-    csvstack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
+    csvStack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
 
 Add a single column to the left of a CSV:  
     **Not supported. Will be supported soon.** But as a workaroud you may do:
 
-    csvstack -n NEWCOL -g " " examples/dummy.csv
+    csvStack -n NEWCOL -g " " examples/dummy.csv
 
 #### Output and Analysis
 * [csvJson](#csvjson)
@@ -675,22 +676,159 @@ Add a single column to the left of a CSV:
 * [csvStat](#csvstat)
 
 #### csvJson
+##### Description
+Converts a CSV file into JSON or GeoJSON (depending on flags):
+
+    Usage: csvJson arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -i,--indent : Indent the output JSON this many spaces. Disabled by default. [default: -2147483648]
+    -k,--key : Output JSON as an object keyed by a given column, KEY, rather than as an array. All column values must be unique. If --lat and --lon are specified, this column is used as the GeoJSON Feature ID. [default: ]
+    --lat : A column index or name containing a latitude. Output will be GeoJSON instead of JSON. Requires --lon. [default: ]
+    --lon : A column index or name containing a longitude. Output will be GeoJSON instead of JSON. Requires --lat. [default: ]
+    --type : A column index or name containing a GeoJSON type. Output will be GeoJSON instead of JSON. Requires --lat and --lon. [default: ]
+    --geometry : A column index or name containing a GeoJSON geometry. Output will be GeoJSON instead of JSON. Requires --lat and --lon. [default: ]
+    --crs : A coordinate reference system string to be included with GeoJSON output. Requires --lat and --lon. [default: ]
+    --no-bbox : Disable the calculation of a bounding box. [implicit: "true", default: false]
+    --stream : Output JSON as a stream of newline-separated objects, rather than an as an array. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format) when parsing the input. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: --geometry option for now is not supported.
+
+**Examples**  
+
+Convert veteran’s education dataset to JSON keyed by state abbreviation (again, do not forget to specify the numeric
+locale):
+
+    $ csvJson -k "State Abbreviate" -i 4 examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US
+    {
+        "AL": {
+            "State Name": "ALABAMA",
+            "State Abbreviate": "AL",
+            "Code": 1.0,
+            "Montgomery GI Bill-Active Duty": 6718.0,
+            "Montgomery GI Bill- Selective Reserve": 1728.0,
+            "Dependents' Educational Assistance": 2703.0,
+            "Reserve Educational Assistance Program": 1269.0,
+            "Post-Vietnam Era Veteran's Educational Assistance Program": 8.0,
+            "TOTAL": 12426.0,
+            "": null
+        },
+        "...": {
+            "...": "..."
+        }
+    }
+
+Convert locations of public art into GeoJSON:
+
+    $ csvJson --date-format=%m/%d/%y --lat latitude --lon longitude --k slug --crs EPSG:4269 -i 4 test/examples/test_geo.csv
+    {
+        "type": "FeatureCollection",
+        "bbox": [
+            -95.334619,
+            32.299076986939205,
+            -95.250699,
+            32.351434
+        ],
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "title": "Downtown Coffee Lounge",
+                    "description": "In addition to being the only coffee shop in downtown Tyler, DCL also features regular exhibitions of work by local artists.",
+                    "address": "200 West Erwin Street",
+                    "type": "Gallery",
+                    "last_seen_date": "2012-03-30"
+                },
+                "id": "dcl",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                    -95.30181,
+                    32.35066
+                    ]
+                }
+            },
+            {
+                ...
+            },
+        ],
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "EPSG:4269"
+            }
+        }
+    }
+
+
 #### csvLook
+##### Description
+Renders a CSV to the command line in a Markdown-compatible, fixed-width format:
+
+    Usage: csvLook arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --max-rows : The maximum number of rows to display before truncating the data. [default: 4294967295]
+    --max-columns : The maximum number of columns to display before truncating the data. [default: 4294967295]
+    --max-column-width : Truncate all columns to at most this width. The remainder will be replaced with ellipsis. [default: 4294967295]
+    --max-precision : The maximum number of decimal places to display. The remainder will be replaced with ellipsis. [default: 3]
+    --no-number-ellipsis : Disable the ellipsis if --max-precision is exceeded. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    -G,--glob-locale : Superseded global locale. [default: C]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: Unlike the *csvkit*, where this utility can ignore extra or missing cells in the absence of a strictly tabular
+form, the csvLook, like all other utilities in the _csvsuite_, will simply report this by default (see the 
+[-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the csvClean utility or its
+original.  
+
+NOTE: There has been introduced -G,--glob-locale option, superseded global locale for numerics, for you to still see
+separator signs in your numbers. Do not mix it with still existent -L option, which is the "input" locale for numerics.
+
+**Examples**
+
+Basic use:
+
+    csvLook examples/testfixed_converted.csv
+
+A final operation when piping through other tools:
+
+    csvCut -c 9,1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvLook
+
+To ignore extra cells:  
+_not supported, see notation above._
+
+To ignore missing cells:  
+_not supported, see notation above._
+
+
 #### csvSql
 #### csvStat
 
 ### Arguments common to all tools
-	-z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]  
-	-e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]  
-	-S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]  
-	-H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]  
-	-K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]  
-	-l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]  
-	--zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]  
-	-Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]  
-	-L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]  
-	--blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]  
-	--null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]  
-	--date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]  
-	--datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]  
-	--no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]  
+
+    -z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]
+    -e,--encoding : Specify the encoding of the input CSV file. [default: UTF-8]
+    -S,--skipinitialspace : Ignore whitespace immediately following the delimiter. [implicit: "true", default: false]
+    -H,--no-header-row : Specify that the input CSV file has no header row. Will create default headers (a,b,c,...). [implicit: "true", default: false]
+    -K,--skip-lines : Specify the number of initial lines to skip before the header row (e.g. comments, copyright notices, empty rows). [default: 0]
+    -l,--linenumbers : Insert a column of line numbers at the front of the output. Useful when piping to grep or as a simple primary key. [implicit: "true", default: false]
+    --zero : When interpreting or displaying column numbers, use zero-based numbering instead of the default 1-based numbering. [implicit: "true", default: false]
+    -Q,--quick-check : Quickly check the CSV source for matrix shape [implicit: "true", default: true]
+    -L,--locale : Specify the locale ("C") of any formatted numbers. [default: C]
+    --blanks : Do not convert "", "na", "n/a", "none", "null", "." to NULL. [implicit: "true", default: false]
+    --null-value : Convert this value to NULL. --null-value can be specified multiple times. [default: unknown]
+    --date-format : Specify a strptime date format string like "%m/%d/%Y". [default: %m/%d/%Y]
+    --datetime-format : Specify a strptime datetime format string like "%m/%d/%Y %I:%M %p". [default: %m/%d/%Y %I:%M %p]
+    --no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]
+    --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
+    --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
