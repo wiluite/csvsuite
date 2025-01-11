@@ -33,24 +33,8 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
                     cache_values(other);
 
-//#define SEQUENTIAL 1
-#if defined(SEQUENTIAL)
-                    arg.run_rows([&](auto &span) {
-                        auto const key = elem_t{span[c_ids[0]]};
-                        const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                        for (auto next = p.first; next != p.second; ++next) {
-                            std::vector<std::string> join_vec;
-
-                            join_vec.reserve(span.size() + next->size() - 1);
-                            join_vec.assign(span.begin(), span.end());
-                            join_vec.insert(join_vec.end(), next->begin(), next->begin() + c_ids[1]);
-                            join_vec.insert(join_vec.end(), next->begin() + c_ids[1] + 1, next->end());
-                            impl.add(std::move(join_vec));
-                        }  
-                    });
-#else
                     using row_t = std::vector<std::string>;
-                    using rows_t = std::vector<std::vector<std::string>>;
+                    using rows_t = std::vector<row_t>;
 
                     auto process = [&](auto & this_table, auto & join_vec) {
                         auto const table_addr = std::addressof(this_table[0]); 
@@ -84,7 +68,6 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                         std::vector<rows_t> join_vec(this_table.size());
                         process(this_table, join_vec);
                     }
-#endif
                 }
                 catch (typename reader_type::implementation_exception const &) {}
                 catch (no_body_exception const &) {}
