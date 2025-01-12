@@ -55,20 +55,43 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
                     cache_values(other);
 
-                    arg.run_rows([&](auto &span) {
-                        auto const key = elem_t{span[c_ids[0]]};
-                        const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                        if (p.first != p.second)
-                            for (auto next = p.first; next != p.second; ++next) {
-                                std::vector<std::string> join_vec;
-                                join_vec.reserve(span.size() + next->size());
-                                join_vec.assign(span.begin(), span.end());
-                                join_vec.insert(join_vec.end(), next->begin(), next->end());
-                                impl.add(std::move(join_vec));
-                            }
-                        else
-                            impl.add(std::move(compose_distinct_left_part(span)));
-                    });
+                    using row_t = std::vector<std::string>;
+                    using rows_t = std::vector<row_t>;
+
+                    auto process = [&](auto & this_table, auto & join_vec) {
+                        auto const table_addr = std::addressof(this_table[0]);
+                        std::for_each(poolstl::par, this_table.begin(), this_table.end(), [&](auto & row) {
+
+                            auto const key = elem_t{row[c_ids[0]]};
+                            const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                            if (p.first != p.second)
+                                for (auto next = p.first; next != p.second; ++next) {
+                                    std::vector<std::string> joins;
+
+                                    joins.reserve(row.size() + next->size());
+                                    joins.assign(row.begin(), row.end());
+                                    joins.insert(joins.end(), next->begin() , next->end());
+                                    join_vec[std::addressof(row) - table_addr].emplace_back(std::move(joins));
+                                }
+                            else
+                                join_vec[std::addressof(row) - table_addr].emplace_back(std::move(compose_distinct_left_part(row)));
+                        });
+                        for (auto & rows : join_vec) {
+                            for (auto & row : rows)
+                                impl.add(std::move(row));
+                        }
+                    };
+
+                    if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, reader_type>) {
+                        compromise_table_MxN this_table(arg, args);
+                        std::vector<rows_t> join_vec(this_table.rows());
+                        process(this_table, join_vec);
+                    } else {
+                        static_assert(std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>);
+                        auto const & this_table = arg.operator typename reader_fake<reader_type>::table &();
+                        std::vector<rows_t> join_vec(this_table.size());
+                        process(this_table, join_vec);
+                    }
                 }
                 catch (typename reader_type::implementation_exception const &) {}
                 catch (no_body_exception const &) {
@@ -105,15 +128,37 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     std::stable_sort(poolstl::par, this_.begin(), this_.end(), sort_comparator(compare_fun, std::less<>()));
                     cache_values(this_);
 
-                    arg.run_rows([&](auto &span) {
-                        auto const key = elem_t{span[c_ids[1]]};
-                        const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
-                        if (p.first == p.second) {
-                            impl.add(std::move(compose_distinct_right_part(span)));
-                            if (!recalculate_types_blanks)
-                                recalculate_types_blanks = true;
+                    using row_t = std::vector<std::string>;
+                    using rows_t = std::vector<row_t>;
+
+                    auto process = [&](auto & other_table, auto & join_vec) {
+                        auto const table_addr = std::addressof(other_table[0]);
+                        std::for_each(poolstl::par, other_table.begin(), other_table.end(), [&](auto & row) {
+
+                            auto const key = elem_t{row[c_ids[1]]};
+                            const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                            if (p.first == p.second) {
+                                join_vec[std::addressof(row) - table_addr].emplace_back(std::move(compose_distinct_right_part(row)));
+                                if (!recalculate_types_blanks)
+                                    recalculate_types_blanks = true;
+                            }
+                        });
+                        for (auto & rows : join_vec) {
+                            for (auto & row : rows)
+                                impl.add(std::move(row));
                         }
-                    });
+                    };
+
+                    if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, reader_type>) {
+                        compromise_table_MxN other_table(arg, args);
+                        std::vector<rows_t> join_vec(other_table.rows());
+                        process(other_table, join_vec);
+                    } else {
+                        static_assert(std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>);
+                        auto const & other_table = arg.operator typename reader_fake<reader_type>::table &();
+                        std::vector<rows_t> join_vec(other_table.size());
+                        process(other_table, join_vec);
+                    }
                 }
                 catch (typename reader_type::implementation_exception const &) {}
                 catch (no_body_exception const &) {
@@ -125,7 +170,6 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                         });
                     } catch (typename reader_type::implementation_exception const &) {}
                 }
-
             }, other_source);
         } else {
             std::visit([&](auto &&arg) {
