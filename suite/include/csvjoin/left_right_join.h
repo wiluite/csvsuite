@@ -41,9 +41,9 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                     auto compare_fun = compose_compare_function();
                     std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
                     cache_values(other);
-
+#if 1
                     arg.run_rows([&](auto &span) {
-                        auto key = elem_t{span[c_ids[0]]};
+                        auto const key = elem_t{span[c_ids[0]]};
                         const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
                         if (p.first != p.second)
                             for (auto next = p.first; next != p.second; ++next) {
@@ -58,6 +58,9 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                         else
                             impl.add(std::move(compose_distinct_record(span)));
                     });
+#else
+
+#endif
                 }
                 catch (typename reader_type::implementation_exception const &) {}
                 catch (no_body_exception const &) {

@@ -56,7 +56,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     cache_values(other);
 
                     arg.run_rows([&](auto &span) {
-                        auto key = elem_t{span[c_ids[0]]};
+                        auto const key = elem_t{span[c_ids[0]]};
                         const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
                         if (p.first != p.second)
                             for (auto next = p.first; next != p.second; ++next) {
@@ -106,7 +106,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     cache_values(this_);
 
                     arg.run_rows([&](auto &span) {
-                        auto key = elem_t{span[c_ids[1]]};
+                        auto const key = elem_t{span[c_ids[1]]};
                         const auto p = std::equal_range(this_.begin(), this_.end(), key, equal_range_comparator<reader_type>(compare_fun));
                         if (p.first == p.second) {
                             impl.add(std::move(compose_distinct_right_part(span)));
