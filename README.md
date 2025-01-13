@@ -800,7 +800,7 @@ Basic use:
 
     csvLook examples/testfixed_converted.csv
 
-A final operation when piping through other tools:
+Serve as the final operation when piping through other tools:
 
     csvCut -c 9,1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvLook
 
@@ -812,6 +812,42 @@ _not supported, see notation above._
 
 
 #### csvSql
+##### Description
+Generate SQL statements for a CSV file or execute those statements directly on a database. In the latter case supports
+both creating tables and inserting data
+
+    Usage: csvSql arg_0  [options...]
+    arg_0 : The CSV files to operate on. [default: unknown]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    -i,--dialect : Dialect of SQL {mysql,postgresql,sqlite,firebird,oracle} to generate. Cannot be used with --db or --query.  [default: ]
+    --db : If present, a 'soci' connection string to use to directly execute generated SQL on a database. [default: ]
+    --query : Execute one or more SQL queries delimited by --sql-delimiter, and output the result of the last query as CSV. QUERY may be a filename. --query may be specified multiple times. [default: ]
+    --insert : Insert the data into the table. Requires --db. [implicit: "true", default: false]
+    --prefix : Add an expression following the INSERT keyword, like OR IGNORE or OR REPLACE. [default: ]
+    --before-insert : Before the INSERT command, execute one or more SQL queries delimited by --sql-delimiter. Requires --insert. [default: ]
+    --after-insert : After the INSERT command, execute one or more SQL queries delimited by --sql-delimiter. Requires --insert. [default: ]
+    --sql-delimiter : Delimiter separating SQL queries in --query, --before-insert, and --after-insert. [default: ;]
+    --tables : A comma-separated list of names of tables to be created. By default, the tables will be named after the filenames without extensions or "stdin". [default: ]
+    --no-constraints : Generate a schema without length limits or null checks. Useful when sampling big tables. [implicit: "true", default: false]
+    --unique-constraint : A comma-separated list of names of columns to include in a UNIQUE constraint [default: ]
+    --no-create : Skip creating the table. Requires --insert. [implicit: "true", default: false]
+    --create-if-not-exists : Create the table if it does not exist, otherwise keep going. Requires --insert. [implicit: "true", default: false]
+    --overwrite : Drop the table if it already exists. Requires --insert. Cannot be used with --no-create. [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    --chunk-size : Chunk size for batch insert into the table. Requires --insert. [default: 0]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: [--engine-option](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported because the
+utility is [SOCI](https://github.com/SOCI/soci) driven, not SQLAlchemy driven.  
+NOTE: [--min-col-len and --col-len-multiplier](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) options are
+not supported as well. See the utility [source](https://github.com/wiluite/csvsuite/blob/main/suite/csvSql.cpp) to know
+about constant lengths of text columns. This will definitely be fixed soon. 
+
+
 #### csvStat
 
 ### Arguments common to all tools
