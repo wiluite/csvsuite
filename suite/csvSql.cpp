@@ -82,7 +82,11 @@ namespace csvsql::detail {
                     updated_names.emplace_back(std::move(elem));
             }
 
+            if (updated_names.empty())
+                throw std::runtime_error(std::string("Invalid argument: ") + R"(')" + args.files[0] + R"(')");
+
             args.files = std::move(updated_names);
+
             for (auto & elem : args.files) {
                 auto reader {elem != "_" ? ReaderType{std::filesystem::path{elem}} : (elem = "stdin", ReaderType{read_standard_input(args)})};
                 recode_source(reader, args);

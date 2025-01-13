@@ -2,6 +2,7 @@
 
 add_subdirectory(external/cppp-reiconv-v2.1.0)
 add_subdirectory(external/simdutf)
+add_subdirectory(external/glob)
 
 include_directories(external/CSV_co/include external/CSV_co/include/csv_co/external ${CMAKE_BINARY_DIR}/include include external/multiprecision/include)
 
@@ -67,12 +68,12 @@ if (NOT _SANITY_CHECK)
         set(ORACLE_INCLUDE_DIR "")
     endif()
 
-    add_executable(csvSql csvSql.cpp external/glob/glob.cpp)
+    add_executable(csvSql csvSql.cpp)
     target_include_directories(csvSql
         PRIVATE
         ${CMAKE_BINARY_DIR}/external/soci/include ${SQLITE3_INCLUDE_DIR} ${POSTGRESQL_INCLUDE_DIR} ${MARIADB_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${FIREBIRD_INCLUDE_DIR} ${ORACLE_INCLUDE_DIR} external/ocilib/include
     )
-    target_link_libraries(csvSql PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
+    target_link_libraries(csvSql PRIVATE libcppp-reiconv.static simdutf soci_core ociliba bz2_connector ranav-glob -lpthread)
     if (UNIX)
     else()
         if (MSVC)

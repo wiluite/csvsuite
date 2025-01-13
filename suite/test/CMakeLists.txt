@@ -472,7 +472,7 @@ add_test(csvGrep_test csvGrep_test)
 
 if (IO_CSVSUITE_UTILS)
   if (NOT _SANITY_CHECK)
-    add_executable(csvSql_test csvSql_test.cpp ../external/glob/glob.cpp)
+    add_executable(csvSql_test csvSql_test.cpp)
     target_include_directories(csvSql_test PRIVATE
         ${CMAKE_BINARY_DIR}/../external/soci/include
         ${SQLITE3_INCLUDE_DIR}
@@ -544,7 +544,7 @@ if (IO_CSVSUITE_UTILS)
         ${CMAKE_SOURCE_DIR}/suite/test/examples/piped_stdin
         ${CMAKE_CURRENT_BINARY_DIR}/examples/piped_stdin)
 
-    target_link_libraries(csvSql_test libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
+    target_link_libraries(csvSql_test libcppp-reiconv.static simdutf soci_core ociliba bz2_connector ranav-glob -lpthread)
     add_test(csvSql_test csvSql_test)
 
     if (UNIX)
