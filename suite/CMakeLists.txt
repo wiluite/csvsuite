@@ -67,7 +67,7 @@ if (NOT _SANITY_CHECK)
         set(ORACLE_INCLUDE_DIR "")
     endif()
 
-    add_executable(csvSql csvSql.cpp)
+    add_executable(csvSql csvSql.cpp external/glob/glob.cpp)
     target_include_directories(csvSql
         PRIVATE
         ${CMAKE_BINARY_DIR}/external/soci/include ${SQLITE3_INCLUDE_DIR} ${POSTGRESQL_INCLUDE_DIR} ${MARIADB_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${FIREBIRD_INCLUDE_DIR} ${ORACLE_INCLUDE_DIR} external/ocilib/include

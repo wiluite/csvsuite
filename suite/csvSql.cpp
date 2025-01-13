@@ -12,6 +12,7 @@ using namespace ocilib;
 #include <cli.h>
 #include <sql_utils/rowset-query-impl.h>
 #include <sql_utils/local-sqlite3-dep.h>
+#include "external/glob/glob/glob.h"
 
 // TODO:
 //  3. implement null_value (while printing results?) (see how this is done in original utility)
@@ -69,6 +70,19 @@ namespace csvsql::detail {
         auto set_readers(auto & args) {
             if (args.files.empty())
                 args.files = std::vector<std::string>{"_"};
+
+            // process a chance we are dealing with file patterns
+            std::vector<std::string> updated_names;
+            for (auto & elem : args.files) {
+                if (elem.find_first_of("*?[") != std::string::npos)
+                    for (auto& match: glob::glob(elem)) {
+                        updated_names.emplace_back(match.string());
+                    }
+                else
+                    updated_names.emplace_back(std::move(elem));
+            }
+
+            args.files = std::move(updated_names);
             for (auto & elem : args.files) {
                 auto reader {elem != "_" ? ReaderType{std::filesystem::path{elem}} : (elem = "stdin", ReaderType{read_standard_input(args)})};
                 recode_source(reader, args);

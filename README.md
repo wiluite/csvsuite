@@ -846,7 +846,7 @@ utility is [SOCI](https://github.com/SOCI/soci) driven, not SQLAlchemy driven.
 NOTE: [--min-col-len and --col-len-multiplier](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) options are
 not supported as well. See the utility [source](https://github.com/wiluite/csvsuite/blob/main/suite/csvSql.cpp) to know
 about constant lengths of text columns. This will definitely be fixed soon. 
-
+NOTE: [--db-schema](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported as well.
 
 #### csvStat
 

@@ -472,7 +472,7 @@ add_test(csvGrep_test csvGrep_test)
 
 if (IO_CSVSUITE_UTILS)
   if (NOT _SANITY_CHECK)
-    add_executable(csvSql_test csvSql_test.cpp)
+    add_executable(csvSql_test csvSql_test.cpp ../external/glob/glob.cpp)
     target_include_directories(csvSql_test PRIVATE
         ${CMAKE_BINARY_DIR}/../external/soci/include
         ${SQLITE3_INCLUDE_DIR}

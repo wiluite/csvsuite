@@ -111,7 +111,7 @@ int main() {
 
     OutputCodePage65001 ocp65001;
 
-    struct csvsql_specific_args {
+    struct csvSql_specific_args {
         std::vector<std::string> files;
         std::string dialect;
         std::string db;
@@ -132,7 +132,38 @@ int main() {
         bool check_integrity = {true};
     };
 
-    struct csvSql_args : tf::common_args, tf::type_aware_args, csvsql_specific_args {};
+    struct csvSql_args : tf::common_args, tf::type_aware_args, csvSql_specific_args {};
+
+    "glob"_test = [] {
+        struct Args : csvSql_args {
+            Args() {
+                files = {"examples/dummy?.csv"};
+            }
+        } args;
+
+        CALL_TEST_AND_REDIRECT_TO_COUT(
+            csvsql::sql<notrimming_reader_type>(args)
+        )
+
+        auto no_tabs_rep = cout_buffer.str();
+        std::replace(no_tabs_rep.begin(), no_tabs_rep.end(), '\t', ' ');
+        expect(no_tabs_rep == R"(CREATE TABLE dummy2 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+CREATE TABLE dummy3 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+CREATE TABLE dummy4 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+)");  
+    };
 
     "create table"_test = [] {
         struct Args : csvSql_args {
