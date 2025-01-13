@@ -529,6 +529,20 @@ True,2,3,,,,
 ,,,,,2,c
 )");
             };
+
+            "empty values in columns of different types"_test = [&] {
+                auto args_copy = args;
+                args_copy.columns = "1,1";
+                args_copy.outer_join = true;
+                args_copy.files = std::vector<std::string>{"a,b\n1.0,2\n ,4", "a,b\n,char2\nchar3,char4"};
+                CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy, csvjoin::detail::csvjoin_source_option::csvjoin_string_source))
+                expect(cout_buffer.str() == R"(a,b,a2,b2
+1.0,2,,
+,4,,char2
+,,char3,char4
+)");
+            };
+
         };
 
         "std::equal_range"_test = [&] {
