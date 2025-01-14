@@ -29,7 +29,7 @@ namespace csvsuite::cli {
     };
 
     void print_LF(auto & stdout_) {
-        stdout_ << "\n";
+        stdout_ << '\n';
     }
 }
 
