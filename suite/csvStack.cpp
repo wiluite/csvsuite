@@ -129,14 +129,15 @@ namespace csvstack::detail {
             obtain_header_and_<skip_header>(r, args);
             std::size_t row_idx = 0;
             max_field_size_checker size_checker(r, args, r.cols(), init_row{args.no_header ? 1u : 2u});
+            bool const groups_or_filenames = args.groups != "empty" or args.filenames;
             r.run_rows([&](auto & row_span) {
                 check_max_size(row_span, size_checker);
-                if (args.groups != "empty" or args.filenames)
+                if (groups_or_filenames)
                     table[row_idx][0] = args.filenames ? args.files[0] : group_names[0];
 
-                auto col_idx = 0;
+                auto col_idx = groups_or_filenames ? 1 : 0;
                 for (auto & elem : row_span)
-                    table[row_idx][(args.groups != "empty" or args.filenames ? 1 : 0) + col_idx++] = elem;
+                    table[row_idx][col_idx++] = elem;
                 row_idx++;
             });
             r_man.get_readers().pop_front();
@@ -155,9 +156,10 @@ namespace csvstack::detail {
                 unsigned const cols = r.cols();
 
                 max_field_size_checker size_checker(r, args, cols, init_row{args.no_header ? 1u : 2u});
+                bool const groups_or_filenames = args.groups != "empty" or args.filenames;
                 r.run_rows([&](auto & row_span) {
                     check_max_size(row_span, size_checker);
-                    if (args.groups != "empty" or args.filenames)
+                    if (groups_or_filenames)
                         table[row_idx][0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
 
                     auto col_idx = 0;
@@ -256,7 +258,8 @@ namespace csvstack {
         std::vector<unsigned> replace_vec;
         auto const header = fill_replace_vec(headers, replace_vec, args);
         std::vector<std::vector<std::string>> t (rows, std::vector<std::string>(cols + (args.groups == "empty" && !args.filenames ? 0 : 1)));
-        put_rest(r_man, put_first(r_man, args, t, group_names), args, t, replace_vec, group_names);
+        auto const next_row = put_first(r_man, args, t, group_names);
+        put_rest(r_man, next_row, args, t, replace_vec, group_names);
         std::ostringstream oss;
         std::ostream & oss_ = args.asap ? std::cout : oss;
         printer p(oss_);
