@@ -6,6 +6,7 @@
 #include <cli.h>
 #include <printer_concepts.h>
 #include <deque>
+#include "external/glob/glob/glob.h"
 
 using namespace ::csvsuite::cli;
 
@@ -206,10 +207,33 @@ namespace csvstack::detail {
         auto & get_readers() {
             return readers;
         }
+
         template<typename ReaderType>
-        auto set_readers(auto const & args) {
-            for (auto const & elem : args.files) {
-                auto reader {elem != "_" ? ReaderType{std::filesystem::path{elem}} : ReaderType{read_standard_input(args)}};
+        auto set_readers(auto & args) {
+            if (args.files.empty()) {
+                args.files = std::vector<std::string>{"_"};
+                if (isatty(STDIN_FILENO))
+                    std::cerr << "No input file or piped data provided. Waiting for standard input:\n";
+            }
+            else {
+                // process a chance we are dealing with file patterns
+                std::vector<std::string> updated_names;
+                for (auto & elem : args.files) {
+                    if (elem.find_first_of("*?[") != std::string::npos)
+                        for (auto& match: glob::glob(elem))
+                            updated_names.emplace_back(match.string());
+                    else
+                        updated_names.emplace_back(std::move(elem));
+                }
+
+                if (updated_names.empty())
+                    throw std::runtime_error(std::string("Invalid argument: ") + R"(')" + args.files[0] + R"(')");
+
+                args.files = std::move(updated_names);
+            }
+
+            for (auto & elem : args.files) {
+                auto reader {elem != "_" ? ReaderType{std::filesystem::path{elem}} : (ReaderType{read_standard_input(args)})};
                 recode_source(reader, args);
                 skip_lines(reader, args);
                 quick_check(reader, args);
@@ -225,7 +249,7 @@ namespace csvstack::detail {
 namespace csvstack {
 
     template <typename ReaderType>
-    void stack(auto const & args) {
+    void stack(auto & args) {
         using namespace csv_co;
         using namespace detail;
         std::vector<std::string> group_names;

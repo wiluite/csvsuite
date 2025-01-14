@@ -386,7 +386,7 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_field_size_limit.csv
         ${CMAKE_CURRENT_BINARY_DIR}/examples/test_field_size_limit.csv)
 
-target_link_libraries(csvStack_test libcppp-reiconv.static simdutf bz2_connector -lpthread)
+target_link_libraries(csvStack_test libcppp-reiconv.static simdutf bz2_connector ranav-glob -lpthread)
 add_test(csvStack_test csvStack_test)
 
 add_executable(csvJson_test csvJson_test.cpp)

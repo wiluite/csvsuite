@@ -37,6 +37,27 @@ int main() {
 
     struct csvStack_args : tf::common_args, tf::output_args, csvstack_specific_args {};
 
+    "glob"_test = [] {
+        struct Args : csvStack_args {
+        } args;
+
+        args.files = std::vector<std::string>{"examples/dummy*.csv"};
+
+        CALL_TEST_AND_REDIRECT_TO_COUT(
+            csvstack::stack<notrimming_reader_type>(args)
+        )
+
+        expect(cout_buffer.str() == R"(a,b,c,d
+1,2,3,
+1,2,3,
+1,2,3,
+1,4,5,
+0,2,3,
+1,2,3,
+1,2,3,4
+)");
+    };
+
     "skip lines"_test = [] {
         struct Args : csvStack_args {
         } args;

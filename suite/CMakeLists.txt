@@ -184,7 +184,7 @@ add_executable(csvJoin csvJoin.cpp)
 target_link_libraries(csvJoin libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
 add_executable(csvStack csvStack.cpp)
-target_link_libraries(csvStack libcppp-reiconv.static simdutf bz2_connector)
+target_link_libraries(csvStack libcppp-reiconv.static simdutf bz2_connector ranav-glob)
 
 add_executable(csvGrep csvGrep.cpp)
 target_link_libraries(csvGrep libcppp-reiconv.static simdutf bz2_connector)

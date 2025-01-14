@@ -70,22 +70,22 @@ namespace csvsql::detail {
         auto set_readers(auto & args) {
             if (args.files.empty())
                 args.files = std::vector<std::string>{"_"};
+            else {
+                // process a chance we are dealing with file patterns
+                std::vector<std::string> updated_names;
+                for (auto & elem : args.files) {
+                    if (elem.find_first_of("*?[") != std::string::npos)
+                        for (auto& match: glob::glob(elem))
+                            updated_names.emplace_back(match.string());
+                    else
+                        updated_names.emplace_back(std::move(elem));
+                }
 
-            // process a chance we are dealing with file patterns
-            std::vector<std::string> updated_names;
-            for (auto & elem : args.files) {
-                if (elem.find_first_of("*?[") != std::string::npos)
-                    for (auto& match: glob::glob(elem)) {
-                        updated_names.emplace_back(match.string());
-                    }
-                else
-                    updated_names.emplace_back(std::move(elem));
+                if (updated_names.empty())
+                    throw std::runtime_error(std::string("Invalid argument: ") + R"(')" + args.files[0] + R"(')");
+
+                args.files = std::move(updated_names);
             }
-
-            if (updated_names.empty())
-                throw std::runtime_error(std::string("Invalid argument: ") + R"(')" + args.files[0] + R"(')");
-
-            args.files = std::move(updated_names);
 
             for (auto & elem : args.files) {
                 auto reader {elem != "_" ? ReaderType{std::filesystem::path{elem}} : (elem = "stdin", ReaderType{read_standard_input(args)})};
