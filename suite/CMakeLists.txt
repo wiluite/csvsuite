@@ -181,7 +181,7 @@ add_executable(csvJson csvJson.cpp)
 target_link_libraries(csvJson libcppp-reiconv.static simdutf bz2_connector -lpthread)
 
 add_executable(csvJoin csvJoin.cpp)
-target_link_libraries(csvJoin libcppp-reiconv.static simdutf bz2_connector -lpthread)
+target_link_libraries(csvJoin libcppp-reiconv.static simdutf bz2_connector ranav-glob -lpthread)
 
 add_executable(csvStack csvStack.cpp)
 target_link_libraries(csvStack libcppp-reiconv.static simdutf bz2_connector ranav-glob)

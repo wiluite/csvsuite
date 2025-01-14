@@ -46,6 +46,17 @@ int main() {
             }
         } args;
 
+        "glob"_test = [&] {
+            auto args_copy = args;
+            args_copy.files = std::vector<std::string>{"examples/dummy_col*.csv"};
+            args_copy.no_inference = true;
+            args_copy.columns = "1";
+            CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+            expect(cout_buffer.str() == R"(b,c,a,c2,a2,d
+2,3,1,3,1,4
+)");
+        };
+
         "sequential"_test = [&] {
             {
                 auto args_copy = args;

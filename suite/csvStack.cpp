@@ -199,10 +199,10 @@ namespace csvstack::detail {
 
         template<typename ReaderType>
         auto set_readers(auto & args) {
-            if (args.files.empty()) {
-                args.files = std::vector<std::string>{"_"};
+            if (args.files.empty() or (args.files.size() == 1 and args.files[0] == "_")) {
                 if (isatty(STDIN_FILENO))
                     std::cerr << "No input file or piped data provided. Waiting for standard input:\n";
+                args.files = std::vector<std::string>{"_"};
             }
             else {
                 // process a chance we are dealing with file patterns

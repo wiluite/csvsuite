@@ -336,7 +336,7 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_field_size_limit.csv
         ${CMAKE_CURRENT_BINARY_DIR}/examples/test_field_size_limit.csv)
-target_link_libraries(csvJoin_test libcppp-reiconv.static simdutf bz2_connector -lpthread)
+target_link_libraries(csvJoin_test libcppp-reiconv.static simdutf bz2_connector ranav-glob -lpthread)
 add_test(csvJoin_test csvJoin_test)
 
 add_executable(csvStack_test csvStack_test.cpp)

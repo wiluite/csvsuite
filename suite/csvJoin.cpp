@@ -8,6 +8,7 @@
 #include "type_name.h"
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
+#include "external/glob/glob/glob.h"
 
 using namespace ::csvsuite::cli;
 using namespace ::csvsuite::cli::compare;
@@ -330,11 +331,10 @@ namespace csvjoin::detail {
 
 namespace csvjoin {
     using namespace detail;
-    void join_wrapper(auto const & args, csvjoin_source_option source_type = csvjoin_source_option::csvjoin_file_source) {
+    void join_wrapper(auto & args, csvjoin_source_option source_type = csvjoin_source_option::csvjoin_file_source) {
         using namespace csvjoin::detail;
 
         check_arg_semantics(args);
-        auto join_column_names = get_join_column_names(args);
 
         std::variant<std::deque<notrimming_reader_or_fake_type>, std::deque<skipinitspace_reader_or_fake_type>> variants;
 
@@ -342,23 +342,41 @@ namespace csvjoin {
 
             using real_reader_t = std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>;
 
-            if (args.files.empty())
-                deq.emplace_back(real_reader_t{read_standard_input(args)});
-            else {
-                for (auto && elem : args.files)
-                    if (source_type == csvjoin_source_option::csvjoin_file_source) {
-                        auto r = elem != "_" ? real_reader_t{std::filesystem::path{elem}} : real_reader_t{read_standard_input(args)};
-                        deq.emplace_back(std::move(r));
-                    }
-                    else
-                        deq.emplace_back(real_reader_t{elem});
+            if (args.files.empty() or (args.files.size() == 1 and args.files[0] == "_")) {
+                if (isatty(STDIN_FILENO))
+                    throw std::runtime_error("You must provide an input file or piped data.");
+                args.files = std::vector<std::string>{"_"};
             }
+            else {
+                // process a chance we are dealing with file patterns
+                std::vector<std::string> updated_names;
+                for (auto & elem : args.files) {
+                    if (elem.find_first_of("*?[") != std::string::npos)
+                        for (auto& match: glob::glob(elem))
+                            updated_names.emplace_back(match.string());
+                    else
+                        updated_names.emplace_back(std::move(elem));
+                }
+
+                if (updated_names.empty())
+                    throw std::runtime_error(std::string("Invalid argument: ") + R"(')" + args.files[0] + R"(')");
+
+                args.files = std::move(updated_names);
+            }
+
+            for (auto && elem : args.files)
+                if (source_type == csvjoin_source_option::csvjoin_file_source) {
+                    auto r = elem != "_" ? real_reader_t{std::filesystem::path{elem}} : real_reader_t{read_standard_input(args)};
+                    deq.emplace_back(std::move(r));
+                }
+                else
+                    deq.emplace_back(real_reader_t{elem});
+
             if (args.right_join)
                 std::reverse(deq.begin(), deq.end());
 
             variants = std::move(deq);
         };
-
         if (!args.skip_init_space) {
             std::deque<notrimming_reader_or_fake_type> d;
             fill_deque(d);
@@ -366,6 +384,8 @@ namespace csvjoin {
             std::deque<skipinitspace_reader_or_fake_type> d;
             fill_deque(d);
         }
+        auto join_column_names = get_join_column_names(args);
+
         std::visit([&](auto && arg) { join(arg, args, join_column_names);}, variants);
     }
 }

@@ -68,8 +68,11 @@ namespace csvsql::detail {
         }
         template<typename ReaderType>
         auto set_readers(auto & args) {
-            if (args.files.empty())
+            if (args.files.empty() or (args.files.size() == 1 and args.files[0] == "_")) {
+                if (isatty(STDIN_FILENO))
+                    throw std::runtime_error("You must provide an input file or piped data.");
                 args.files = std::vector<std::string>{"_"};
+            }
             else {
                 // process a chance we are dealing with file patterns
                 std::vector<std::string> updated_names;
