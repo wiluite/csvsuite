@@ -886,10 +886,21 @@ database, so it won’t be very fast:
     
     csvSql --query "SELECT m.usda_id, avg(i.sepal_length) AS mean_sepal_length FROM iris AS i JOIN irismeta AS m ON (i.species = m.species) GROUP BY m.species" examples/iris.csv examples/irismeta.csv
 
+Group rows by one column:
 
+    csvSql --query "SELECT * FROM 'dummy3' GROUP BY a" examples/dummy3.csv
 
+Concatenate two columns:
 
+    csvSql --query "SELECT a || b FROM 'dummy3'" --no-inference examples/dummy3.csv
 
+If a column contains null values, you must COALESCE the column:
+
+    csvSql --query "SELECT a || COALESCE(b, '') as RESULT FROM 'sort_ints_nulls'" --no-inference examples/sort_ints_nulls.csv
+
+The UPDATE SQL statement produces no output. Remember to SELECT the columns and rows you want:
+
+~~csvSql --query "UPDATE 'dummy3' SET a = 'foo'; SELECT * FROM 'dummy3'" examples/dummy3.csv~~
 
 #### csvStat
 
