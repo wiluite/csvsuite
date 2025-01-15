@@ -612,7 +612,7 @@ if (IO_CSVSUITE_UTILS)
             ${CMAKE_SOURCE_DIR}/suite/test/examples/stdin_select
             ${CMAKE_CURRENT_BINARY_DIR}/examples/stdin_select)
 
-    target_link_libraries(Sql2csv_test libcppp-reiconv.static simdutf soci_core ociliba bz2_connector -lpthread)
+    target_link_libraries(Sql2csv_test libcppp-reiconv.static simdutf soci_core ociliba bz2_connector ranav-glob -lpthread)
     add_test(Sql2csv_test Sql2csv_test)
 
     if (UNIX)

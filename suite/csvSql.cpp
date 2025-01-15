@@ -69,8 +69,10 @@ namespace csvsql::detail {
         template<typename ReaderType>
         auto set_readers(auto & args) {
             if (args.files.empty() or (args.files.size() == 1 and args.files[0] == "_")) {
+#if !defined(BOOST_UT_DISABLE_MODULE)
                 if (isatty(STDIN_FILENO))
                     throw std::runtime_error("You must provide an input file or piped data.");
+#endif
                 args.files = std::vector<std::string>{"_"};
             }
             else {
