@@ -4,7 +4,6 @@
 /// \brief  Stack up the rows from multiple CSV files.
 
 #include <cli.h>
-#include <printer_concepts.h>
 #include <deque>
 #include "external/glob/glob/glob.h"
 
@@ -22,73 +21,6 @@ namespace csvstack::detail {
         void welcome() final {
             std::cout << "\nStack up the rows from multiple CSV files, optionally adding a grouping value.\n\n";
         }
-    };
-
-    template <class OS>
-    class printer {
-        OS &os;
-    public:
-        explicit printer(OS &os = std::cout) : os(os) {}
-        template <CsvKitCellSpanTableConcept Table>
-        void write(Table & table, auto const & types_blanks, auto const & args)  {
-            for (auto const & row : table) {
-                write(row, types_blanks, args);
-                print_CRLF(os);
-            }
-        }
-
-        template <typename T>
-        void write(T&& printable, auto && args)
-        requires (!CsvKitCellSpanTableConcept<T> && !CsvKitCellSpanRowConcept<T> && !CellSpanRowConcept<T> && !CsvReaderConcept<T>) {
-            if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<T>>) { // print header
-                if (args.linenumbers)
-                    os << "line_number,";
-
-                std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
-                    os << elem << ',';
-                });
-                os << printable.back();
-                print_LF(os);
-            } else {
-            }
-        }
-
-        template <typename T>
-        void write(T&& printable, auto && types_n_blanks, auto && args)
-        requires (!CsvKitCellSpanTableConcept<T>
-                  && !CsvKitCellSpanRowConcept<T>
-                  && !CellSpanRowConcept<T>
-                  && !CsvReaderConcept<T>) {
-            if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<T>>) { // print header
-                if (args.linenumbers)
-                    os << "line_number,";
-
-                std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
-                    os << elem << ',';
-                });
-                os << printable.back();
-                print_LF(os);
-            } else
-            if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<decltype(std::declval<T>()[0])>>) { // print body
-                for (auto && elem : printable) {
-                    if (args.linenumbers) {
-                        static unsigned line_nums = 0;
-                        os << ++line_nums << ',';
-                    }
-
-                    auto col = 0u;
-                    std::for_each(elem.begin(), elem.end()-1, [&](auto const & e) {
-                        os << e << ',';
-                    });
-                    os << elem.back();
-                    print_LF(os);
-                }
-            } else {
-                std::cerr << "No implementation for printing of this kind of table\n";
-                std::cerr << type_name<T>() << std::endl;
-            }
-        }
-
     };
 
 //TODO: -no-table option
@@ -122,6 +54,8 @@ namespace csvstack::detail {
         return std::tuple(rows, header_fields.size(), headers);
     }
 
+    unsigned line_nums = 0;
+
     auto put_first(auto & r_man, auto const & args, auto cols, auto const & group_names) {
         return std::visit([&](auto && r) {
             r.skip_rows(0);
@@ -131,6 +65,9 @@ namespace csvstack::detail {
             bool const groups_or_filenames = args.groups != "empty" or args.filenames;
             r.run_rows([&](auto & row_span) {
                 check_max_size(row_span, size_checker);
+                if (args.linenumbers)
+                    std::cout << ++line_nums << ',';
+
                 if (groups_or_filenames)
                     std::cout << (args.filenames ? args.files[0] : group_names[0]) << ',';
 
@@ -162,6 +99,9 @@ namespace csvstack::detail {
                 std::vector<std::string> row(total_cols);
                 r.run_rows([&](auto & row_span) {
                     check_max_size(row_span, size_checker);
+                    if (args.linenumbers)
+                        std::cout << ++line_nums << ',';
+
                     if (groups_or_filenames)
                         row[0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
 
@@ -270,8 +210,13 @@ namespace csvstack {
         std::ostringstream oss;
         std::ostream & oss_ = args.asap ? std::cout : oss;
 
-        printer p(oss_);
-        p.write(header, args);
+        if (args.linenumbers)
+            oss_ << "line_number,";
+
+        std::for_each(header.begin(), header.end() - 1, [&](auto const & elem) {
+            oss_ << elem << ',';
+        });
+        oss_ << header.back() << '\n';
 
         put_first(r_man, args, total_cols, group_names);
         put_rest(r_man, args, total_cols, replace_vec, group_names);
