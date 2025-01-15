@@ -122,30 +122,32 @@ namespace csvstack::detail {
         return std::tuple(rows, header_fields.size(), headers);
     }
 
-    auto put_first(auto & r_man, auto const & args, auto && table, auto const & group_names) {
+    auto put_first(auto & r_man, auto const & args, auto cols, auto const & group_names) {
         return std::visit([&](auto && r) {
             r.skip_rows(0);
             skip_lines(r, args);
             obtain_header_and_<skip_header>(r, args);
-            std::size_t row_idx = 0;
             max_field_size_checker size_checker(r, args, r.cols(), init_row{args.no_header ? 1u : 2u});
             bool const groups_or_filenames = args.groups != "empty" or args.filenames;
             r.run_rows([&](auto & row_span) {
                 check_max_size(row_span, size_checker);
                 if (groups_or_filenames)
-                    table[row_idx][0] = args.filenames ? args.files[0] : group_names[0];
+                    std::cout << (args.filenames ? args.files[0] : group_names[0]) << ',';
 
-                auto col_idx = groups_or_filenames ? 1 : 0;
-                for (auto & elem : row_span)
-                    table[row_idx][col_idx++] = elem;
-                row_idx++;
+                std::cout << row_span.front().operator csv_co::cell_string();
+                std::for_each (row_span.begin() + 1, row_span.end(), [](auto & elem) {
+                    std::cout << ',' << elem.operator csv_co::cell_string();
+                });
+                auto i = row_span.size() + (groups_or_filenames ? 1 : 0);
+                while (i++ < cols)
+                    std::cout << ',';
+                std::cout << '\n';
             });
             r_man.get_readers().pop_front();
-            return row_idx;
         }, r_man.get_readers()[0]);
     }
 
-    void put_rest(auto & r_man, auto row_idx, auto const & args, auto && table, auto const& replace_vec, auto const & group_names) {
+    void put_rest(auto & r_man, auto const & args, auto total_cols, auto const& replace_vec, auto const & group_names) {
         auto replace_idx = 0ul;
         auto group_idx = 1ul;
         for (auto & reader_elem : r_man.get_readers()) {
@@ -157,15 +159,21 @@ namespace csvstack::detail {
 
                 max_field_size_checker size_checker(r, args, cols, init_row{args.no_header ? 1u : 2u});
                 bool const groups_or_filenames = args.groups != "empty" or args.filenames;
+                std::vector<std::string> row(total_cols);
                 r.run_rows([&](auto & row_span) {
                     check_max_size(row_span, size_checker);
                     if (groups_or_filenames)
-                        table[row_idx][0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
+                        row[0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
 
                     auto col_idx = 0;
                     for (auto & elem : row_span)
-                        table[row_idx][replace_vec[replace_idx + col_idx++]] = elem;
-                    row_idx++;
+                        row[replace_vec[replace_idx + col_idx++]] = elem;
+
+                    std::cout << row.front();
+                    std::for_each(row.begin() + 1, row.end(), [](auto & elem) {
+                        std::cout << ',' << elem;
+                    });
+                    std::cout << '\n';
                 });
 
                 replace_idx += cols;
@@ -257,15 +265,17 @@ namespace csvstack {
 
         std::vector<unsigned> replace_vec;
         auto const header = fill_replace_vec(headers, replace_vec, args);
-        std::vector<std::vector<std::string>> t (rows, std::vector<std::string>(cols + (args.groups == "empty" && !args.filenames ? 0 : 1)));
-        auto const next_row = put_first(r_man, args, t, group_names);
-        put_rest(r_man, next_row, args, t, replace_vec, group_names);
+        auto const total_cols = cols + (args.groups == "empty" && !args.filenames ? 0 : 1);
+
         std::ostringstream oss;
         std::ostream & oss_ = args.asap ? std::cout : oss;
+
         printer p(oss_);
-        struct non_typed_output {};
         p.write(header, args);
-        p.write(t, non_typed_output{}, args);
+
+        put_first(r_man, args, total_cols, group_names);
+        put_rest(r_man, args, total_cols, replace_vec, group_names);
+
         if (!args.asap)
             std::cout << oss.str();
     }
