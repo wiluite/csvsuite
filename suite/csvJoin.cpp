@@ -246,7 +246,7 @@ namespace csvjoin::detail {
         }
     };
 
-    void join(auto && deq, auto const & args, auto & join_column_names) {
+    void join(auto && deq, auto const & args, auto join_column_names) {
         using namespace csv_co;
         using reader_type = std::variant_alternative_t<0, typename std::decay_t<decltype(deq)>::value_type>;
         using args_type = std::decay_t<decltype(args)>;
@@ -384,9 +384,7 @@ namespace csvjoin {
             std::deque<skipinitspace_reader_or_fake_type> d;
             fill_deque(d);
         }
-        auto join_column_names = get_join_column_names(args);
-
-        std::visit([&](auto && arg) { join(arg, args, join_column_names);}, variants);
+        std::visit([&](auto && arg) { join(arg, args, get_join_column_names(args));}, variants);
     }
 }
 
