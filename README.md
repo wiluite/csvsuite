@@ -848,6 +848,49 @@ not supported as well. See the utility [source](https://github.com/wiluite/csvsu
 about constant lengths of text columns. This will definitely be fixed soon. 
 NOTE: [--db-schema](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported as well.
 
+**Examples**  
+
+NOTE: Each example assumes that you have already created your test database.
+
+***Generate SQL statements***
+
+Generate a statement in the PostgreSQL dialect:
+
+    csvSql -L en_US -i postgresql examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+***Interact with a SQL database***
+
+Create a table and import data from the CSV directly into PostgreSQL:
+
+    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+For large tables it may not be practical to process the entire table. One solution to this is to analyze a sample of the
+table. In this case it can be useful to turn off length limits and null checks with the --no-constraints option:
+
+~~head -n 20 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSql -L en_US --no-constraints --tables fy09~~
+
+Create tables for an entire directory of CSVs and import data from those files directly into PostgreSQL:
+
+    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --insert examples/*_converted.csv
+
+If those CSVs have identical headers, you can import them into the same table by using csvstack first:
+
+    csvStack test/examples/dummy?.csv | csvSql --db "postgresql://dbname=databasename user=username password=pswrd" --insert
+
+NOTE: in this case you will have a table named stdin in your database.
+
+***Query and output CSV files using SQL***
+
+You can use csvSql to “directly” query one or more CSV files. Please note that this will create an in-memory SQLite
+database, so it won’t be very fast:
+    
+    csvSql --query "SELECT m.usda_id, avg(i.sepal_length) AS mean_sepal_length FROM iris AS i JOIN irismeta AS m ON (i.species = m.species) GROUP BY m.species" examples/iris.csv examples/irismeta.csv
+
+
+
+
+
+
 #### csvStat
 
 ### Arguments common to all tools

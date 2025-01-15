@@ -268,7 +268,7 @@ namespace csvsql::detail {
                 for (auto e : types) {
                     auto header_cell_name = header[index].operator csv_co::cell_string();
                     if (header_cell_name.empty())
-                        header_cell_name = csvsuite::cli::letter_name(index) + "_name_fix";
+                        header_cell_name = csvsuite::cli::letter_name(index) + "_col";
                     printer_map[dialect]->print_name(header_cell_name);
                     std::visit([&](auto & arg) {
                         printer_map[dialect]->print(arg, blanks[index], precisions[index]);
@@ -284,7 +284,7 @@ namespace csvsql::detail {
                 for (auto e : types) {
                     auto header_cell_name = header[index].operator csv_co::cell_string();
                     if (header_cell_name.empty())
-                        header_cell_name = csvsuite::cli::letter_name(index) + "_name_fix";
+                        header_cell_name = csvsuite::cli::letter_name(index) + "_col";
                     printer_map[dialect]->print_name(header_cell_name);
                     std::visit([&](auto & arg) {
                         printer_map[dialect]->print(arg);
@@ -350,7 +350,7 @@ namespace csvsql::detail {
             unsigned field_count = 0;
             for (auto & e : header_) {
                 if (e.empty())
-                    e = csvsuite::cli::letter_name(field_count) + "_name_fix";
+                    e = csvsuite::cli::letter_name(field_count) + "_col";
                 ++field_count;
             }
 
