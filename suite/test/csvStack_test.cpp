@@ -379,7 +379,6 @@ int main() {
 1,foo,1,2,3
 2,bar,4,5,6
 )"); 
-        //std::cerr << cout_buffer.str() << std::endl;
     };
 
     "max field size"_test = [] {
