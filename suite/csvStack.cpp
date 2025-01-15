@@ -56,7 +56,7 @@ namespace csvstack::detail {
 
     unsigned line_nums = 0;
 
-    auto put_first(auto & r_man, auto const & args, auto cols, auto const & group_names) {
+    auto put_first(std::ostream & os, auto & r_man, auto const & args, auto cols, auto const & group_names) {
         return std::visit([&](auto && r) {
             r.skip_rows(0);
             skip_lines(r, args);
@@ -66,25 +66,25 @@ namespace csvstack::detail {
             r.run_rows([&](auto & row_span) {
                 check_max_size(row_span, size_checker);
                 if (args.linenumbers)
-                    std::cout << ++line_nums << ',';
+                    os << ++line_nums << ',';
 
                 if (groups_or_filenames)
-                    std::cout << (args.filenames ? args.files[0] : group_names[0]) << ',';
+                    os << (args.filenames ? args.files[0] : group_names[0]) << ',';
 
-                std::cout << row_span.front().operator csv_co::cell_string();
-                std::for_each (row_span.begin() + 1, row_span.end(), [](auto & elem) {
-                    std::cout << ',' << elem.operator csv_co::cell_string();
+                os << row_span.front().operator csv_co::cell_string();
+                std::for_each (row_span.begin() + 1, row_span.end(), [&os](auto & elem) {
+                    os << ',' << elem.operator csv_co::cell_string();
                 });
                 auto i = row_span.size() + (groups_or_filenames ? 1 : 0);
                 while (i++ < cols)
-                    std::cout << ',';
-                std::cout << '\n';
+                    os << ',';
+                os << '\n';
             });
             r_man.get_readers().pop_front();
         }, r_man.get_readers()[0]);
     }
 
-    void put_rest(auto & r_man, auto const & args, auto total_cols, auto const& replace_vec, auto const & group_names) {
+    void put_rest(std::ostream & os, auto & r_man, auto const & args, auto total_cols, auto const& replace_vec, auto const & group_names) {
         auto replace_idx = 0ul;
         auto group_idx = 1ul;
         for (auto & reader_elem : r_man.get_readers()) {
@@ -100,7 +100,7 @@ namespace csvstack::detail {
                 r.run_rows([&](auto & row_span) {
                     check_max_size(row_span, size_checker);
                     if (args.linenumbers)
-                        std::cout << ++line_nums << ',';
+                        os << ++line_nums << ',';
 
                     if (groups_or_filenames)
                         row[0] = args.filenames ? args.files[group_idx] : group_names[group_idx];
@@ -109,11 +109,11 @@ namespace csvstack::detail {
                     for (auto & elem : row_span)
                         row[replace_vec[replace_idx + col_idx++]] = elem;
 
-                    std::cout << row.front();
-                    std::for_each(row.begin() + 1, row.end(), [](auto & elem) {
-                        std::cout << ',' << elem;
+                    os << row.front();
+                    std::for_each(row.begin() + 1, row.end(), [&os](auto & elem) {
+                        os << ',' << elem;
                     });
-                    std::cout << '\n';
+                    os << '\n';
                 });
 
                 replace_idx += cols;
@@ -218,8 +218,8 @@ namespace csvstack {
         });
         oss_ << header.back() << '\n';
 
-        put_first(r_man, args, total_cols, group_names);
-        put_rest(r_man, args, total_cols, replace_vec, group_names);
+        put_first(oss_, r_man, args, total_cols, group_names);
+        put_rest(oss_, r_man, args, total_cols, replace_vec, group_names);
 
         if (!args.asap)
             std::cout << oss.str();
