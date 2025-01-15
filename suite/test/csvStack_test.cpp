@@ -361,6 +361,26 @@ int main() {
         expect("hello,a,b,c\nexamples/no_header_row.csv,1,2,3\nexamples/no_header_row2.csv,4,5,6\n" == cout_buffer.str());
     };
 
+    "linenumbers and groups"_test = [] {
+        struct Args : csvStack_args {
+            Args() {
+                no_header = true;
+                filenames = false;
+                group_name = "hello";
+                groups = "foo,bar";
+                files = std::vector<std::string>{"examples/no_header_row.csv", "examples/no_header_row2.csv"};
+                linenumbers = true; 
+            }
+        } args;
+        CALL_TEST_AND_REDIRECT_TO_COUT(
+            csvstack::stack<notrimming_reader_type>(args)
+        )
+        expect(cout_buffer.str() == R"(line_number,hello,a,b,c
+1,foo,1,2,3
+2,bar,4,5,6
+)"); 
+        //std::cerr << cout_buffer.str() << std::endl;
+    };
 
     "max field size"_test = [] {
         struct Args : csvStack_args {
