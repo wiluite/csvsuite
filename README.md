@@ -272,10 +272,14 @@ Release/test.exe
 *    [Processing](#processing)
 *    [Output and Analysis](#output-and-analysis)
 
+---
 
 #### Input
 * [In2csv](#in2csv)
 * [Sql2csv](#sql2csv)
+
+---
+
 #### In2csv
 ##### Description
 Converts various tabular data formats into CSV.
@@ -348,6 +352,7 @@ Then the input file might have initial rows before the header and data rows. You
 (-K):  
 
 	in2csv --skip-lines 3 examples/test_skip_lines.csv
+---
 
 #### Sql2csv
 ##### Description
@@ -394,6 +399,7 @@ Then find the three states that received the most, while also filtering out empt
 You can even use it as a simple SQL calculator (in this example an in-memory SQLite database is used as the default):
 
     Sql2csv --query "select 300 * 47 % 14 * 27 + 7000"
+---
 
 #### Processing
 * [csvClean](#csvclean)
@@ -402,6 +408,8 @@ You can even use it as a simple SQL calculator (in this example an in-memory SQL
 * [csvJoin](#csvjoin)
 * [csvSort](#csvsort)
 * [csvStack](#csvstack)
+
+---
 
 #### csvClean
 ##### Description
@@ -444,6 +452,7 @@ Fix this document:
     line_number,msg,column_a,column_b,column_c
     1,"Expected 3 columns, found 4 columns",1,27,,I'm too long!
     2,"Expected 3 columns, found 2 columns",,I'm too short!
+---
 
 #### csvCut
 ##### Description
@@ -518,6 +527,7 @@ Display a column’s unique values:
 Or:
 
     csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+---
 
 #### csvGrep
 ##### Description
@@ -571,6 +581,7 @@ Remove comment rows:
 
 Get the indices of the columns that contain matching text (\x1e is the Record Separator (RS) character):  
     **This example can not be demonstrated due to the _csvsuite_ does not support the csvformat utility.**
+---
 
 #### csvJoin
 ##### Description
@@ -612,6 +623,8 @@ Add a single column to the right of a CSV:
 
 NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
 
+---
+
 #### csvSort
 ##### Description
 Sort CSV files. Like the Unix “sort” command, but for tabular data:
@@ -643,6 +656,7 @@ View the five states with the most individuals claiming veteran’s education be
 numeric locale):
 
     csvCut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSort -r -c 2 -L en_US | head -n 5
+---
 
 #### csvStack
 ##### Description
@@ -669,11 +683,14 @@ Add a single column to the left of a CSV:
 
     csvStack -n NEWCOL -g " " examples/dummy.csv
 
+---
+
 #### Output and Analysis
 * [csvJson](#csvjson)
 * [csvLook](#csvlook)
 * [csvSql](#csvsql)
 * [csvStat](#csvstat)
+---
 
 #### csvJson
 ##### Description
@@ -765,7 +782,7 @@ Convert locations of public art into GeoJSON:
             }
         }
     }
-
+---
 
 #### csvLook
 ##### Description
@@ -809,7 +826,7 @@ _not supported, see notation above._
 
 To ignore missing cells:  
 _not supported, see notation above._
-
+---
 
 #### csvSql
 ##### Description
@@ -906,6 +923,7 @@ The UPDATE SQL statement produces no output. Remember to SELECT the columns and 
 NOTE: In this particular case, column 'a' should still only accept values of its specific type.
 Assigning other values as [here](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) is
 possible, but will not appear in the selection.
+---
 
 #### csvStat
 ##### Description
@@ -979,7 +997,7 @@ If a single stat and a single column are requested, only a value will be returne
 
     $ csvStat -L en_US -c 4 --mean examples/realdata/FY09_EDU_Recipients_by_State.csv
     6 263,904
-
+---
 ### Arguments common to all tools
 
     -z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]
