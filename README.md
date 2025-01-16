@@ -908,6 +908,77 @@ Assigning other values as [here](https://csvkit.readthedocs.io/en/latest/scripts
 possible, but will not appear in the selection.
 
 #### csvStat
+##### Description
+Prints descriptive statistics for all columns in a CSV file. Will intelligently determine the type of each column and
+then print analysis relevant to that type (ranges for dates, mean and median for integers, etc.):
+
+    Usage: csvStat arg_0  [options...]
+    arg_0 : The CSV file to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+
+Options:
+
+    --help : print help [implicit: "true", default: false]
+    --csv : Output results as a CSV table, rather than plain text. [implicit: "true", default: false]
+    --json : Output results as a JSON test, rather than plain text. [implicit: "true", default: false]
+    -i,--indent : Indent the output JSON this many spaces. Disabled by default. [default: -2147483648]
+    -n,--names : Display column names and indices from the input CSV and exit. [implicit: "true", default: false]
+    -c,--columns : A comma-separated list of column indices, names or ranges to be examined, e.g. "1,id,3-5". [default: all columns]
+    --type : Only output data type. [implicit: "true", default: false]
+    --nulls : Only output whether columns contain nulls. [implicit: "true", default: false]
+    --non-nulls : Only output counts of non-null values. [implicit: "true", default: false]
+    --unique : Only output counts of unique values. [implicit: "true", default: false]
+    --min : Only output smallest values. [implicit: "true", default: false]
+    --max : Only output largest values. [implicit: "true", default: false]
+    --sum : Only output sums. [implicit: "true", default: false]
+    --mean : Only output means. [implicit: "true", default: false]
+    --median : Only output medians. [implicit: "true", default: false]
+    --stdev : Only output standard deviations. [implicit: "true", default: false]
+    --len : Only output the length of the longest values. [implicit: "true", default: false]
+    --max-precision : Only output the most decimal places. [implicit: "true", default: false]
+    --freq : Only output lists of frequent values. [implicit: "true", default: false]
+    --freq-count : The maximum number of frequent values to display. [default: 5]
+    --count : Only output total row count. [implicit: "true", default: false]
+    --decimal-format : %-format specification for printing decimal numbers. Defaults to locale-specific formatting with "%.3f" [default: %.3f]
+    -G,--no-grouping-separator : Do not use grouping separators in decimal numbers [implicit: "true", default: false]
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    --no-mdp,--no-max-precision : Do not calculate most decimal places. [implicit: "true", default: false]
+
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
+
+NOTE: There has been introduced --no-mdp,--no-max-precision option to turn off the most decimal places calculation if
+it is not necessary for you right now: if this calculation is performed through the boost::multiprecision library, then
+this greatly slows down the work of the main purpose of the utility - other statistics. You can find out whether most
+decimal places are calculated using the quick method (by default) or via boost::multiprecision library by looking at the
+[source](https://github.com/wiluite/csvsuite/blob/main/suite/include/reader-bridge-impl.hpp). In any case, you can build
+the utility with one or another method of this calculation.
+
+**Examples**
+
+Basic use:
+
+    csvStat -L en_US examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+When a statistic name is passed, only that stat will be printed:
+
+    $ csvStat -L en_US --min examples/realdata/FY09_EDU_Recipients_by_State.csv    
+    1. State Name: None
+    2. State Abbreviate: None
+    3. Code: 1,
+    4. Montgomery GI Bill-Active Duty: 435,
+    5. Montgomery GI Bill- Selective Reserve: 48,
+    6. Dependents' Educational Assistance: 118,
+    7. Reserve Educational Assistance Program: 60,
+    8. Post-Vietnam Era Veteran's Educational Assistance Program: 1,
+    9. TOTAL: 768,
+    10. : None
+
+NOTE: In all cases of numeric output, the numeric locale is the global locale of your system environment (again, do not
+mix with the -L option which is the "input" locale for numerics).
+
+If a single stat and a single column are requested, only a value will be returned:
+
+    $ csvStat -L en_US -c 4 --mean examples/realdata/FY09_EDU_Recipients_by_State.csv
+    6 263,904
 
 ### Arguments common to all tools
 

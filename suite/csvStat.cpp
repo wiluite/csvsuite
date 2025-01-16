@@ -404,7 +404,7 @@ namespace csvstat {
                     std::iota(column_numbers.begin(), column_numbers.end(), 0);
 
                     transwarp::parallel exec(std::thread::hardware_concurrency());
-                    std::vector<bool> blanks (types.size(), false);
+                    std::vector<unsigned char> blanks (types.size(), 0);
 
                     imbue_numeric_locale(reader, args);
 
@@ -507,7 +507,7 @@ namespace csvstat {
                         assert(col < task_vec.size());
                         switch (types[col]) {
                             case column_type::bool_t:
-                                task_vec[col] = bool_class_type{std::ref(transposed_2d), std::ref(args), col, col_name, index, blanks[col]};
+                                task_vec[col] = bool_class_type{std::ref(transposed_2d), std::ref(args), col, col_name, index, static_cast<bool>(blanks[col])};
                                 break;
                             case column_type::timedelta_t:
                                 task_vec[col] = timedelta_class_type{std::ref(transposed_2d), std::ref(args), col, col_name, index, blanks[col]};
