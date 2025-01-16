@@ -867,7 +867,7 @@ Create a table and import data from the CSV directly into PostgreSQL:
 For large tables it may not be practical to process the entire table. One solution to this is to analyze a sample of the
 table. In this case it can be useful to turn off length limits and null checks with the --no-constraints option:
 
-~~head -n 20 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSql -L en_US --no-constraints --tables fy09~~
+    head -n 20 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSql -L en_US --no-constraints --tables fy09
 
 Create tables for an entire directory of CSVs and import data from those files directly into PostgreSQL:
 

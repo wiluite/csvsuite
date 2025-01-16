@@ -962,7 +962,7 @@ namespace csvsuite::cli {
                     blanks[c] = 1;
             };
         else
-            setup_blanks = [&](unsigned, bool) {};
+            setup_blanks = [](unsigned, bool) {};
 
         auto task = transwarp::for_each(exec, column_numbers.cbegin(), column_numbers.cend(), [&](auto c) {
             if (std::all_of(table[c].begin(), table[c].end(), [&args, &c, &setup_blanks](auto & e)  {
