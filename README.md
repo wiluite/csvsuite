@@ -900,7 +900,12 @@ If a column contains null values, you must COALESCE the column:
 
 The UPDATE SQL statement produces no output. Remember to SELECT the columns and rows you want:
 
-~~csvSql --query "UPDATE 'dummy3' SET a = 'foo'; SELECT * FROM 'dummy3'" examples/dummy3.csv~~
+    csvSql --query "UPDATE 'dummy3' SET a = '0'; SELECT * FROM 'dummy3'" examples/dummy3.csv
+    csvSql --query "UPDATE 'dummy3' SET a = '1'; SELECT * FROM 'dummy3'" examples/dummy3.csv
+
+NOTE: In this particular case, column 'a' should still only accept values of its specific type.
+Assigning other values as [here](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) is
+possible, but will not appear in the selection.
 
 #### csvStat
 
