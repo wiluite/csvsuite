@@ -53,9 +53,9 @@ ENTRYPOINT service postgresql start && service mysql start && service firebird s
 
 # QUICK HELP
 
-# Go to the CSV_co directory, then:
-# docker build -t foo/CSV_co_ubuntu_22_04 -f Dockerfile .
-# docker run -it --rm --name=CSV_co_ubuntu_22_04 --mount type=bind,source=${PWD},target=/src  foo/CSV_co_ubuntu_22_04
+# Go to the csvsuite directory, then:
+# docker build -t foo/csvsuite_ubuntu_22_04 -f Dockerfile .
+# docker run -it --rm --name=csvsuite_ubuntu_22_04 --mount type=bind,source=${PWD},target=/src  foo/csvsuite_ubuntu_22_04
 
 # Inside the docker container, build and test:
 # cd src && mkdir build && cd build && cmake .. && make -j 4 all

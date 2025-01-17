@@ -1028,3 +1028,23 @@ If a single stat and a single column are requested, only a value will be returne
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
 
 ### SQL Database support
+#### Introduction
+Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
+[OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ in its utilities
+[Sql2csv](#sql2csv) and [csvSql](#csvsql) supports the following SQL databases (besides SQLite3):
+
+    - Windows: MySQL, MariaDB, PostgreSQL, Firebird, Oracle
+    - Linux: the same, except for Oracle (some obstacles for verification and confirmation)
+
+But the actual use of these databases depends on how you acquire the _csvsuite_ on your host.
+1. If you prefer to use a ready-made binary archive for Windows (MSVC or MinGW) available on the releases page, then you
+must have certain versions of the databases described in the following sections installed on your computer, or any other
+versions that are not guaranteed to work correctly. So, you should have these particular databases installed.
+
+2. If you prefer to use a ready-made binary archive for Linux, available on the releases page, then it will be
+Ubuntu 22.04 with the database versions described below, some of which are standard for this operating system, and some
+of which are described in the Dockerfile. So, you should have these particular databases installed.
+
+3. If you want to use the _csvsuite_ with your existing databases, the best way is to build the _csvsuite_ yourself from
+source. The _csvsuite_ build process will detect all of your currently installed databases and build the libraries to
+access them.
