@@ -11,6 +11,7 @@
 *    [SQL performance](#sql-performance)
 *    [Build All](#build-all)
 *    [Reference](#reference)
+*    [SQL Database support](#sql-database-support)
 
 ### About
 _csvsuite_ is written to dramatically increase the speed of working with large amounts of data by taking advantage of
@@ -356,7 +357,9 @@ Then the input file might have initial rows before the header and data rows. You
 
 #### Sql2csv
 ##### Description
-Executes arbitrary commands against a SQL database and outputs the results as a CSV:  
+Executes arbitrary commands against a SQL database and outputs the results as a CSV.
+##### Requirements
+    
 
 	Usage: Sql2csv arg_0  [options...]  
 	arg_0 : The FILE to use as SQL query. If it and --query are omitted, the query is piped data via STDIN. [default: ]  
@@ -833,6 +836,13 @@ _not supported, see notation above._
 Generate SQL statements for a CSV file or execute those statements directly on a database. In the latter case supports
 both creating tables and inserting data
 
+##### Requirements
+Skip this section if you intend to use this utility only with the built-in SQL database (SQLite3), always available, and
+do not need to use other SQL databases. Otherwise, read the [section](#sql-database-support) carefully. It provides steps
+for preparing the _csvsuite_ to work with supported versions of common SQL databases without having to rebuild the
+_csvsuite_, and steps for rebuilding the _csvsuite_ to work with your current versions of those databases. Information
+on running unit tests of utilities working with supported databases is also provided.
+
     Usage: csvSql arg_0  [options...]
     arg_0 : The CSV files to operate on. [default: unknown]
 
@@ -920,9 +930,9 @@ The UPDATE SQL statement produces no output. Remember to SELECT the columns and 
     csvSql --query "UPDATE 'dummy3' SET a = '0'; SELECT * FROM 'dummy3'" examples/dummy3.csv
     csvSql --query "UPDATE 'dummy3' SET a = '1'; SELECT * FROM 'dummy3'" examples/dummy3.csv
 
-NOTE: In this particular case, column 'a' should still only accept values of its specific type.
-Assigning other values as [here](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) is
-possible, but will not appear in the selection.
+NOTE: In this particular case, column 'a' should still only accept values of its specific type. Assigning other values
+as [here](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) is possible, but will not appear in the selection.
+
 ---
 
 #### csvStat
@@ -1016,3 +1026,5 @@ If a single stat and a single column are requested, only a value will be returne
     --no-leading-zeroes : Do not convert a numeric value with leading zeroes to a number. [implicit: "true", default: false]
     --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
+
+### SQL Database support
