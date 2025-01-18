@@ -55,6 +55,15 @@ int main() {
 0,2,3,
 1,2,3,
 1,2,3,4
+)" or
+        cout_buffer.str() == R"(a,b,c,d
+1,2,3,
+1,2,3,
+1,2,3,4
+0,2,3,
+1,2,3,
+1,4,5,
+1,2,3,
 )");
     };
 
@@ -375,6 +384,7 @@ int main() {
         CALL_TEST_AND_REDIRECT_TO_COUT(
             csvstack::stack<notrimming_reader_type>(args)
         )
+
         expect(cout_buffer.str() == R"(line_number,hello,a,b,c
 1,foo,1,2,3
 2,bar,4,5,6
