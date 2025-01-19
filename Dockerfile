@@ -55,8 +55,16 @@ ENTRYPOINT service postgresql start && service mysql start && service firebird s
 
 # Go to the csvsuite directory, then:
 # docker build -t foo/csvsuite_ubuntu_22_04 -f Dockerfile .
+
+# Check your new docker image is in the system:
+# docker images
+
+# Run the container from your image:
 # docker run -it --rm --name=csvsuite_ubuntu_22_04 --mount type=bind,source=${PWD},target=/src  foo/csvsuite_ubuntu_22_04
 
-# Inside the docker container, build and test:
+# Inside the docker container build all:
 # cd src && mkdir build && cd build && cmake .. && make -j 4 all
-# cd suite/test && ctest -j 8
+# (NOTE: you may build with clang as well: cmake -DCMAKE_CXX_COMPILER=clang++-15 -DCMAKE_C_COMPILER=clang-15 ..)
+
+# And run tests:
+# cd suite/test && ctest -j 1 && cd ../../

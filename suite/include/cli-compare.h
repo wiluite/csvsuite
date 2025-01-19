@@ -220,8 +220,12 @@ namespace csvsuite::cli::compare {
         };
 
         std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
+#if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
-
+#else
+        auto const types = std::get<0>(types_blanks);
+        auto const blanks = std::get<1>(types_blanks);
+#endif
         for (auto elem : ids) {
             std::visit([&](auto & arg) {
                 result.push_back({elem, arg.clone(args, blanks[elem])});
@@ -244,7 +248,12 @@ namespace csvsuite::cli::compare {
         };
 
         std::tuple<unsigned, compare_fun<ElemType>> result;
+#if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
+#else
+        auto const types = std::get<0>(types_blanks);
+        auto const blanks = std::get<1>(types_blanks);
+#endif
 
         std::visit([&](auto & arg) {
             result = {id, arg.clone(args, blanks[id])};

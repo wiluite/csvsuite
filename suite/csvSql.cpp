@@ -245,7 +245,13 @@ namespace csvsql::detail {
 
         public:
             void direct(auto & reader, typify_with_precisions_result const & value, std::string const & dialect, auto const & header) {
+#if !defined(__clang__) || __clang_major__ >= 16
                 auto [types, blanks, precisions] = value;
+#else
+                auto types = std::get<0>(value);
+                auto blanks = std::get<1>(value);
+                auto precisions = std::get<2>(value);
+#endif
                 // re-fill precisions with varchar lengths if needed
 
                 if (dynamic_cast<varchar_precision*>(printer_map[dialect].get())) {
