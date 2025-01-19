@@ -39,7 +39,7 @@ namespace in2csv::detail {
         };
 
         struct impl {
-            impl(impl_args a) : a(std::move(a)) {}
+            explicit impl(impl_args a) : a(std::move(a)) {}
             void convert();
         private:
             impl_args a;
@@ -50,7 +50,7 @@ namespace in2csv::detail {
     template <class Args2>
     struct dbf_client final : converter_client {
         explicit dbf_client(Args2 & args) {
-            dbf::pimpl = std::make_shared<dbf::impl>(dbf::impl_args(
+            dbf::pimpl = std::make_shared<dbf::impl>(dbf::impl_args{
                 args.maxfieldsize
                 , args.encoding
                 , args.skip_init_space
@@ -68,7 +68,7 @@ namespace in2csv::detail {
                 , args.date_lib_parser
                 , args.asap
 
-                , args.file));
+                , args.file});
         }
         void convert() override {
             dbf::pimpl->convert();

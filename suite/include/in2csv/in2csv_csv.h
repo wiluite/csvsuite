@@ -49,7 +49,7 @@ namespace in2csv::detail {
     template <class Args2>
     struct csv_client final : converter_client {
         explicit csv_client(Args2 & args) {
-            csv::pimpl = std::make_shared<csv::impl> (csv::impl_args(
+            csv::pimpl = std::make_shared<csv::impl> (csv::impl_args{
                     args.maxfieldsize
                     , args.encoding
                     , args.skip_init_space
@@ -70,7 +70,7 @@ namespace in2csv::detail {
                     , args.d_excel
                     , args.dt_excel
                     , args.is1904
-                    , args.file));
+                    , args.file});
         }
         void convert() override {
             csv::pimpl->convert();

@@ -118,7 +118,7 @@ namespace in2csv::detail {
     struct fixed_client final : converter_client {
         explicit fixed_client(Args2 & args) {
             fixed::pimpl = std::make_shared<fixed::impl>
-                (fixed::impl_args(args.skip_init_space, args.schema, args.encoding, args.skip_lines, args.linenumbers, true, args.file));
+                (fixed::impl_args{args.skip_init_space, args.schema, args.encoding, args.skip_lines, args.linenumbers, true, args.file});
         }
         void convert() override {
             fixed::pimpl->convert();

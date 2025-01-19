@@ -53,7 +53,7 @@ namespace in2csv::detail {
     template <class Args2>
     struct xls_client final : converter_client {
         explicit xls_client(Args2 & args) {
-            xls::pimpl = std::make_shared<xls::impl> (xls::impl_args(
+            xls::pimpl = std::make_shared<xls::impl> (xls::impl_args{
                 args.maxfieldsize
                 , args.encoding
                 , args.skip_init_space
@@ -78,7 +78,7 @@ namespace in2csv::detail {
                 , args.encoding_xls
                 , args.d_excel
                 , args.dt_excel
-                , args.file));
+                , args.file});
         }
         void convert() override {
             xls::pimpl->convert();

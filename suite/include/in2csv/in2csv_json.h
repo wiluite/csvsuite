@@ -47,7 +47,7 @@ namespace in2csv::detail {
     template <class Args2>
     struct json_client final : converter_client {
         explicit json_client(Args2 & args) {
-            json::pimpl = std::make_shared<json::impl> (json::impl_args(
+            json::pimpl = std::make_shared<json::impl> (json::impl_args{
                 args.maxfieldsize
                 , args.encoding
                 , args.skip_init_space
@@ -66,7 +66,7 @@ namespace in2csv::detail {
                 , args.asap
 
                 , args.key
-                , args.file));
+                , args.file});
         }
         void convert() override {
             json::pimpl->convert();

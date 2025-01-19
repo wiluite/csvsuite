@@ -46,7 +46,7 @@ namespace in2csv::detail {
     template <class Args2>
     struct ndjson_client final : converter_client {
         explicit ndjson_client(Args2 & args) {
-            ndjson::pimpl = std::make_shared<ndjson::impl> (ndjson::impl_args(
+            ndjson::pimpl = std::make_shared<ndjson::impl> (ndjson::impl_args{
                 args.maxfieldsize
                 , args.encoding
                 , args.skip_init_space
@@ -64,7 +64,7 @@ namespace in2csv::detail {
                 , args.date_lib_parser
                 , args.asap
 
-                , args.file));
+                , args.file});
         }
         void convert() override {
             ndjson::pimpl->convert();

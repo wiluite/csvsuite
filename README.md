@@ -45,7 +45,7 @@ scenarios that failed and so on are welcome.</h4>
 ### Restrictions
 1) Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
 overwhelming percentage of documents in the world adhere to this rule. If not, you can/should always resort to the
-csvClean (or even a more powerful one from the original package:
+[csvClean](#csvclean) (or even a more powerful one from the original package:
 [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case, this
 document just needs to be fixed.
 2) The only 2 of utilities of the Python's original are not implemented for not being too actual:
@@ -53,13 +53,14 @@ document just needs to be fixed.
 [csvpy](https://csvkit.readthedocs.io/en/latest/scripts/csvpy.html).
 3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following utility arguments are missing:
 
-
-	-d DELIMITER, --delimiter DELIMITER
-	-t, --tabs
-	-q QUOTECHAR, --quotechar QUOTECHAR
-	-u {0,1,2,3}, --quoting {0,1,2,3}
-	-b, --no-doublequote
-	-y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT
+| unsupported options                      |
+|------------------------------------------|
+| -d DELIMITER, --delimiter DELIMITER      |
+| -t, --tabs                               |
+| -q QUOTECHAR, --quotechar QUOTECHAR      |
+| -u {0,1,2,3}, --quoting {0,1,2,3}        |
+| -b, --no-doublequote                     |
+| -y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT |
 
    The remaining arguments (or even newly introduced by the _csvsuite_) are present and almost certainly implemented.
 When running, any utility tries to quickly check the strong tabular shape of your documents to match [RFC-4180] and
@@ -76,7 +77,7 @@ complete info see [formatting section](https://howardhinnant.github.io/date/date
 documentation.
 
 5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
-somewhere (for example MinGW/Windows), you will not be able to work with localization.  
+somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.  
 
 6) Other restrictions and some substitutions are presented in section [Reference](#reference), when describing
 utilities.

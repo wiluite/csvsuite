@@ -33,13 +33,13 @@ namespace in2csv::detail {
     template <class Args2>
     struct geojson_client final : converter_client {
         explicit geojson_client(Args2 & args) {
-            geojson::pimpl = std::make_shared<geojson::impl> (geojson::impl_args(
+            geojson::pimpl = std::make_shared<geojson::impl> (geojson::impl_args{
                 args.maxfieldsize
                 , args.encoding
                 , args.skip_init_space
                 , args.no_inference
 
-                , args.file));
+                , args.file});
         }
         void convert() override {
             geojson::pimpl->convert();
