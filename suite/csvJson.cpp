@@ -94,10 +94,13 @@ namespace csvjson {
         quick_check(reader, args);
 
         // Detect types and blanks presence in columns
-#if defined(__clang__) && (__clang_major__ < 16)
-        static
-#endif
+#if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
+#else
+        auto const types_blanks = std::get<1>(typify(reader, args, typify_option::typify_without_precisions));
+        auto const types = std::get<0>(types_blanks);
+        auto const blanks = std::get<1>(types_blanks);
+#endif
         using types_type = decltype(types);
         using blanks_type = decltype(blanks);
 
