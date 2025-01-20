@@ -24,7 +24,8 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     libmysql++-dev \
     libpq-dev \
     curl \
-    git
+    git \
+    nano
 
 # Install Python's csvkit to be able to compare everything.
 RUN pip3 install csvkit==1.5.0
