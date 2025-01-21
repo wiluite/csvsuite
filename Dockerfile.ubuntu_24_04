@@ -1,6 +1,6 @@
 # Quick Help is right underneath.
 
-FROM debian:bookworm
+FROM ubuntu:24.04
 LABEL Description="Build environment"
 
 ENV HOME=/root
@@ -17,9 +17,9 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     gdb \
     wget \
     python3 \
-    clang-19 \
-    libc++-19-dev \
-    libc++abi-19-dev \
+    clang-18 \
+    libc++-18-dev \
+    libc++abi-18-dev \
     pip \
     libmysql++-dev \
     libpq-dev \
@@ -31,8 +31,8 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
 RUN apt install -qy python3-csvkit
 
 # Deal with the MySQL server.
-RUN apt-get install -y mariadb-server && sleep 1
-RUN service mariadb start && mariadb -u root -e "CREATE DATABASE testdb" && service mariadb stop
+RUN apt-get install -y mysql-server && sleep 1
+RUN service mysql start && mysql -u root -e "CREATE DATABASE testdb" && service mysql stop
 
 # Deal with the PostgreSQL server.
 ENV DEBIAN_FRONTEND=noninteractive
@@ -51,21 +51,22 @@ RUN cd Firebird-5.0.0.1306-0-linux-x64 && y masterkey | ./install.sh && \
     echo "CREATE DATABASE '/dbname.fdb' PAGE_SIZE 4096 USER 'sysdba' PASSWORD 'masterkey' ;" | isql-fb -q
 
 # Finalize.
-ENTRYPOINT service postgresql start && service mariadb start && service firebird start && bash
+ENTRYPOINT service postgresql start && service mysql start && service firebird start && bash
 
 # QUICK HELP
 
 # Go to the csvsuite directory, then:
-# docker build -t foo/csvsuite_debian_bookworm -f Dockerfile.debian_bookworm .
+# docker build -t foo/csvsuite_ubuntu_24_04 -f Dockerfile .
 
 # Check your new docker image is in the system:
 # docker images
 
 # Run the container from your image:
-# docker run -it --rm --name=csvsuite_debian_bookworm --mount type=bind,source=${PWD},target=/src foo/csvsuite_debian_bookworm
+# docker run -it --rm --name=csvsuite_ubuntu_24_04 --mount type=bind,source=${PWD},target=/src  foo/csvsuite_ubuntu_24_04
 
 # Inside the docker container build all:
 # cd src && mkdir build && cd build && cmake .. && make -j 4 all
+# (NOTE: you may build with clang as well: cmake -DCMAKE_CXX_COMPILER=clang++-18 -DCMAKE_C_COMPILER=clang-18 ..)
 
 # And run tests:
-# cd suite/test && ctest && cd ../../
+# cd suite/test && ctest -j 1 && cd ../../

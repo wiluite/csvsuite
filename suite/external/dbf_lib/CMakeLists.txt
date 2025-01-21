@@ -3,6 +3,7 @@ if (MSVC)
 else()
     remove_definitions(-Wno-old-style-cast -fcoroutines -Wno-reorder)
     if (IS_GNU)
+        remove_definitions(-Wno-redundant-move)
         add_definitions(-Wno-stringop-truncation)
     else() #CLANG
         add_definitions(-Wno-deprecated-non-prototype)
