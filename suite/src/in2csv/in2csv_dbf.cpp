@@ -69,7 +69,7 @@ namespace in2csv::detail::dbf {
 
         for (auto j = 0u; j < cols; j++) {
             dbf_getfield_info (handle, j, &info);
-            header += (j ? "," : "") + recode_source(std::string(info.name), a);
+            header += std::string((j ? "," : "")) + recode_source(std::string(info.name), a);
             types.push_back(static_cast<field_type>(info.type));
         }
 
@@ -83,7 +83,7 @@ namespace in2csv::detail::dbf {
             for (auto j = 0u; j < cols; j++) {
                 char temp[1024] = "";
                 dbf_getfield(handle, dbf_getfieldptr(handle, j), temp, sizeof(temp), DBF_DATA_TYPE_ANY);
-                contents += (j ? "," : "") + recode_source(std::string(temp), a);
+                contents += std::string((j ? "," : "")) + recode_source(std::string(temp), a);
             }
             contents += '\n';
         }

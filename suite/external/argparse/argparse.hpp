@@ -549,7 +549,8 @@ namespace argparse {
 
         void print() const {
             for (const auto &entry : all_entries) {
-                std::string snip = entry->type == Entry::ARG ? "(" + (entry->help.size() > 10 ? entry->help.substr(0, 7) + "..." : entry->help) + ")" : "";
+                auto const pre = entry->help.size() > 10 ? entry->help.substr(0, 7) + "..." : entry->help;
+                std::string snip = entry->type == Entry::ARG ? "(" + pre + ")" : "";
                 cout << setw(21) << entry->_get_keys() + snip << " : " << (entry->is_set_by_user? bold(entry->value_.value_or("null")) : entry->value_.value_or("null")) << endl;
             }
 

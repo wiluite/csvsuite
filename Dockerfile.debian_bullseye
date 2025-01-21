@@ -56,7 +56,7 @@ ENTRYPOINT service postgresql start && service mariadb start && service firebird
 # QUICK HELP
 
 # Go to the csvsuite directory, then:
-# docker build -t foo/csvsuite_debian_bullseye -f Dockerfile .
+# docker build -t foo/csvsuite_debian_bullseye -f Dockerfile.debian_bullseye .
 
 # Check your new docker image is in the system:
 # docker images

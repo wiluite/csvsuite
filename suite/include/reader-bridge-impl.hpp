@@ -133,7 +133,7 @@ namespace csv_co {
         if (in) {
             auto const money_decimal_point = std::use_facet<std::moneypunct<char>>(num_locale()).decimal_point();
             if (auto const pos = in.str().find(money_decimal_point); pos != std::string::npos)
-                double_rep.insert(double_rep.size()-std::use_facet<std::moneypunct<char>>(num_locale()).frac_digits(), ".");
+                double_rep.insert(double_rep.size() - std::use_facet<std::moneypunct<char>>(num_locale()).frac_digits(), std::string("."));
 #ifdef _MSC_VER
             std::from_chars_result r{};
             r = std::from_chars(double_rep.data(), double_rep.data()+double_rep.size(), value, std::chars_format::general);

@@ -191,13 +191,13 @@ namespace csvsuite::cli {
             for (auto const & e : cols_map) {
                 if (e.first == 1 and e.second == row + args.skip_lines - 1)
                     continue;
-                error_message += (" " + std::to_string(e.first));
+                error_message += std::string(" ") + std::to_string(e.first);
             }
             error_message += " at least at rows :";
             for (auto e : cols_map) {
                 if (e.first == 1 and e.second == row + args.skip_lines - 1)
                     continue;
-                error_message += (" " + std::to_string(e.second));
+                error_message += std::string(" ") + std::to_string(e.second);
             }
             error_message += "...\nEither use/reuse the -K option for alignment, or use the csvClean utility to fix it.";
 
@@ -1273,9 +1273,9 @@ namespace csvsuite::cli {
         // TODO: use std and comment this in more details:
         if constexpr('\n' != line_break) {
             bool stay_quoted = false;
-            std::remove_const_t<decltype(std::string::npos)> it;
-            while ((it = full.find(line_break)) != std::string::npos) {
-                full.replace(it, 1, "\n");
+            std::size_t pos;
+            while ((pos = full.find(line_break)) != std::string::npos) {
+                full[pos] = '\n';
                 stay_quoted = true;
             }
             if (stay_quoted)
