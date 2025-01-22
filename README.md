@@ -1,4 +1,4 @@
-**Documentation is UNDER CONSTRUCTION NOW.**
+**DOCUMENTATION IS UNDER CONSTRUCTION**
 
 # csvsuite
 ## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
@@ -10,6 +10,8 @@
 *    [Sorting performance](#sorting-performance)
 *    [SQL performance](#sql-performance)
 *    [Build All](#build-all)
+*    [Testing](#testing)
+*    [Installation](#installation)
 *    [Reference](#reference)
 *    [SQL Database support](#sql-database-support)
 
@@ -221,54 +223,90 @@ unlike our tool.
 
 ### Build All
 
-<h4>Note. For now, you need Python installed. This is to configure one of libraries used. Over time, this dependence will be removed.</h4>
+NOTE: For now you need Python installed. This is to configure one of libraries used. Over time, this dependence will be
+removed.
 
-_Conventional:_
+#### Preparation
+
+Install the necessary SQL database servers and client libraries for them into the system, if not already done. This is
+necessary for the build system to create the appropriate libraries for the [csvSql](#csvsql) and [Sql2csv](#sql2csv)
+utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
+[OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ supports the following SQL databases:
+
+    - Windows: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle.
+    - Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle. Oracle is not tested.
+
+Please, refer to the SOCI documentation to find out which versions of these databases are supported.  
+Please, refer to the OCILIB documentation to find out which versions of ORACLE are supported.  
+
+Access to other databases within the _csvsuite_ is disabled due to lack of verification capabilities.  
+
+| Linux                                                     | Windows                                                  |
+|-----------------------------------------------------------|----------------------------------------------------------|
+| It seems that no additional preparations required. Except | Add to the PATH environment variable the access paths to |
+| for, you may need to create ORACLE_HOME env.var. Example: | the bin and lib directories of your databases (except    |
+|                                                           | for SQLite3). Examples:                                  |
+|   export ORACLE_HOME=~/product/21c/dbhomeXE               |   C:\Program Files\MySQL\MySQL Server 8.0\bin;           |
+|                                                           |   C:\Program Files\MySQL\MySQL Server 8.0\lib;           |
+| in your user's  ~/.profile                                |   C:\Program Files\PostgreSQL\14\bin;                    |
+|                                                           |   C:\Program Files\PostgreSQL\14\lib;                    |
+|                                                           |   C:\Program Files\Firebird\Firebird_5_0;                |
+|                                                           |                                                          |
+|                                                           | Create ORACLE_HOME environment variable. Example:        |
+|                                                           |   ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE       |
+
+
+#### Build variants
+
+_Conventional (Linux/GCC, Windows/MinGW):_
 ```bash
 mkdir build && cd build
 cmake ..
-make -j 4
+make -j 6
 ```
 
-_Better (if you have clang, libc++-dev, libc++abi-dev packages or their analogs installed):_
+_Alternative 1 (Linux, with Clang >= 15):_
 ```bash
 mkdir build && cd build
-cmake -DCMAKE_CXX_COMPILER=clang++ -D_STDLIB_LIBCPP=ON ..
-make -j 4
+cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=OFF ..
+make -j 6
 ```
-
-_Best (if you simply have got clang):_
+NOTE: You may have to specify an explicit compiler version (example: clang++-16 instead of clang, clang-16 instead of clang). 
+ 
+_Alternative 2 (Linux, with Clang, libc++-dev, libc++abi-dev packages installed):_
 ```bash
 mkdir build && cd build
-cmake -DCMAKE_CXX_COMPILER=clang++ -D_STDLIB_LIBCPP=OFF ..
-make -j 4
+cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=ON ..
+make -j 6
 ```
+NOTE: You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
 
-_Check for memory safety (if you have clang sanitizers packages installed):_
+_Test build for memory safety (Linux, with Clang, libc++-dev, libc++abi-dev, and Clang sanitizers packages installed):_
 ```bash
 mkdir build && cd build
-cmake -DCMAKE_CXX_COMPILER=clang++ -D_SANITY_CHECK=ON -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=ON -D_SANITY_CHECK=ON -DCMAKE_BUILD_TYPE=Debug ..
 make -j 4
 ```
+NOTE: You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
 
-_MSVC (in x64 Native Tools Command Prompt):_  
+_MSVC (Windows, in x64 Native Tools Command Prompt):_
 ```bash
 mkdir build && cd build
 cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release ..
-msbuild /property:Configuration=Release csv_co.sln
+msbuild /property:Configuration=Release csvsuite.sln
 ```
-_Running tests in MSVC:_
+
+### Testing
+This assumes that you have successfully build the product. Go to your build/suite/test directory and run all the tests:
 ```bash
-cd build/test
+ctest -j 1 --repeat until-fail:10 --stop-on-failure
 ```
-_Then, run all tests:_
-```bash
-ctest.exe -j 1 
-```
-_Or run a particular test (still staying in the test directory):_
-```bash
-Release/test.exe
-```
+NOTE: You could run tests in parallel as well: ctest -j 6, but keep in mind that csvSql_test and Sql2csv_test
+executables have non-shared states.
+
+### Installation
+
+
 ### Reference
 *    [Input](#input)
 *    [Processing](#processing)
@@ -1029,15 +1067,7 @@ If a single stat and a single column are requested, only a value will be returne
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
 
 ### SQL Database support
-#### Introduction
-Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
-[OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ in its utilities
-[Sql2csv](#sql2csv) and [csvSql](#csvsql) supports the following SQL databases (besides SQLite3):
 
-    - Windows: MySQL, MariaDB, PostgreSQL, Firebird, Oracle
-    - Linux: the same, except for Oracle (some obstacles for verification and confirmation)
-
-But the actual use of these databases depends on how you acquire the _csvsuite_ on your host.
 1. If you prefer to use a ready-made binary archive for Windows (MSVC or MinGW) available on the releases page, then you
 must have certain versions of the databases described in the following sections installed on your computer, or any other
 versions that are not guaranteed to work correctly. So, you should have these particular databases installed.
