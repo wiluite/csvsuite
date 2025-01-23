@@ -233,13 +233,12 @@ necessary for the build system to create the appropriate libraries for the [csvS
 utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
 [OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ supports the following SQL databases:
 
+- Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle(not tested).
 - Windows: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle.
-- Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle. Oracle is not tested.
 
-Please, refer to the SOCI documentation to find out which versions of these databases are supported.  
-Please, refer to the OCILIB documentation to find out which versions of ORACLE databases are supported.  
-
-Access to other databases within the _csvsuite_ is disabled due to lack of verification capabilities.  
+> Please, refer to the SOCI documentation to find out which versions of these databases are supported.  
+> Please, refer to the OCILIB documentation to find out which versions of ORACLE databases are supported.  
+> Access to other databases within the _csvsuite_ is disabled due to lack of verification capabilities.  
 
 * **Linux**
 
@@ -247,7 +246,7 @@ Access to other databases within the _csvsuite_ is disabled due to lack of verif
   variable. Example:
   > export ORACLE_HOME=~/product/21c/dbhomeXE
 
-  in your user's  ~/.profile, and reboot. <br><br>
+  in your user's  ~/.profile, and reboot.
 
 * **Windows**
 
@@ -302,12 +301,34 @@ msbuild /property:Configuration=Release csvsuite.sln
 ```
 
 ### Testing
-This assumes that you have successfully build the product. Go to your build/suite/test directory and run all the tests:
+This assumes that you have successfully [built](#build-all) the product.  
+Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
+successfully test all branches of the csvSql utility:
+
+* **Linux**
+
+  > SOCI_DB_SQLITE3="sqlite3://db=test.sqlite3"
+  > SOCI_DB_MYSQL="mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306"
+  > SOCI_DB_MARIADB="mariadb://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307"
+  > SOCI_DB_POSTGRESQL="postgresql://dbname=your_db user=your_user password=your_password"
+  > SOCI_DB_FIREBIRD="firebird://service=/path_to/your_db.fdb user=SYSDBA password=masterkey"
+
+* **Windows**
+
+  > SOCI_DB_SQLITE3=sqlite3://db=test.sqlite3 timeout=2 share-cache=true
+  > SOCI_DB_MYSQL=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306
+  > SOCI_DB_MARIADB=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307
+  > SOCI_DB_POSTGRESQL=postgresql://dbname=your_db user=your_user password=your_password
+  > SOCI_DB_FIREBIRD=firebird://service=d:\\your_directory_path\\your_db.fdb user=SYSDBA password=masterkey
+  > SOCI_DB_ORACLE="oracle://service=//127.0.0.1:1521/xepdb1 user=hr password=hr"
+
+Go to your build/suite/test directory and run all the unit tests:
+
 ```bash
 ctest -j 1 --repeat until-fail:10 --stop-on-failure
 ```
-NOTE: You could run tests in parallel as well: ctest -j 6, but keep in mind that csvSql_test and Sql2csv_test
-executables have non-shared states.
+  > You could run tests in parallel as well (ctest -j 6), but keep in mind csvSql_test and Sql2csv_test executables may
+    have non-shared states.
 
 ### Installation
 
