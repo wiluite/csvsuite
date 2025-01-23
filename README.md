@@ -26,8 +26,8 @@ It tries to reproduce the functionality of the [csvkit](https://csvkit.readthedo
 
 The goals for the reproduction were: to find out the complexity and limitations of the applicability of the C++
 ecosystem for broad universal tasks, where Python is good with its rich environment for data processing, text encoding,
-localization, and so on. It was also interesting to see the performance benefits of C++ applications in non-traditional
-areas. These utilities (from 14) seem to be almost fully operational at the moment:
+localization, SQL databases and so on. It was also interesting to see the performance benefits of C++ applications in
+non-traditional areas. These utilities (from 14) seem to be almost fully operational at the moment:
 1) csvClean (ala [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html))
 2) csvCut (ala [csvcut](https://csvkit.readthedocs.io/en/latest/scripts/csvcut.html))
 3) csvGrep (ala [csvgrep](https://csvkit.readthedocs.io/en/latest/scripts/csvgrep.html))
@@ -121,8 +121,8 @@ you are facing the necessity to always specify which numeric columns and using w
 datetimes.  
 
 **_Note 3._** In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
-on the screen, unlike _csvStat_, which displays number separator according to the current global locale. This is because
-in the *csvkit* there is a difference between the locales according to which numbers are output in the two utilities.
+on the screen, unlike _csvStat_ which displays number separator according to the current global locale. This is because
+in the _csvkit_ there is a difference between the locales according to which numbers are output in the two utilities.
 To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
 them. For example:
 
@@ -315,7 +315,6 @@ Inside the docker container build all:
 cd src && mkdir build && cd build && cmake .. && make -j 4 all
 ```
 
-
 ### Testing
 This assumes that you have successfully [built](#build-all) the product.  
 Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
@@ -348,6 +347,29 @@ ctest -j 1 --repeat until-fail:10 --stop-on-failure
     have non-shared states.
 
 ### Installation
+In general, the _csvsuite_ should not be installed into system directories. It is enough to leave binary build results
+in place. Or, unpack a ready-made binary archive from the releases page into any directory. In both cases, you only need
+to establish global paths.
+
+* Linux
+
+  - If you've built it, please modify your ~/.profile to have:
+  > export PATH=$PATH:/path/to/csvsuite/suite/build/
+
+  and reboot.
+
+  - If you've downloaded it as a binary release, please modify your ~/.profile to have:
+  > export PATH=$PATH:/path/to/unpacked/archive
+  > export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
+
+  and reboot.
+
+* Windows
+
+  - If you've built it, add the path to your build\suite directory to the Path environment variable.
+  - If you've downloaded it as a binary release, add the path to the root of the unpacked archive to the Path
+    environment variable.
+  - If you've downloaded a MSVC binary archive, please install a redistributable package as well.
 
 
 ### Reference
@@ -413,7 +435,7 @@ Convert an Excel .xls file:
 Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
 	In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
-Unlike the _csvkit_, which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
+Unlike the _csvkit_ , which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
 explicitly, since the utility uses the C/Posix locale by default.
 
 Fetch csvkit’s open issues from the GitHub API, convert the JSON response into a CSV and write it to a file:  
@@ -888,8 +910,8 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: Unlike the *csvkit*, where this utility can ignore extra or missing cells in the absence of a strictly tabular
-form, the csvLook, like all other utilities in the _csvsuite_, will simply report this by default (see the 
+NOTE: Unlike the _csvkit_ , where this utility can ignore extra or missing cells in the absence of a strictly tabular
+form, the csvLook, like all other utilities in the _csvsuite_ , will simply report this by default (see the 
 [-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the csvClean utility or its
 original.  
 
