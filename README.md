@@ -223,40 +223,45 @@ unlike our tool.
 
 ### Build All
 
-NOTE: For now you need Python installed. This is to configure one of libraries used. Over time, this dependence will be
+> For now you need Python installed. This is to configure one of libraries used. Over time, this dependence will be
 removed.
 
-#### Preparation
+#### PREPARATION
 
 Install the necessary SQL database servers and client libraries for them into the system, if not already done. This is
 necessary for the build system to create the appropriate libraries for the [csvSql](#csvsql) and [Sql2csv](#sql2csv)
 utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
 [OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ supports the following SQL databases:
 
-    - Windows: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle.
-    - Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle. Oracle is not tested.
+- Windows: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle.
+- Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle. Oracle is not tested.
 
 Please, refer to the SOCI documentation to find out which versions of these databases are supported.  
-Please, refer to the OCILIB documentation to find out which versions of ORACLE are supported.  
+Please, refer to the OCILIB documentation to find out which versions of ORACLE databases are supported.  
 
 Access to other databases within the _csvsuite_ is disabled due to lack of verification capabilities.  
 
-| Linux                                                     | Windows                                                  |
-|-----------------------------------------------------------|----------------------------------------------------------|
-| It seems that no additional preparations required. Except | Add to the PATH environment variable the access paths to |
-| for, you may need to create ORACLE_HOME env.var. Example: | the bin and lib directories of your databases (except    |
-|                                                           | for SQLite3). Examples:                                  |
-|   export ORACLE_HOME=~/product/21c/dbhomeXE               |   C:\Program Files\MySQL\MySQL Server 8.0\bin;           |
-|                                                           |   C:\Program Files\MySQL\MySQL Server 8.0\lib;           |
-| in your user's  ~/.profile                                |   C:\Program Files\PostgreSQL\14\bin;                    |
-|                                                           |   C:\Program Files\PostgreSQL\14\lib;                    |
-|                                                           |   C:\Program Files\Firebird\Firebird_5_0;                |
-|                                                           |                                                          |
-|                                                           | Create ORACLE_HOME environment variable. Example:        |
-|                                                           |   ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE       |
+* **Linux**
 
+  It seems that no additional preparations required. Except for, you may need to create ORACLE_HOME environment
+  variable. Example:
+  > export ORACLE_HOME=~/product/21c/dbhomeXE
 
-#### Build variants
+  in your user's  ~/.profile, and reboot. <br><br>
+
+* **Windows**
+
+  Add to the PATH environment variable the access paths to the bin and lib directories of your databases (except for
+  for SQLite3). Examples:
+  > C:\Program Files\MySQL\MySQL Server 8.0\bin;<br>
+  > C:\Program Files\MySQL\MySQL Server 8.0\lib;<br>
+  > C:\Program Files\Firebird\Firebird_5_0;
+
+  Create ORACLE_HOME environment variable. Example:
+  > ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE
+  
+
+#### BUILD VARIANTS
 
 _Conventional (Linux/GCC, Windows/MinGW):_
 ```bash
