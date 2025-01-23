@@ -13,7 +13,6 @@
 *    [Testing](#testing)
 *    [Installation](#installation)
 *    [Reference](#reference)
-*    [SQL Database support](#sql-database-support)
 
 ### About
 _csvsuite_ is written to dramatically increase the speed of working with large amounts of data by taking advantage of
@@ -465,28 +464,28 @@ Executes arbitrary commands against a SQL database and outputs the results as a 
 ##### Requirements
     
 
-	Usage: Sql2csv arg_0  [options...]  
-	arg_0 : The FILE to use as SQL query. If it and --query are omitted, the query is piped data via STDIN. [default: ]  
+    Usage: Sql2csv arg_0  [options...]  
+    arg_0 : The FILE to use as SQL query. If it and --query are omitted, the query is piped data via STDIN. [default: ]  
 
 Options:
 
-	--db : If present, a 'soci' connection string to use to directly execute generated SQL on a database. [default: ]
-	--query : The SQL query to execute. Overrides FILE and STDIN. [default: ]
+    --db : If present, a 'soci' connection string to use to directly execute generated SQL on a database. [default: ]
+    --query : The SQL query to execute. Overrides FILE and STDIN. [default: ]
     -e,--encoding : Specify the encoding of the input query file. [default: UTF-8]
-	-H,--no-header-row : Do not output column names. [implicit: "true", default: false]
-	--help : print help [implicit: "true", default: false]
+    -H,--no-header-row : Do not output column names. [implicit: "true", default: false]
+    --help : print help [implicit: "true", default: false]
 
 **Examples**
 
 Load sample data into a table using [csvSql](#csvsql) and then query it using _Sql2csv_:
 
-	csvSql --db "sqlite3://dummy.db" --tables "test" --insert dummy.csv
-	Sql2csv --db "sqlite3://dummy.db" --query "select * from test"
+    csvSql --db "sqlite3://dummy.db" --tables "test" --insert dummy.csv
+    Sql2csv --db "sqlite3://dummy.db" --query "select * from test"
 
 alternatively (too verbose):
 
-	csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert dummy.csv
-	Sql2csv --db "sqlite3://dbname=dummy.db" --query "select * from test"
+    csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert dummy.csv
+    Sql2csv --db "sqlite3://dbname=dummy.db" --query "select * from test"
 
 To access databases, the *csvsuite* uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
 Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this particular case, you must specify the value
@@ -1131,16 +1130,3 @@ If a single stat and a single column are requested, only a value will be returne
     --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
 
-### SQL Database support
-
-1. If you prefer to use a ready-made binary archive for Windows (MSVC or MinGW) available on the releases page, then you
-must have certain versions of the databases described in the following sections installed on your computer, or any other
-versions that are not guaranteed to work correctly. So, you should have these particular databases installed.
-
-2. If you prefer to use a ready-made binary archive for Linux, available on the releases page, then it will be
-Ubuntu 22.04 with the database versions described below, some of which are standard for this operating system, and some
-of which are described in the Dockerfile. So, you should have these particular databases installed.
-
-3. If you want to use the _csvsuite_ with your existing databases, the best way is to build the _csvsuite_ yourself from
-source. The _csvsuite_ build process will detect all of your currently installed databases and build the libraries to
-access them.
