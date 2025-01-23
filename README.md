@@ -300,10 +300,27 @@ cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release ..
 msbuild /property:Configuration=Release csvsuite.sln
 ```
 
+_Docker container (Linux):_
+
+Go to the csvsuite directory, then build a necessary docker image:
+```bash
+docker build -t foo/your_image_name -f ./a_dockerfile .
+```
+Run a docker container from the new docker image:
+```bash
+docker run -it --rm --name=random_name --mount type=bind,source=${PWD},target=/src foo/your_image_name
+```
+Inside the docker container build all:
+```bash
+cd src && mkdir build && cd build && cmake .. && make -j 4 all
+```
+
+
 ### Testing
 This assumes that you have successfully [built](#build-all) the product.  
 Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
-successfully test all branches of the csvSql utility:
+successfully test all branches of the csvSql utility. This step is not necessary if you've built the product in a Docker
+container, where the environment is completely customized.
 
 * **Linux**
 
