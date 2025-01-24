@@ -398,8 +398,8 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         };
 
         "utf-8 ignore case comparison"_test = [&cs] {
-            cs = R"( ПрИвЕт, C++ )";
-            std::string cs2 = R"( привет, c++ )";
+            cs = R"( ПрИвЕт C++ )";
+            std::string cs2 = R"( привет c++ )";
             {
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
                 reader<>::typed_span<unquoted> span2{reader<>::cell_span{cs2}};
@@ -410,9 +410,21 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
                 reader<>::typed_span<unquoted> span{reader<>::cell_span{cs}};
                 reader<>::typed_span<unquoted> span2{reader<>::cell_span{cs2}};
                 reader<>::typed_span<unquoted>::case_insensitivity(true);
-                expect(span.text_compare(span2) == 0);
+                expect(!span.text_compare(span2));
                 reader<>::typed_span<unquoted>::case_insensitivity(false);
             }
+        };
+
+        "common text_compare"_test = [&cs] {
+            cs = "\"ПрИвЕт\"\",\"\" C++\"\r\t";
+            std::string cs2 = "ПрИвЕт\"\",\"\" C++\"";
+            expect(!reader<>::typed_span<unquoted>{reader<>::cell_span{cs}}.text_compare(reader<>::typed_span<unquoted>{reader<>::cell_span{cs2}}));
+            cs = "";
+            cs2 = " ";
+            expect(reader<>::typed_span<unquoted>{reader<>::cell_span{cs}}.text_compare(reader<>::typed_span<unquoted>{reader<>::cell_span{cs2}}) < 0);
+            cs = " ";
+            cs2 = "";
+            expect(reader<>::typed_span<unquoted>{reader<>::cell_span{cs}}.text_compare(reader<>::typed_span<unquoted>{reader<>::cell_span{cs2}}) > 0);
         };
     };
 

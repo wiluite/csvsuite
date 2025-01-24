@@ -263,8 +263,30 @@ namespace csv_co {
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
     template<bool Unquoted>
     [[nodiscard]] auto reader<T, Q, D, L, M, E>::typed_span<Unquoted>::text_compare(typed_span const &other) const -> int {
-        static_assert(Unquoted == csv_co::unquoted);
-        return string_comparison_func(unquoted_cell_string(*this).c_str(), unquoted_cell_string(other).c_str());
+        auto s1 = this->raw_string_view();
+        auto s2 = other.raw_string_view();
+
+        auto b1 = s1.find_first_not_of("\"");
+        std::size_t e1;
+        if (b1 == std::string_view::npos)
+            s1 = "";
+        else if ((e1 = s1.find_last_not_of("\"\t\r")) == std::string_view::npos)
+            s1 = "";
+        else
+            s1 = std::string_view{s1.data() + b1, e1 - b1 + 1};
+
+        auto b2 = s2.find_first_not_of("\"");
+        std::size_t e2;
+        if (b2 == std::string_view::npos)
+            s2 = "";
+        else if ((e2 = s2.find_last_not_of("\"\t\r")) == std::string_view::npos)
+            s2 = "";
+        else
+            s2 = std::string_view{s2.data() + b2, e2 - b2 + 1};
+        if (string_comparison_func == reinterpret_cast<int (*)(void const*, void const*)>(strcmp))
+            return s1.compare(s2);
+        else
+            return string_comparison_func(std::string(s1).c_str(), std::string(s2).c_str());
     }
 
     template<TrimPolicyConcept T, QuoteConcept Q, DelimiterConcept D, LineBreakConcept L, MaxFieldSizePolicyConcept M, EmptyRowsPolicyConcept E>
