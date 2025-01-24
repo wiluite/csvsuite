@@ -40,19 +40,22 @@ non-traditional areas. These utilities (from 14) seem to be almost fully operati
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
-<h4>Note: _csvsuite_ is in the active stage of development. But, as you will see, is already quite usable. Bug reports,
-scenarios that failed and so on are welcome.</h4>
+  > The _csvsuite_ is in the active stage of development. But, as you will see, is already quite usable. Bug reports,
+  scenarios that failed are very welcome. Well, it is imperfect, but it will improve.
+
 
 ### Restrictions
 1) Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
 overwhelming percentage of documents in the world adhere to this rule. If not, you can/should always resort to the
 [csvClean](#csvclean) (or even a more powerful one from the original package:
-[csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case, this
-document just needs to be fixed.
+[csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case, such
+document just obviously needs to be fixed.
+
 2) The only 2 of utilities of the Python's original are not implemented for not being too actual:
 [csvformat](https://csvkit.readthedocs.io/en/latest/scripts/csvformat.html),
 [csvpy](https://csvkit.readthedocs.io/en/latest/scripts/csvpy.html).
-3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following utility arguments are missing:
+
+3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following options are unsupported:
 
 | unsupported options                      |
 |------------------------------------------|
@@ -63,25 +66,24 @@ document just needs to be fixed.
 | -b, --no-doublequote                     |
 | -y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT |
 
-   The remaining arguments (or even newly introduced by the _csvsuite_) are present and almost certainly implemented.
+   The remaining options (or even newly introduced by the _csvsuite_ ) are present and almost certainly implemented.
 When running, any utility tries to quickly check the strong tabular shape of your documents to match [RFC-4180] and
 whistles if this is not the case.  
 
 4) When handling date and datetime data types and their localization, the _csvkit_ relies on the rich Python datetime
 library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
-The _csvsuite_, though, is tightly bound to the --date-format and --datetime-format arguments and works well only on
+The _csvsuite_ , though, is tightly bound to the --date-format and --datetime-format options and works well only on
 those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
-argument engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
+option engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
 consistency everywhere (on most platforms). For more info see tests located in the
 [csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module. For
 complete info see [formatting section](https://howardhinnant.github.io/date/date.html#from_stream_formatting) of the
 documentation.
 
 5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
-somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.  
+somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.
 
-6) Other restrictions and some substitutions are presented in section [Reference](#reference), when describing
-utilities.
+6) Other restrictions and some substitutions are presented in section [Reference](#reference), describing utilities.
 
 
 ### Tutorial
@@ -90,10 +92,11 @@ utilities.
 This tutorial should be almost exactly the same as the original tutorial.
 #### 1.2. Installing csvsuite
 The best way to install the tool is to simply download a required binary archive from the
-[release](https://github.com/wiluite/csvsuite/releases) page and unpack it. Then add the path to the unpacked
-subdirectory "suite" to the list of directories in which to search for commands, according to the rules for doing this
-for this particular operating system.  
-For an alternative software installation option, see the [Build All](#build-all) section.
+[release](https://github.com/wiluite/csvsuite/releases) page and unpack it. Then add the path to the unpacked directory
+root to the list of directories in which to search for commands, according to the rules for doing this for this
+particular operating system. See [Installation](#installation) section for details.
+
+See also [Build All](#build-all) section.
 
 #### 1.3. Remaining steps
 Just repeat the lessons from the original training:
@@ -111,13 +114,13 @@ _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their
 number, not a date. If this is too important for you right now, then to improve it, run the following command instead of
 the one suggested:
 
-	In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv
+    In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv
 
 The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
 like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/), which do
-not guarantee that dates are correctly recognized, since Excel documents themselves do not have a date storage type. So
-you are facing the necessity to always specify which numeric columns and using which era you want to convert to dates or
-datetimes.  
+not guarantee that dates/datetimes are correctly recognized, since Excel documents themselves do not have a date or
+datetime storage type. So you are facing the necessity to always specify which numeric columns and using which era you
+want to convert to dates or datetimes.  
 
 **_Note 3._** In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
 on the screen, unlike _csvStat_ which displays number separator according to the current global locale. This is because
@@ -125,10 +128,10 @@ in the _csvkit_ there is a difference between the locales according to which num
 To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
 them. For example:
 
-	csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US
+    csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US
 or  
 	
-	csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8  
+    csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8  
 where -G option is a "Superseded global locale".  
 
 **_Note 4._**
@@ -136,73 +139,75 @@ In the _csvStat_ utility, "Most common values" with the same number of repetitio
 original utility, due to different sorting algorithms. To display more data, use the --freq-count option.
 
 **_Note 5._** In paragraph 3.3 you must use: `--db sqlite3://leso.db` instead of `--db sqlite:///leso.db`. For more
-details, see the description of the --db option in the utilities [csvSql](#csvsql) and [Sql2csv](#sql2csv).
+details, see the description of the --db option in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
 
 
 ### Statistics performance
 There were measured the performances of three tools: [csvkit(1.5.0)'s csvstat](https://pypi.org/project/csvkit/), 
-[xsv(0.13.0)' stats](https://github.com/BurntSushi/xsv/releases/tag/0.13.0) and this one (csv_co's csvstat) at files: 
+[xsv(0.13.0)' stats](https://github.com/BurntSushi/xsv/releases/tag/0.13.0) and [_csvStat_](#csvstat) at files: 
 crime.csv, worldcitiespop.csv, flights.csv and question_tags.csv with (or with no) a limited number of columns
-(so as not to break up screenshots). Here are the results (csvkit, xsv, and this tool screenshots):  
+(so as not to break up screenshots). Here are the result screenshots:  
 
-<h3>(crime.csv)(csvkit)</h3> 
- 
+**CRIME.CSV**
+
+<h4>(csvkit)</h4>
 ![image info](./img/crime_csvkit.png) 
--
-<h3>(crime.csv)(xsv)</h3>  
 
+<h4>(xsv)</h4>
 ![image info](./img/crime_xsv.png) 
--
-<h3>(crime.csv)(this tool)</h3>
-  
+
+<h4>(csvsuite)</h4> 
 ![image info](./img/crime_csv_co.png) 
 
-Here, xsv is the winner. It produces results in less than a second.  
-The peculiarity of this file is that it is not utf8-encoded and that its fields are heavily quoted.  
+Here, xsv is the winner. It produces results in less than a second.
 
-<h3>(worldcitiespop.csv)(csvkit)</h3>
+---
 
+**WORLDCITIESPOP.CSV**  
+
+<h4>(csvkit)</h4>
 ![image info](./img/worldcitiespop_csvkit.png)
--
-<h3>(worldcitiespop.csv)(xsv)</h3>
 
+<h4>(xsv)</h4>
 ![image info](./img/worldcitiespop_xsv.png)
--
-<h3>(worldcitiespop.csv)(this tool)</h3>
 
+<h4>(csvsuite)</h4>
 ![image info](./img/worldcitiespop_csv_co.png)
 
-Here, this tool is even faster. 
-Note: since xsv does not calculate 'most decimal places' in its statistics, unlike csvkit, we have disabled this time-consuming 
-option at ours.
+Here, we are the winner. Note: since _xsv_ does not calculate 'most decimal places' in its statistics, unlike _csvkit_ ,
+we have disabled this option at ours.
 
-<h3>(flights.csv)(csvkit)</h3>
+---
 
+**FLIGHTS.CSV**
+
+<h4>(csvkit)</h4>
 ![image info](./img/flights_c_1_10_csvkit.png)
--
-<h3>(flights.csv)(xsv)</h3>
 
+<h4>(xsv)</h4>
 ![image info](./img/flights_c_1_10_xsv.png)
--
-<h3>(flights.csv)(this tool)</h3>
 
+<h4>(csvsuite)</h4>
 ![image info](./img/flights_c_1_10_csv_co.png)
 
-Here we again beat xsv by more than 2 times by doing statistics on the first 10 columns.
-If we did full statistics on all columns, xsv would run out of memory on our current machine (now we had 12 GB RAM), 
-as in the following test.
+Here we again beat xsv by more than 2 times by doing statistics on the first 10 columns. If we did full statistics on
+all the columns, xsv would run out of memory on our current machine (we had 12 GB RAM), as in the following test.
+The _csvkit_ is out of the competition.
 
-<h3>(question_tags.csv)(xsv)</h3>
+---
 
+**QUESTION_TAGS.CSV**
+
+<h4>(xsv)</h4>
 ![image info](./img/question_tags_xsv.png)
--
-<h3>(question_tags.csv)(this tool)</h3>
 
+<h4>(csvsuite)</h4>
 ![image info](./img/question_tags_csv_co.png)
 
-Our tool gives the result in about 42 seconds. Here we could not wait for the result from csvkit within a reasonable time. 
-Thus, both csvkit and xsv are unable to produce their results where for csv_co' csvstat the reasons why this is not possible 
-are not the case. This is a subject for further research.
+Our tool gives the result in about 42 seconds. Here we could not wait for the result from csvkit within a reasonable
+time. Thus, both the _csvkit_ and the _xsv_ are unable to produce their results where for out tool the reason why this
+is not possible is not the case. This is a subject for further research.
+
 
 ### Sorting performance
 If we talk about sorting by columns of string types, then the xsv is unrivaled, far ahead of other means in time, because
@@ -212,6 +217,7 @@ results will be incorrect). We only need about 7 seconds versus 21 at the xsv. T
 
 ![image info](./img/sort_worldcitiespop.png)
 
+
 ### SQL performance
 C++ is said to outperform Python in general, non-specialized areas by about 3 times. In this case, it is so. And even
 better. In light of the impossibility of parallelizing the filling of the database table using language tools.
@@ -220,10 +226,10 @@ unlike our tool.
 
 ![image info](./img/csvsql_worldcitiespop.png)
 
+
 ### Build All
 
-> For now you need Python installed. This is to configure one of libraries used. Over time, this dependence will be
-removed.
+> For now, you need Python installed to configure several libraries used. Over time, this dependence will be removed.
 
 #### PREPARATION
 
@@ -232,7 +238,7 @@ necessary for the build system to create the appropriate libraries for the [csvS
 utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
 [OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ supports the following SQL databases:
 
-- Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle(not tested).
+- Linux: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle (not tested).
 - Windows: SQLite3, MySQL, MariaDB, PostgreSQL, Firebird, Oracle.
 
 > Please, refer to the SOCI documentation to find out which versions of these databases are supported.  
@@ -317,24 +323,24 @@ cd src && mkdir build && cd build && cmake .. && make -j 4 all
 ### Testing
 This assumes that you have successfully [built](#build-all) the product.  
 Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
-successfully test all branches of the csvSql utility. This step is not necessary if you've built the product in a Docker
-container, where the environment is completely customized.
+successfully test all branches of the [csvSql](#csvsql) utility. This step is not necessary if you've built the product
+in a Docker container, where the environment is completely customized.
 
 * **Linux**
 
-  > SOCI_DB_SQLITE3="sqlite3://db=test.sqlite3"
-  > SOCI_DB_MYSQL="mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306"
-  > SOCI_DB_MARIADB="mariadb://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307"
-  > SOCI_DB_POSTGRESQL="postgresql://dbname=your_db user=your_user password=your_password"
+  > SOCI_DB_SQLITE3="sqlite3://db=test.sqlite3" <br>
+  > SOCI_DB_MYSQL="mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306" <br>
+  > SOCI_DB_MARIADB="mariadb://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307" <br>
+  > SOCI_DB_POSTGRESQL="postgresql://dbname=your_db user=your_user password=your_password" <br>
   > SOCI_DB_FIREBIRD="firebird://service=/path_to/your_db.fdb user=SYSDBA password=masterkey"
 
 * **Windows**
 
-  > SOCI_DB_SQLITE3=sqlite3://db=test.sqlite3 timeout=2 share-cache=true
-  > SOCI_DB_MYSQL=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306
-  > SOCI_DB_MARIADB=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307
-  > SOCI_DB_POSTGRESQL=postgresql://dbname=your_db user=your_user password=your_password
-  > SOCI_DB_FIREBIRD=firebird://service=d:\\your_directory_path\\your_db.fdb user=SYSDBA password=masterkey
+  > SOCI_DB_SQLITE3=sqlite3://db=test.sqlite3 timeout=2 share-cache=true <br>
+  > SOCI_DB_MYSQL=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306 <br>
+  > SOCI_DB_MARIADB=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307 <br>
+  > SOCI_DB_POSTGRESQL=postgresql://dbname=your_db user=your_user password=your_password <br>
+  > SOCI_DB_FIREBIRD=firebird://service=d:\\your_directory_path\\your_db.fdb user=SYSDBA password=masterkey <br>
   > SOCI_DB_ORACLE="oracle://service=//127.0.0.1:1521/xepdb1 user=hr password=hr"
 
 Go to your build/suite/test directory and run all the unit tests:
@@ -350,20 +356,20 @@ In general, the _csvsuite_ should not be installed into system directories. It i
 in place. Or, unpack a ready-made binary archive from the releases page into any directory. In both cases, you only need
 to establish global paths.
 
-* Linux
+* **Linux**
 
   - If you've built it, please modify your ~/.profile to have:
   > export PATH=$PATH:/path/to/csvsuite/suite/build/
 
-  and reboot.
+  and reboot.<br><br>
 
   - If you've downloaded it as a binary release, please modify your ~/.profile to have:
-  > export PATH=$PATH:/path/to/unpacked/archive
+  > export PATH=$PATH:/path/to/unpacked/archive <br>
   > export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
-  and reboot.
+  and reboot.<br><br>
 
-* Windows
+* **Windows**
 
   - If you've built it, add the path to your build\suite directory to the Path environment variable.
   - If you've downloaded it as a binary release, add the path to the root of the unpacked archive to the Path
@@ -372,6 +378,7 @@ to establish global paths.
 
 
 ### Reference
+
 *    [Input](#input)
 *    [Processing](#processing)
 *    [Output and Analysis](#output-and-analysis)
@@ -389,73 +396,75 @@ to establish global paths.
 Converts various tabular data formats into CSV.
 
 Converting fixed width requires that you provide a schema file with the “-s” option. The schema file should have the
-following format:  
+following format:
 
-	column,start,length  
-	name,0,30  
-	birthday,30,10  
-	age,40,3  
+    column,start,length
+    name,0,30
+    birthday,30,10
+    age,40,3
 
 The header line is required though the columns may be in any order:
 
-	Usage: In2csv arg_0  [options...]  
-	arg_0 : The file of a specified format to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
+    Usage: In2csv arg_0  [options...]  
+    arg_0 : The file of a specified format to operate on. If omitted, will accept input as piped data via STDIN. [default: ]
 
-Options:  
+Options:
 
     --help : print help [implicit: "true", default: false]
-	-f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
-	-s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
-	-k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
-	-n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
-	--sheet : The name of the Excel sheet to operate on. [default: ]  
-	--write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  
-	--use-sheet-names : Use the sheet names as file names when --write-sheets is set. [implicit: "true", default: false]  
-	--encoding-xls : Specify the encoding of the input XLS file. [default: UTF-8]  
-	--d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
-	--dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
-	--is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
-	-I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
+    -f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
+    -s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
+    -k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
+    -n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
+    --sheet : The name of the Excel sheet to operate on. [default: ]  
+    --write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  
+    --use-sheet-names : Use the sheet names as file names when --write-sheets is set. [implicit: "true", default: false]  
+    --encoding-xls : Specify the encoding of the input XLS file. [default: UTF-8]  
+    --d-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as dates, e.g. "1,id,3-5". [default: none]  
+    --dt-excel : A comma-separated list of numeric columns of the input XLS/XLSX/CSV source, considered as datetimes, e.g. "1,id,3-5". [default: none]  
+    --is1904 : Epoch based on the 1900/1904 datemode for input XLSX source, or for the input CSV source, converted from XLS/XLSX. [implicit: "true", default: true]  
+    -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
 
-Some command-line flags only pertain to specific input formats.  
+Some command-line flags only pertain to specific input formats.
 
-See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
+See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-**Examples**  
+**Examples**
 
-Convert the 2000 census geo headers file from fixed-width to CSV and from latin-1 encoding to utf8:  
+Convert the 2000 census geo headers file from fixed-width to CSV and from latin-1 encoding to utf8:
 
-	In2csv -e iso-8859-1 -f fixed -s examples/realdata/census_2000/census2000_geo_schema.csv examples/realdata/census_2000/usgeo_excerpt.upl
+    In2csv -e iso-8859-1 -f fixed -s examples/realdata/census_2000/census2000_geo_schema.csv examples/realdata/census_2000/usgeo_excerpt.upl
 
-Convert an Excel .xls file:  
+Convert an Excel .xls file:
 
-	In2csv examples/test.xls  
+    In2csv examples/test.xls  
 
 Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
-	In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
+    In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
+
 Unlike the _csvkit_ , which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
 explicitly, since the utility uses the C/Posix locale by default.
 
 Fetch csvkit’s open issues from the GitHub API, convert the JSON response into a CSV and write it to a file:  
 
-	This example cannot be demonstrated at the moment because the [jsoncons](https://github.com/danielaparker/jsoncons)
-	underlying the conversion does not know how to map nested json documents to csv.
+    This example cannot be demonstrated at the moment because the [jsoncons](https://github.com/danielaparker/jsoncons)
+    underlying the conversion does not know how to map nested json documents to csv.
 
-Convert a DBase DBF file to an equivalent CSV:  
+Convert a DBase DBF file to an equivalent CSV:
 
-	In2csv examples/testdbf.dbf  
+    In2csv examples/testdbf.dbf  
 
-**Troubleshooting**  
+**Troubleshooting**
 
 If an error like the following occurs when providing an input file in one of the formats:  
 
-	The document has 1 column at NNN row...  
+    The document has 1 column at NNN row...  
 
 Then the input file might have initial rows before the header and data rows. You can skip such rows with --skip-lines
-(-K):  
+(-K):
 
-	in2csv --skip-lines 3 examples/test_skip_lines.csv
+    in2csv --skip-lines 3 examples/test_skip_lines.csv
+
 ---
 
 #### Sql2csv
@@ -687,6 +696,7 @@ Remove comment rows:
 
 Get the indices of the columns that contain matching text (\x1e is the Record Separator (RS) character):  
     **This example can not be demonstrated due to the _csvsuite_ does not support the csvformat utility.**
+
 ---
 
 #### csvJoin
@@ -762,6 +772,7 @@ View the five states with the most individuals claiming veteran’s education be
 numeric locale):
 
     csvCut -c 1,9 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSort -r -c 2 -L en_US | head -n 5
+
 ---
 
 #### csvStack
@@ -971,22 +982,22 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: [--engine-option](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported because the
-utility is [SOCI](https://github.com/SOCI/soci) driven, not SQLAlchemy driven.  
-NOTE: [--min-col-len and --col-len-multiplier](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) options are
-not supported as well. See the utility [source](https://github.com/wiluite/csvsuite/blob/main/suite/csvSql.cpp) to know
-about constant lengths of text columns. This will definitely be fixed soon. 
-NOTE: [--db-schema](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported as well.
+> [--engine-option](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported because the
+> utility is [SOCI](https://github.com/SOCI/soci) driven, not SQLAlchemy driven.  
+> [--min-col-len and --col-len-multiplier](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) options are
+> not supported as well. See the utility [source](https://github.com/wiluite/csvsuite/blob/main/suite/csvSql.cpp) to
+> know about constant lengths of text columns. This will definitely be fixed soon.  
+> [--db-schema](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) option is not supported as well.
 
 **Examples**  
-
-NOTE: Each example assumes that you have already created your test database.
 
 ***Generate SQL statements***
 
 Generate a statement in the PostgreSQL dialect:
 
     csvSql -L en_US -i postgresql examples/realdata/FY09_EDU_Recipients_by_State.csv
+
+NOTE: Each further example assumes that you have already created your test database.
 
 ***Interact with a SQL database***
 
@@ -1033,7 +1044,7 @@ The UPDATE SQL statement produces no output. Remember to SELECT the columns and 
     csvSql --query "UPDATE 'dummy3' SET a = '0'; SELECT * FROM 'dummy3'" examples/dummy3.csv
     csvSql --query "UPDATE 'dummy3' SET a = '1'; SELECT * FROM 'dummy3'" examples/dummy3.csv
 
-NOTE: In this particular case, column 'a' should still only accept values of its specific type. Assigning other values
+> In this particular case, column 'a' should still only accept values of its specific type. Assigning other values
 as [here](https://csvkit.readthedocs.io/en/latest/scripts/csvsql.html) is possible, but will not appear in the selection.
 
 ---
@@ -1076,7 +1087,7 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: There has been introduced --no-mdp,--no-max-precision option to turn off the most decimal places calculation if
+> There has been introduced --no-mdp,--no-max-precision option to turn off the most decimal places calculation if
 it is not necessary for you right now: if this calculation is performed through the boost::multiprecision library, then
 this greatly slows down the work of the main purpose of the utility - other statistics. You can find out whether most
 decimal places are calculated using the quick method (by default) or via boost::multiprecision library by looking at the
@@ -1103,14 +1114,16 @@ When a statistic name is passed, only that stat will be printed:
     9. TOTAL: 768,
     10. : None
 
-NOTE: In all cases of numeric output, the numeric locale is the global locale of your system environment (again, do not
+> In all cases of numeric output, the numeric locale is the global locale of your system environment (again, do not
 mix with the -L option which is the "input" locale for numerics).
 
 If a single stat and a single column are requested, only a value will be returned:
 
     $ csvStat -L en_US -c 4 --mean examples/realdata/FY09_EDU_Recipients_by_State.csv
     6 263,904
+
 ---
+
 ### Arguments common to all tools
 
     -z,--maxfieldsize : Maximum length of a single field in the input CSV file. [default: 4294967295]
@@ -1130,3 +1143,8 @@ If a single stat and a single column are requested, only a value will be returne
     --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
 
+There are 3 new options here:
+
+* -Q,--quick-check to make sure that the sources are in matrix form. Default is ON.<br>
+* --date-lib-parser to turn on a professional date and date-time parser for cross-platform use. Default is ON. <br>
+* --ASAP to emit the results of work without waiting for the source to be fully processed.
