@@ -81,19 +81,17 @@ namespace in2csv::detail::json {
                     is >> *ptr;
                 }
             }
-            void obtain_csv(std::ostream & os) {
-#if 1
+            void obtain_csv(std::ostream & os, bool non_flat) {
                 auto options = csv::csv_options{}
-                    .flat(true);
+                    .flat(!non_flat);
                 csv::csv_stream_encoder encoder(os, options);
-#else
-                csv::csv_stream_encoder encoder(os);
-#endif
                 ptr->dump(encoder);
 
             }
-            void obtain_csv(std::ostream & os, std::string const & key) {
-                csv::csv_stream_encoder encoder(os);
+            void obtain_csv(std::ostream & os, std::string const & key, bool non_flat) {
+                auto options = csv::csv_options{}
+                    .flat(!non_flat);
+                csv::csv_stream_encoder encoder(os, options);
                 ojson w = ptr->at(key);
                 w.dump(encoder);
             }
@@ -101,9 +99,9 @@ namespace in2csv::detail::json {
 
         std::ostringstream oss;
         if (a.key.empty())
-            doc.obtain_csv(oss);
+            doc.obtain_csv(oss, a.non_flat);
         else
-            doc.obtain_csv(oss, a.key);
+            doc.obtain_csv(oss, a.key, a.non_flat);
 
         a.skip_lines = 0;
         a.no_header = false;

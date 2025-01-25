@@ -31,6 +31,7 @@ int main() {
         std::string format;
         std::string schema;
         std::string key;
+        bool non_flat = false;
         bool names = false;
         std::string sheet;
         std::string write_sheets;
@@ -252,18 +253,17 @@ int main() {
         }));
     };
 #endif
-#if 1
+
     "convert nested json"_test = [&] {
         struct Args : In2csv_args {
-            Args() { file = "examples/testjson_nested.json"; format = "json"; }
+            Args() { file = "examples/testjson_nested.json"; non_flat = true; }
         } args;
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
-            std::cerr << cout_buffer.str();
-            //expect(cout_buffer.str() == get_source("examples/testjson_multiline_converted.csv"));
+            expect(cout_buffer.str() == get_source("examples/testjson_nested_converted.csv"));
         }));
     };
-#endif
+
     // TODO: FOR THIS ONE AND FOR THE NEXT ONE add tests with different data shifts absent at Python kit.
     "convert xls"_test = [&] {
         struct Args : In2csv_args {

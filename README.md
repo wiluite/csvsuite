@@ -361,13 +361,13 @@ to establish global paths.
   - If you've built it, please modify your ~/.profile to have:
   > export PATH=$PATH:/path/to/csvsuite/suite/build/
 
-  and reboot.<br><br>
+  and reboot.
 
   - If you've downloaded it as a binary release, please modify your ~/.profile to have:
   > export PATH=$PATH:/path/to/unpacked/archive <br>
   > export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
-  and reboot.<br><br>
+  and reboot.
 
 * **Windows**
 
@@ -414,6 +414,7 @@ Options:
     -f,--format : The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type. [default: ]  
     -s,--schema : Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example. [default: ]  
     -k,--key : Specify a top-level key to look within for a list of objects to be converted when processing JSON. [default: ]  
+    --non-flat : Specify, whether to navigate through nested structures when processing JSON. [implicit: "true", default: false]
     -n,--names : Display sheet names from the input Excel file. [implicit: "true", default: false]  
     --sheet : The name of the Excel sheet to operate on. [default: ]  
     --write-sheets : The names of the Excel sheets to write to files, or "-" to write all sheets. [default: ]  

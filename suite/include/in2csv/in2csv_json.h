@@ -32,6 +32,7 @@ namespace in2csv::detail {
             bool asap;
 
             std::string key;
+            bool non_flat;
             std::filesystem::path file;
         };
 
@@ -66,6 +67,7 @@ namespace in2csv::detail {
                 , args.asap
 
                 , args.key
+                , args.non_flat
                 , args.file});
         }
         void convert() override {

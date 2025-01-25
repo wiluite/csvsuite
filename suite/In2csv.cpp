@@ -27,6 +27,7 @@ namespace in2csv::detail {
         std::string & format = kwarg("f,format","The format {csv,dbf,fixed,geojson,json,ndjson,xls,xlsx} of the input file. If not specified will be inferred from the file type.").set_default(std::string{});
         std::string & schema = kwarg("s,schema","Specify a CSV-formatted schema file for converting fixed-width files. See In2csv_test as example.").set_default(std::string{});
         std::string & key = kwarg("k,key","Specify a top-level key to look within for a list of objects to be converted when processing JSON.").set_default(std::string{});
+        bool & non_flat = flag("non-flat", "Specify, whether to navigate through nested structures when processing JSON.");
         bool & names = flag ("n,names","Display sheet names from the input Excel file.");
         std::string & sheet = kwarg("sheet","The name of the Excel sheet to operate on.").set_default(std::string{});
         std::string & write_sheets = kwarg("write-sheets","The names of the Excel sheets to write to files, or \"-\" to write all sheets.").set_default(std::string{});
@@ -131,7 +132,7 @@ namespace in2csv {
         } else {
             if (!args.schema.empty())
                 filetype = "fixed";
-            else if (!args.key.empty())
+            else if (!args.key.empty() or args.non_flat)
                 filetype = "json";
             else {
                 if (args.file.empty() or args.file == "_") { // piped data, but no format specified
