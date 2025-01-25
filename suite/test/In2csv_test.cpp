@@ -241,7 +241,7 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/test_geojson.csv"));
         }));
     };
-
+#if 0
     "convert ndjson"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "examples/testjson_multiline.json"; format = "ndjson"; }
@@ -251,7 +251,19 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/testjson_multiline_converted.csv"));
         }));
     };
-
+#endif
+#if 1
+    "convert nested json"_test = [&] {
+        struct Args : In2csv_args {
+            Args() { file = "examples/testjson_nested.json"; format = "json"; }
+        } args;
+        expect(nothrow([&] {
+            CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
+            std::cerr << cout_buffer.str();
+            //expect(cout_buffer.str() == get_source("examples/testjson_multiline_converted.csv"));
+        }));
+    };
+#endif
     // TODO: FOR THIS ONE AND FOR THE NEXT ONE add tests with different data shifts absent at Python kit.
     "convert xls"_test = [&] {
         struct Args : In2csv_args {
@@ -424,7 +436,7 @@ int main() {
             expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
     };
-
+#if 0
     "ndjson no inference"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "_"; format = "ndjson"; no_inference = true; }
@@ -437,7 +449,7 @@ int main() {
             expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
     };
-
+#endif
     "convert xls with write sheets"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "examples/sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }

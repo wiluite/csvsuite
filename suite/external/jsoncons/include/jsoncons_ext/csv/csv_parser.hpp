@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,19 +7,27 @@
 #ifndef JSONCONS_CSV_CSV_PARSER_HPP
 #define JSONCONS_CSV_CSV_PARSER_HPP
 
-#include <memory> // std::allocator
-#include <string>
-#include <sstream>
-#include <vector>
-#include <stdexcept>
-#include <system_error>
 #include <cctype>
-#include <jsoncons/json_exception.hpp>
-#include <jsoncons/json_visitor.hpp>
-#include <jsoncons/json_reader.hpp>
-#include <jsoncons/json_filter.hpp>
-#include <jsoncons/json.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory> // std::allocator
+#include <sstream>
+#include <string>
+#include <system_error>
+#include <vector>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/config/jsoncons_config.hpp>
 #include <jsoncons/detail/parse_number.hpp>
+#include <jsoncons/json_exception.hpp>
+#include <jsoncons/json_filter.hpp>
+#include <jsoncons/json_reader.hpp>
+#include <jsoncons/json_visitor.hpp>
+#include <jsoncons/ser_context.hpp>
+#include <jsoncons/staj_event.hpp>
+#include <jsoncons/tag_type.hpp>
+
 #include <jsoncons_ext/csv/csv_error.hpp>
 #include <jsoncons_ext/csv/csv_options.hpp>
 
@@ -1632,7 +1640,7 @@ private:
         auto it = std::find_if(string_double_map_.begin(), string_double_map_.end(), string_maps_to_double{ buffer_ });
         if (it != string_double_map_.end())
         {
-            more_ = visitor_->double_value(it->second, semantic_tag::none, *this, ec);
+            more_ = visitor_->double_value((*it).second, semantic_tag::none, *this, ec);
         }
         else if (column_index_ < column_types_.size() + offset_)
         {

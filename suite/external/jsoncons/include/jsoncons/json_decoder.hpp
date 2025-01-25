@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,14 +7,17 @@
 #ifndef JSONCONS_JSON_DECODER_HPP
 #define JSONCONS_JSON_DECODER_HPP
 
-#include <string>
-#include <vector>
-#include <type_traits> // std::true_type
+#include <cstddef>
+#include <cstdint>
 #include <memory> // std::allocator
-#include <iterator> // std::make_move_iterator
+#include <system_error>
 #include <utility> // std::move
-#include <jsoncons/json_exception.hpp>
+#include <vector>
+
+#include <jsoncons/json_object.hpp>
 #include <jsoncons/json_visitor.hpp>
+#include <jsoncons/ser_context.hpp>
+#include <jsoncons/tag_type.hpp>
 
 namespace jsoncons {
 
@@ -41,13 +44,13 @@ private:
     struct structure_info
     {
         structure_type type_;
-        std::size_t container_index_;
+        std::size_t container_index_{0};
 
         structure_info(structure_type type, std::size_t offset) noexcept
             : type_(type), container_index_(offset)
         {
         }
-
+        ~structure_info() = default;
     };
 
     using temp_allocator_type = TempAllocator;
@@ -194,7 +197,7 @@ private:
             auto last = first + size;
             for (auto it = first; it != last; ++it)
             {
-                container.push_back(std::move(it->value));
+                container.push_back(std::move((*it).value));
             }
             item_stack_.erase(first, item_stack_.end());
         }
@@ -381,4 +384,4 @@ private:
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_DECODER_HPP

@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,20 +7,27 @@
 #ifndef JSONCONS_JSON_PARSER_HPP
 #define JSONCONS_JSON_PARSER_HPP
 
+#include <cstddef>
+#include <cstdint>
+#include <functional> // std::function
+#include <limits> // std::numeric_limits
 #include <memory> // std::allocator
 #include <string>
-#include <vector>
-#include <stdexcept>
 #include <system_error>
 #include <unordered_map>
-#include <limits> // std::numeric_limits
-#include <functional> // std::function
+#include <utility>
+#include <vector>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/detail/parse_number.hpp>
+#include <jsoncons/json_error.hpp>
 #include <jsoncons/json_exception.hpp>
 #include <jsoncons/json_filter.hpp>
 #include <jsoncons/json_options.hpp>
 #include <jsoncons/json_visitor.hpp>
-#include <jsoncons/json_error.hpp>
-#include <jsoncons/detail/parse_number.hpp>
+#include <jsoncons/ser_context.hpp>
+#include <jsoncons/tag_type.hpp>
+#include <jsoncons/utility/unicode_traits.hpp>
 
 #define JSONCONS_ILLEGAL_CONTROL_CHARACTER \
         case 0x00:case 0x01:case 0x02:case 0x03:case 0x04:case 0x05:case 0x06:case 0x07:case 0x08:case 0x0b: \
@@ -33,7 +40,7 @@ namespace detail {
 
 }
 
-enum class json_parse_state : uint8_t 
+enum class parse_state : uint8_t 
 {
     root,
     start, 
@@ -52,25 +59,7 @@ enum class json_parse_state : uint8_t
     array, 
     string,
     member_name,
-    escape, 
-    escape_u1, 
-    escape_u2, 
-    escape_u3, 
-    escape_u4, 
-    escape_expect_surrogate_pair1, 
-    escape_expect_surrogate_pair2, 
-    escape_u5, 
-    escape_u6, 
-    escape_u7, 
-    escape_u8, 
-    minus, 
-    zero,  
-    integer,
-    fraction1,
-    fraction2,
-    exp1,
-    exp2,
-    exp3,
+    number,
     n,
     nu,
     nul,
@@ -83,6 +72,34 @@ enum class json_parse_state : uint8_t
     fals,  
     cr,
     done
+};
+
+enum class parse_string_state : uint8_t 
+{
+    text = 0,
+    escape, 
+    escape_u1, 
+    escape_u2, 
+    escape_u3, 
+    escape_u4, 
+    escape_expect_surrogate_pair1, 
+    escape_expect_surrogate_pair2, 
+    escape_u5, 
+    escape_u6, 
+    escape_u7, 
+    escape_u8
+};
+
+enum class parse_number_state : uint8_t 
+{
+    minus, 
+    zero,  
+    integer,
+    fraction1,
+    fraction2,
+    exp1,
+    exp2,
+    exp3
 };
 
 template <typename CharT,typename TempAllocator  = std::allocator<char>>
@@ -104,7 +121,7 @@ private:
 
     using temp_allocator_type = TempAllocator;
     using char_allocator_type = typename std::allocator_traits<temp_allocator_type>:: template rebind_alloc<CharT>;
-    using parse_state_allocator_type = typename std::allocator_traits<temp_allocator_type>:: template rebind_alloc<json_parse_state>;
+    using parse_state_allocator_type = typename std::allocator_traits<temp_allocator_type>:: template rebind_alloc<parse_state>;
 
     static constexpr std::size_t initial_string_buffer_capacity = 256;
     static constexpr int default_initial_stack_capacity = 66;
@@ -122,14 +139,16 @@ private:
     const char_type* begin_input_;
     const char_type* end_input_;
     const char_type* input_ptr_;
-    json_parse_state state_;
+    parse_state state_;
+    parse_string_state string_state_ = parse_string_state{};
+    parse_number_state number_state_ = parse_number_state{};
     bool more_;
     bool done_;
 
     std::basic_string<char_type,std::char_traits<char_type>,char_allocator_type> string_buffer_;
     jsoncons::detail::chars_to to_double_;
 
-    std::vector<json_parse_state,parse_state_allocator_type> state_stack_;
+    std::vector<parse_state,parse_state_allocator_type> state_stack_;
     std::vector<std::pair<std::basic_string<char_type>,double>> string_double_map_;
 
     // Noncopyable and nonmoveable
@@ -169,7 +188,7 @@ public:
          begin_input_(nullptr),
          end_input_(nullptr),
          input_ptr_(nullptr),
-         state_(json_parse_state::start),
+         state_(parse_state::start),
          more_(true),
          done_(false),
          string_buffer_(temp_alloc),
@@ -177,9 +196,9 @@ public:
     {
         string_buffer_.reserve(initial_string_buffer_capacity);
 
-        std::size_t initial_stack_capacity = (options.max_nesting_depth()+2) <= default_initial_stack_capacity ? (options.max_nesting_depth()+2) : default_initial_stack_capacity;
+        std::size_t initial_stack_capacity = options.max_nesting_depth() <= (default_initial_stack_capacity-2) ? (options.max_nesting_depth()+2) : default_initial_stack_capacity;
         state_stack_.reserve(initial_stack_capacity );
-        push_state(json_parse_state::root);
+        push_state(parse_state::root);
 
         if (options_.enable_str_to_nan())
         {
@@ -204,7 +223,7 @@ public:
     {
     }
 
-    json_parse_state parent() const
+    parse_state parent() const
     {
         JSONCONS_ASSERT(state_stack_.size() >= 1);
         return state_stack_.back();
@@ -217,12 +236,12 @@ public:
 
     bool enter() const
     {
-        return state_ == json_parse_state::start;
+        return state_ == parse_state::start;
     }
 
     bool accept() const
     {
-        return state_ == json_parse_state::accept || done_;
+        return state_ == parse_state::accept || done_;
     }
 
     bool stopped() const
@@ -230,14 +249,14 @@ public:
         return !more_;
     }
 
-    json_parse_state state() const
+    parse_state state() const
     {
         return state_;
     }
 
     bool finished() const
     {
-        return !more_ && state_ != json_parse_state::accept;
+        return !more_ && state_ != parse_state::accept;
     }
 
     const char_type* first() const
@@ -271,7 +290,7 @@ public:
                     push_state(state_);
                     ++input_ptr_;
                     ++position_;
-                    state_ = json_parse_state::cr;
+                    state_ = parse_state::cr;
                     return; 
                 case '\n': 
                     ++input_ptr_;
@@ -293,7 +312,7 @@ public:
         {
             switch (state_)
             {
-                case json_parse_state::cr:
+                case parse_state::cr:
                     ++line_;
                     ++position_;
                     mark_position_ = position_;
@@ -339,8 +358,8 @@ public:
             }
         } 
 
-        push_state(json_parse_state::object);
-        state_ = json_parse_state::expect_member_name_or_end;
+        push_state(parse_state::object);
+        state_ = parse_state::expect_member_name_or_end;
         more_ = visitor.begin_object(semantic_tag::none, *this, ec);
     }
 
@@ -355,11 +374,11 @@ public:
         }
         --nesting_depth_;
         state_ = pop_state();
-        if (state_ == json_parse_state::object)
+        if (state_ == parse_state::object)
         {
             more_ = visitor.end_object(*this, ec);
         }
-        else if (state_ == json_parse_state::array)
+        else if (state_ == parse_state::array)
         {
             err_handler_(json_errc::expected_comma_or_rbracket, *this);
             ec = json_errc::expected_comma_or_rbracket;
@@ -374,13 +393,13 @@ public:
             return;
         }
 
-        if (parent() == json_parse_state::root)
+        if (parent() == parse_state::root)
         {
-            state_ = json_parse_state::accept;
+            state_ = parse_state::accept;
         }
         else
         {
-            state_ = json_parse_state::expect_comma_or_end;
+            state_ = parse_state::expect_comma_or_end;
         }
     }
 
@@ -396,8 +415,8 @@ public:
             }
         }
 
-        push_state(json_parse_state::array);
-        state_ = json_parse_state::expect_value_or_end;
+        push_state(parse_state::array);
+        state_ = parse_state::expect_value_or_end;
         more_ = visitor.begin_array(semantic_tag::none, *this, ec);
     }
 
@@ -412,11 +431,11 @@ public:
         }
         --nesting_depth_;
         state_ = pop_state();
-        if (state_ == json_parse_state::array)
+        if (state_ == parse_state::array)
         {
             more_ = visitor.end_array(*this, ec);
         }
-        else if (state_ == json_parse_state::object)
+        else if (state_ == parse_state::object)
         {
             err_handler_(json_errc::expected_comma_or_rbrace, *this);
             ec = json_errc::expected_comma_or_rbrace;
@@ -430,13 +449,13 @@ public:
             more_ = false;
             return;
         }
-        if (parent() == json_parse_state::root)
+        if (parent() == parse_state::root)
         {
-            state_ = json_parse_state::accept;
+            state_ = parse_state::accept;
         }
         else
         {
-            state_ = json_parse_state::expect_comma_or_end;
+            state_ = parse_state::expect_comma_or_end;
         }
     }
 
@@ -455,8 +474,8 @@ public:
     void reset()
     {
         state_stack_.clear();
-        push_state(json_parse_state::root);
-        state_ = json_parse_state::start;
+        push_state(parse_state::root);
+        state_ = parse_state::start;
         more_ = true;
         done_ = false;
         line_ = 1;
@@ -551,11 +570,11 @@ public:
 
     void parse_some_(basic_json_visitor<char_type>& visitor, std::error_code& ec)
     {
-        if (state_ == json_parse_state::accept)
+        if (state_ == parse_state::accept)
         {
             visitor.flush();
             done_ = true;
-            state_ = json_parse_state::done;
+            state_ = parse_state::done;
             more_ = false;
             return;
         }
@@ -565,27 +584,38 @@ public:
         {
             switch (state_)
             {
-                case json_parse_state::zero:  
-                case json_parse_state::integer:
-                    end_integer_value(visitor, ec);
-                    if (ec) return;
+                case parse_state::number:  
+                    if (number_state_ == parse_number_state::zero || number_state_ == parse_number_state::integer)
+                    {
+                        end_integer_value(visitor, ec);
+                        if (ec) return;
+                    }
+                    else if (number_state_ == parse_number_state::fraction2 || number_state_ == parse_number_state::exp3)
+                    {
+                        end_fraction_value(visitor, ec);
+                        if (ec) return;
+                    }
+                    else
+                    {
+                        err_handler_(json_errc::unexpected_eof, *this);
+                        ec = json_errc::unexpected_eof;
+                        more_ = false;
+                    }
                     break;
-                case json_parse_state::fraction2:
-                case json_parse_state::exp3:
-                    end_fraction_value(visitor, ec);
-                    if (ec) return;
-                    break;
-                case json_parse_state::accept:
+                case parse_state::accept:
                     visitor.flush();
                     done_ = true;
-                    state_ = json_parse_state::done;
+                    state_ = parse_state::done;
                     more_ = false;
                     break;
-                case json_parse_state::start:
-                case json_parse_state::done:
+                case parse_state::start:
+                    more_ = false;
+                    ec = json_errc::unexpected_eof;
+                    break;                
+                case parse_state::done:
                     more_ = false;
                     break;
-                case json_parse_state::cr:
+                case parse_state::cr:
                     state_ = pop_state();
                     break;
                 default:
@@ -600,13 +630,13 @@ public:
         {
             switch (state_)
             {
-                case json_parse_state::accept:
+                case parse_state::accept:
                     visitor.flush();
                     done_ = true;
-                    state_ = json_parse_state::done;
+                    state_ = parse_state::done;
                     more_ = false;
                     break;
-                case json_parse_state::cr:
+                case parse_state::cr:
                     ++line_;
                     mark_position_ = position_;
                     switch (*input_ptr_)
@@ -621,7 +651,7 @@ public:
                             break;
                     }
                     break;
-                case json_parse_state::start: 
+                case parse_state::start: 
                     {
                         switch (*input_ptr_)
                         {
@@ -637,7 +667,7 @@ public:
                                 push_state(state_);
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -652,7 +682,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '{':
                                 saved_position_ = position_;
@@ -669,7 +699,8 @@ public:
                                 if (ec) return;
                                 break;
                             case '\"':
-                                state_ = json_parse_state::string;
+                                state_ = parse_state::string;
+                                string_state_ = parse_string_state{};
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
@@ -683,14 +714,16 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::minus;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::minus;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
                             case '0': 
                                 string_buffer_.clear();
                                 string_buffer_.push_back(static_cast<char>(*input_ptr_));
-                                state_ = json_parse_state::zero;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::zero;
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
@@ -703,7 +736,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::integer;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::integer;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -738,7 +772,7 @@ public:
                     }
                     break;
 
-                case json_parse_state::expect_comma_or_end: 
+                case parse_state::expect_comma_or_end: 
                     {
                         switch (*input_ptr_)
                         {
@@ -756,7 +790,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -771,7 +805,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_); 
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '}':
                                 saved_position_ = position_;
@@ -794,7 +828,7 @@ public:
                                 ++position_;
                                 break;
                             default:
-                                if (parent() == json_parse_state::array)
+                                if (parent() == parse_state::array)
                                 {
                                     more_ = err_handler_(json_errc::expected_comma_or_rbracket, *this);
                                     if (!more_)
@@ -803,7 +837,7 @@ public:
                                         return;
                                     }
                                 }
-                                else if (parent() == json_parse_state::object)
+                                else if (parent() == parse_state::object)
                                 {
                                     more_ = err_handler_(json_errc::expected_comma_or_rbrace, *this);
                                     if (!more_)
@@ -818,7 +852,7 @@ public:
                         }
                     }
                     break;
-                case json_parse_state::expect_member_name_or_end: 
+                case parse_state::expect_member_name_or_end: 
                     {
                         switch (*input_ptr_)
                         {
@@ -836,7 +870,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -851,7 +885,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_); 
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '}':
                                 saved_position_ = position_;
@@ -864,8 +898,9 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                push_state(json_parse_state::member_name);
-                                state_ = json_parse_state::string;
+                                push_state(parse_state::member_name);
+                                state_ = parse_state::string;
+                                string_state_ = parse_string_state{};
                                 string_buffer_.clear();
                                 parse_string(visitor, ec);
                                 if (ec) return;
@@ -893,7 +928,7 @@ public:
                         }
                     }
                     break;
-                case json_parse_state::expect_member_name: 
+                case parse_state::expect_member_name: 
                     {
                         switch (*input_ptr_)
                         {
@@ -911,7 +946,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -926,14 +961,15 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '\"':
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                push_state(json_parse_state::member_name);
-                                state_ = json_parse_state::string;
+                                push_state(parse_state::member_name);
+                                state_ = parse_state::string;
+                                string_state_ = parse_string_state{};
                                 string_buffer_.clear();
                                 parse_string(visitor, ec);
                                 if (ec) return;
@@ -974,7 +1010,7 @@ public:
                         }
                     }
                     break;
-                case json_parse_state::expect_colon: 
+                case parse_state::expect_colon: 
                     {
                         switch (*input_ptr_)
                         {
@@ -990,7 +1026,7 @@ public:
                                 break;
                             case '\r': 
                                 push_state(state_);
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 ++input_ptr_;
                                 ++position_;
                                 break; 
@@ -1005,12 +1041,12 @@ public:
                                 break;
                             case '/': 
                                 push_state(state_);
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 ++input_ptr_;
                                 ++position_;
                                 break;
                             case ':':
-                                state_ = json_parse_state::expect_value;
+                                state_ = parse_state::expect_value;
                                 ++input_ptr_;
                                 ++position_;
                                 break;
@@ -1028,7 +1064,7 @@ public:
                     }
                     break;
 
-                    case json_parse_state::expect_value: 
+                    case parse_state::expect_value: 
                     {
                         switch (*input_ptr_)
                         {
@@ -1046,7 +1082,7 @@ public:
                                 push_state(state_);
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -1061,7 +1097,7 @@ public:
                                 push_state(state_);
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '{':
                                 saved_position_ = position_;
@@ -1081,7 +1117,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::string;
+                                state_ = parse_state::string;
+                                string_state_ = parse_string_state{};
                                 string_buffer_.clear();
                                 parse_string(visitor, ec);
                                 if (ec) return;
@@ -1092,7 +1129,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::minus;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::minus;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1102,7 +1140,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::zero;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::zero;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1112,7 +1151,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::integer;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::integer;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1132,7 +1172,7 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                if (parent() == json_parse_state::array)
+                                if (parent() == parse_state::array)
                                 {
                                     more_ = err_handler_(json_errc::extra_comma, *this);
                                     if (!more_)
@@ -1176,7 +1216,7 @@ public:
                         }
                     }
                     break;
-                    case json_parse_state::expect_value_or_end: 
+                    case parse_state::expect_value_or_end: 
                     {
                         switch (*input_ptr_)
                         {
@@ -1194,7 +1234,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::cr;
+                                state_ = parse_state::cr;
                                 break; 
                             case '\n': 
                                 ++input_ptr_;
@@ -1209,7 +1249,7 @@ public:
                                 ++input_ptr_;
                                 ++position_;
                                 push_state(state_);
-                                state_ = json_parse_state::slash;
+                                state_ = parse_state::slash;
                                 break;
                             case '{':
                                 saved_position_ = position_;
@@ -1236,7 +1276,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::string;
+                                state_ = parse_state::string;
+                                string_state_ = parse_string_state{};
                                 string_buffer_.clear();
                                 parse_string(visitor, ec);
                                 if (ec) return;
@@ -1247,7 +1288,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::minus;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::minus;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1257,7 +1299,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::zero;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::zero;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1267,7 +1310,8 @@ public:
                                 saved_position_ = position_;
                                 ++input_ptr_;
                                 ++position_;
-                                state_ = json_parse_state::integer;
+                                state_ = parse_state::number;
+                                number_state_ = parse_number_state::integer;
                                 parse_number(visitor, ec);
                                 if (ec) {return;}
                                 break;
@@ -1306,39 +1350,21 @@ public:
                             }
                         }
                     break;
-                case json_parse_state::string: 
-                case json_parse_state::escape: 
-                case json_parse_state::escape_u1: 
-                case json_parse_state::escape_u2: 
-                case json_parse_state::escape_u3: 
-                case json_parse_state::escape_u4: 
-                case json_parse_state::escape_expect_surrogate_pair1: 
-                case json_parse_state::escape_expect_surrogate_pair2: 
-                case json_parse_state::escape_u5: 
-                case json_parse_state::escape_u6: 
-                case json_parse_state::escape_u7: 
-                case json_parse_state::escape_u8: 
+                case parse_state::string: 
                     parse_string(visitor, ec);
                     if (ec) return;
                     break;
-                case json_parse_state::minus:
-                case json_parse_state::zero:  
-                case json_parse_state::integer: 
-                case json_parse_state::fraction1: 
-                case json_parse_state::fraction2: 
-                case json_parse_state::exp1: 
-                case json_parse_state::exp2:  
-                case json_parse_state::exp3: 
+                case parse_state::number:
                     parse_number(visitor, ec);  
                     if (ec) return;
                     break;
-                case json_parse_state::t: 
+                case parse_state::t: 
                     switch (*input_ptr_)
                     {
                         case 'r':
                             ++input_ptr_;
                             ++position_;
-                            state_ = json_parse_state::tr;
+                            state_ = parse_state::tr;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1347,11 +1373,11 @@ public:
                             return;
                     }
                     break;
-                case json_parse_state::tr: 
+                case parse_state::tr: 
                     switch (*input_ptr_)
                     {
                         case 'u':
-                            state_ = json_parse_state::tru;
+                            state_ = parse_state::tru;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1362,20 +1388,20 @@ public:
                     ++input_ptr_;
                     ++position_;
                     break;
-                case json_parse_state::tru: 
+                case parse_state::tru: 
                     switch (*input_ptr_)
                     {
                         case 'e':
                             ++input_ptr_;
                             ++position_;
                             more_ = visitor.bool_value(true,  semantic_tag::none, *this, ec);
-                            if (parent() == json_parse_state::root)
+                            if (parent() == parse_state::root)
                             {
-                                state_ = json_parse_state::accept;
+                                state_ = parse_state::accept;
                             }
                             else
                             {
-                                state_ = json_parse_state::expect_comma_or_end;
+                                state_ = parse_state::expect_comma_or_end;
                             }
                             break;
                         default:
@@ -1385,13 +1411,13 @@ public:
                             return;
                     }
                     break;
-                case json_parse_state::f: 
+                case parse_state::f: 
                     switch (*input_ptr_)
                     {
                         case 'a':
                             ++input_ptr_;
                             ++position_;
-                            state_ = json_parse_state::fa;
+                            state_ = parse_state::fa;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1400,11 +1426,11 @@ public:
                             return;
                     }
                     break;
-                case json_parse_state::fa: 
+                case parse_state::fa: 
                     switch (*input_ptr_)
                     {
                         case 'l':
-                            state_ = json_parse_state::fal;
+                            state_ = parse_state::fal;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1415,11 +1441,11 @@ public:
                     ++input_ptr_;
                     ++position_;
                     break;
-                case json_parse_state::fal: 
+                case parse_state::fal: 
                     switch (*input_ptr_)
                     {
                         case 's':
-                            state_ = json_parse_state::fals;
+                            state_ = parse_state::fals;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1430,20 +1456,20 @@ public:
                     ++input_ptr_;
                     ++position_;
                     break;
-                case json_parse_state::fals: 
+                case parse_state::fals: 
                     switch (*input_ptr_)
                     {
                         case 'e':
                             ++input_ptr_;
                             ++position_;
                             more_ = visitor.bool_value(false, semantic_tag::none, *this, ec);
-                            if (parent() == json_parse_state::root)
+                            if (parent() == parse_state::root)
                             {
-                                state_ = json_parse_state::accept;
+                                state_ = parse_state::accept;
                             }
                             else
                             {
-                                state_ = json_parse_state::expect_comma_or_end;
+                                state_ = parse_state::expect_comma_or_end;
                             }
                             break;
                         default:
@@ -1453,13 +1479,13 @@ public:
                             return;
                     }
                     break;
-                case json_parse_state::n: 
+                case parse_state::n: 
                     switch (*input_ptr_)
                     {
                         case 'u':
                             ++input_ptr_;
                             ++position_;
-                            state_ = json_parse_state::nu;
+                            state_ = parse_state::nu;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1468,11 +1494,11 @@ public:
                             return;
                     }
                     break;
-                case json_parse_state::nu: 
+                case parse_state::nu: 
                     switch (*input_ptr_)
                     {
                         case 'l':
-                            state_ = json_parse_state::nul;
+                            state_ = parse_state::nul;
                             break;
                         default:
                             err_handler_(json_errc::invalid_value, *this);
@@ -1483,19 +1509,19 @@ public:
                     ++input_ptr_;
                     ++position_;
                     break;
-                case json_parse_state::nul: 
+                case parse_state::nul: 
                     ++position_;
                     switch (*input_ptr_)
                     {
                     case 'l':
                         more_ = visitor.null_value(semantic_tag::none, *this, ec);
-                        if (parent() == json_parse_state::root)
+                        if (parent() == parse_state::root)
                         {
-                            state_ = json_parse_state::accept;
+                            state_ = parse_state::accept;
                         }
                         else
                         {
-                            state_ = json_parse_state::expect_comma_or_end;
+                            state_ = parse_state::expect_comma_or_end;
                         }
                         break;
                     default:
@@ -1506,12 +1532,12 @@ public:
                     }
                     ++input_ptr_;
                     break;
-                case json_parse_state::slash: 
+                case parse_state::slash: 
                 {
                     switch (*input_ptr_)
                     {
                     case '*':
-                        state_ = json_parse_state::slash_star;
+                        state_ = parse_state::slash_star;
                         more_ = err_handler_(json_errc::illegal_comment, *this);
                         if (!more_)
                         {
@@ -1520,7 +1546,7 @@ public:
                         }
                         break;
                     case '/':
-                        state_ = json_parse_state::slash_slash;
+                        state_ = parse_state::slash_slash;
                         more_ = err_handler_(json_errc::illegal_comment, *this);
                         if (!more_)
                         {
@@ -1541,7 +1567,7 @@ public:
                     ++position_;
                     break;
                 }
-                case json_parse_state::slash_star:  
+                case parse_state::slash_star:  
                 {
                     switch (*input_ptr_)
                     {
@@ -1549,7 +1575,7 @@ public:
                             push_state(state_);
                             ++input_ptr_;
                             ++position_;
-                            state_ = json_parse_state::cr;
+                            state_ = parse_state::cr;
                             break;
                         case '\n':
                             ++input_ptr_;
@@ -1560,7 +1586,7 @@ public:
                         case '*':
                             ++input_ptr_;
                             ++position_;
-                            state_ = json_parse_state::slash_star_star;
+                            state_ = parse_state::slash_star_star;
                             break;
                         default:
                             ++input_ptr_;
@@ -1569,7 +1595,7 @@ public:
                     }
                     break;
                 }
-                case json_parse_state::slash_slash: 
+                case parse_state::slash_slash: 
                 {
                     switch (*input_ptr_)
                     {
@@ -1583,7 +1609,7 @@ public:
                     }
                     break;
                 }
-                case json_parse_state::slash_star_star: 
+                case parse_state::slash_star_star: 
                 {
                     switch (*input_ptr_)
                     {
@@ -1591,7 +1617,7 @@ public:
                         state_ = pop_state();
                         break;
                     default:    
-                        state_ = json_parse_state::slash_star;
+                        state_ = parse_state::slash_star;
                         break;
                     }
                     ++input_ptr_;
@@ -1615,13 +1641,13 @@ public:
                 input_ptr_ += 4;
                 position_ += 4;
                 more_ = visitor.bool_value(true, semantic_tag::none, *this, ec);
-                if (parent() == json_parse_state::root)
+                if (parent() == parse_state::root)
                 {
-                    state_ = json_parse_state::accept;
+                    state_ = parse_state::accept;
                 }
                 else
                 {
-                    state_ = json_parse_state::expect_comma_or_end;
+                    state_ = parse_state::expect_comma_or_end;
                 }
             }
             else
@@ -1636,7 +1662,7 @@ public:
         {
             ++input_ptr_;
             ++position_;
-            state_ = json_parse_state::t;
+            state_ = parse_state::t;
         }
     }
 
@@ -1650,13 +1676,13 @@ public:
                 input_ptr_ += 4;
                 position_ += 4;
                 more_ = visitor.null_value(semantic_tag::none, *this, ec);
-                if (parent() == json_parse_state::root)
+                if (parent() == parse_state::root)
                 {
-                    state_ = json_parse_state::accept;
+                    state_ = parse_state::accept;
                 }
                 else
                 {
-                    state_ = json_parse_state::expect_comma_or_end;
+                    state_ = parse_state::expect_comma_or_end;
                 }
             }
             else
@@ -1671,7 +1697,7 @@ public:
         {
             ++input_ptr_;
             ++position_;
-            state_ = json_parse_state::n;
+            state_ = parse_state::n;
         }
     }
 
@@ -1685,13 +1711,13 @@ public:
                 input_ptr_ += 5;
                 position_ += 5;
                 more_ = visitor.bool_value(false, semantic_tag::none, *this, ec);
-                if (parent() == json_parse_state::root)
+                if (parent() == parse_state::root)
                 {
-                    state_ = json_parse_state::accept;
+                    state_ = parse_state::accept;
                 }
                 else
                 {
-                    state_ = json_parse_state::expect_comma_or_end;
+                    state_ = parse_state::expect_comma_or_end;
                 }
             }
             else
@@ -1706,7 +1732,7 @@ public:
         {
             ++input_ptr_;
             ++position_;
-            state_ = json_parse_state::f;
+            state_ = parse_state::f;
         }
     }
 
@@ -1714,23 +1740,23 @@ public:
     {
         const char_type* local_input_end = end_input_;
 
-        switch (state_)
+        switch (number_state_)
         {
-            case json_parse_state::minus:
+            case parse_number_state::minus:
                 goto minus_sign;
-            case json_parse_state::zero:
+            case parse_number_state::zero:
                 goto zero;
-            case json_parse_state::integer:
+            case parse_number_state::integer:
                 goto integer;
-            case json_parse_state::fraction1:
+            case parse_number_state::fraction1:
                 goto fraction1;
-            case json_parse_state::fraction2:
+            case parse_number_state::fraction2:
                 goto fraction2;
-            case json_parse_state::exp1:
+            case parse_number_state::exp1:
                 goto exp1;
-            case json_parse_state::exp2:
+            case parse_number_state::exp2:
                 goto exp2;
-            case json_parse_state::exp3:
+            case parse_number_state::exp3:
                 goto exp3;
             default:
                 JSONCONS_UNREACHABLE();               
@@ -1738,7 +1764,7 @@ public:
 minus_sign:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::minus;
+            number_state_ = parse_number_state::minus;
             return;
         }
         switch (*input_ptr_)
@@ -1762,7 +1788,7 @@ minus_sign:
 zero:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::zero;
+            number_state_ = parse_number_state::zero;
             return;
         }
         switch (*input_ptr_)
@@ -1773,7 +1799,7 @@ zero:
                 ++input_ptr_;
                 ++position_;
                 push_state(state_);
-                state_ = json_parse_state::cr;
+                state_ = parse_state::cr;
                 return; 
             case '\n': 
                 end_integer_value(visitor, ec);
@@ -1794,13 +1820,13 @@ zero:
                 ++input_ptr_;
                 ++position_;
                 push_state(state_);
-                state_ = json_parse_state::slash;
+                state_ = parse_state::slash;
                 return;
             case '}':
             case ']':
                 end_integer_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case '.':
                 string_buffer_.push_back(to_double_.get_decimal_point());
@@ -1824,19 +1850,19 @@ zero:
                 err_handler_(json_errc::leading_zero, *this);
                 ec = json_errc::leading_zero;
                 more_ = false;
-                state_ = json_parse_state::zero;
+                number_state_ = parse_number_state::zero;
                 return;
             default:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::invalid_number;
                 more_ = false;
-                state_ = json_parse_state::zero;
+                number_state_ = parse_number_state::zero;
                 return;
         }
 integer:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::integer;
+            number_state_ = parse_number_state::integer;
             return;
         }
         switch (*input_ptr_)
@@ -1847,7 +1873,7 @@ integer:
                 push_state(state_);
                 ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::cr;
+                state_ = parse_state::cr;
                 return; 
             case '\n': 
                 end_integer_value(visitor, ec);
@@ -1868,13 +1894,13 @@ integer:
                 push_state(state_);
                 ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::slash;
+                state_ = parse_state::slash;
                 return;
             case '}':
             case ']':
                 end_integer_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case '0': case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8': case '9':
                 string_buffer_.push_back(static_cast<char>(*input_ptr_));
@@ -1903,13 +1929,13 @@ integer:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::invalid_number;
                 more_ = false;
-                state_ = json_parse_state::integer;
+                number_state_ = parse_number_state::integer;
                 return;
         }
 fraction1:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::fraction1;
+            number_state_ = parse_number_state::fraction1;
             return;
         }
         switch (*input_ptr_)
@@ -1923,13 +1949,13 @@ fraction1:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::invalid_number;
                 more_ = false;
-                state_ = json_parse_state::fraction1;
+                number_state_ = parse_number_state::fraction1;
                 return;
         }
 fraction2:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::fraction2;
+            number_state_ = parse_number_state::fraction2;
             return;
         }
         switch (*input_ptr_)
@@ -1940,7 +1966,7 @@ fraction2:
                 push_state(state_);
                 ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::cr;
+                state_ = parse_state::cr;
                 return; 
             case '\n': 
                 end_fraction_value(visitor, ec);
@@ -1961,17 +1987,17 @@ fraction2:
                 push_state(state_);
                 ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::slash;
+                state_ = parse_state::slash;
                 return;
             case '}':
                 end_fraction_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case ']':
                 end_fraction_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case ',':
                 end_fraction_value(visitor, ec);
@@ -1995,13 +2021,13 @@ fraction2:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::invalid_number;
                 more_ = false;
-                state_ = json_parse_state::fraction2;
+                number_state_ = parse_number_state::fraction2;
                 return;
         }
 exp1:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::exp1;
+            number_state_ = parse_number_state::exp1;
             return;
         }
         switch (*input_ptr_)
@@ -2024,13 +2050,13 @@ exp1:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::expected_value;
                 more_ = false;
-                state_ = json_parse_state::exp1;
+                number_state_ = parse_number_state::exp1;
                 return;
         }
 exp2:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::exp2;
+            number_state_ = parse_number_state::exp2;
             return;
         }
         switch (*input_ptr_)
@@ -2044,14 +2070,14 @@ exp2:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::expected_value;
                 more_ = false;
-                state_ = json_parse_state::exp2;
+                number_state_ = parse_number_state::exp2;
                 return;
         }
         
 exp3:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::exp3;
+            number_state_ = parse_number_state::exp3;
             return;
         }
         switch (*input_ptr_)
@@ -2062,7 +2088,7 @@ exp3:
                 ++input_ptr_;
                 ++position_;
                 push_state(state_);
-                state_ = json_parse_state::cr;
+                state_ = parse_state::cr;
                 return; 
             case '\n': 
                 end_fraction_value(visitor, ec);
@@ -2083,17 +2109,17 @@ exp3:
                 push_state(state_);
                 ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::slash;
+                state_ = parse_state::slash;
                 return;
             case '}':
                 end_fraction_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case ']':
                 end_fraction_value(visitor, ec);
                 if (ec) return;
-                state_ = json_parse_state::expect_comma_or_end;
+                state_ = parse_state::expect_comma_or_end;
                 return;
             case ',':
                 end_fraction_value(visitor, ec);
@@ -2112,7 +2138,7 @@ exp3:
                 err_handler_(json_errc::invalid_number, *this);
                 ec = json_errc::invalid_number;
                 more_ = false;
-                state_ = json_parse_state::exp3;
+                number_state_ = parse_number_state::exp3;
                 return;
         }
 
@@ -2124,37 +2150,37 @@ exp3:
         const char_type* local_input_end = end_input_;
         const char_type* sb = input_ptr_;
 
-        switch (state_)
+        switch (string_state_)
         {
-            case json_parse_state::string:
-                goto string_u1;
-            case json_parse_state::escape:
+            case parse_string_state::text:
+                goto text;
+            case parse_string_state::escape:
                 goto escape;
-            case json_parse_state::escape_u1:
+            case parse_string_state::escape_u1:
                 goto escape_u1;
-            case json_parse_state::escape_u2:
+            case parse_string_state::escape_u2:
                 goto escape_u2;
-            case json_parse_state::escape_u3:
+            case parse_string_state::escape_u3:
                 goto escape_u3;
-            case json_parse_state::escape_u4:
+            case parse_string_state::escape_u4:
                 goto escape_u4;
-            case json_parse_state::escape_expect_surrogate_pair1:
+            case parse_string_state::escape_expect_surrogate_pair1:
                 goto escape_expect_surrogate_pair1;
-            case json_parse_state::escape_expect_surrogate_pair2:
+            case parse_string_state::escape_expect_surrogate_pair2:
                 goto escape_expect_surrogate_pair2;
-            case json_parse_state::escape_u5:
+            case parse_string_state::escape_u5:
                 goto escape_u5;
-            case json_parse_state::escape_u6:
+            case parse_string_state::escape_u6:
                 goto escape_u6;
-            case json_parse_state::escape_u7:
+            case parse_string_state::escape_u7:
                 goto escape_u7;
-            case json_parse_state::escape_u8:
+            case parse_string_state::escape_u8:
                 goto escape_u8;
             default:
                 JSONCONS_UNREACHABLE();               
         }
 
-string_u1:
+text:
         while (input_ptr_ < local_input_end)
         {
             switch (*input_ptr_)
@@ -2166,64 +2192,30 @@ string_u1:
                     if (!more_)
                     {
                         ec = json_errc::illegal_control_character;
-                        state_ = json_parse_state::string;
+                        string_state_ = parse_string_state{};
                         return;
                     }
                     // recovery - skip
                     string_buffer_.append(sb,input_ptr_-sb);
                     ++input_ptr_;
-                    state_ = json_parse_state::string;
-                    return;
-                }
-                case '\r':
-                {
-                    position_ += (input_ptr_ - sb + 1);
-                    more_ = err_handler_(json_errc::illegal_character_in_string, *this);
-                    if (!more_)
-                    {
-                        ec = json_errc::illegal_character_in_string;
-                        state_ = json_parse_state::string;
-                        return;
-                    }
-                    // recovery - keep
-                    string_buffer_.append(sb, input_ptr_ - sb + 1);
-                    ++input_ptr_;
-                    push_state(state_);
-                    state_ = json_parse_state::cr;
+                    string_state_ = parse_string_state{};
                     return;
                 }
                 case '\n':
-                {
-                    ++line_;
-                    ++position_;
-                    mark_position_ = position_;
-                    more_ = err_handler_(json_errc::illegal_character_in_string, *this);
-                    if (!more_)
-                    {
-                        ec = json_errc::illegal_character_in_string;
-                        state_ = json_parse_state::string;
-                        return;
-                    }
-                    // recovery - keep
-                    string_buffer_.append(sb, input_ptr_ - sb + 1);
-                    ++input_ptr_;
-                    return;
-                }
+                case '\r':
                 case '\t':
                 {
                     position_ += (input_ptr_ - sb + 1);
-                    more_ = err_handler_(json_errc::illegal_character_in_string, *this);
-                    if (!more_)
+                    if (!err_handler_(json_errc::illegal_character_in_string, *this))
                     {
+                        more_ = false;
                         ec = json_errc::illegal_character_in_string;
-                        state_ = json_parse_state::string;
                         return;
                     }
-                    // recovery - keep
-                    string_buffer_.append(sb, input_ptr_ - sb + 1);
-                    ++input_ptr_;
-                    state_ = json_parse_state::string;
-                    return;
+                    // recovery - skip
+                    string_buffer_.append(sb,input_ptr_-sb);
+                    sb = input_ptr_ + 1;
+                    break;
                 }
                 case '\\': 
                 {
@@ -2259,14 +2251,14 @@ string_u1:
         {
             string_buffer_.append(sb,input_ptr_-sb);
             position_ += (input_ptr_ - sb);
-            state_ = json_parse_state::string;
+            string_state_ = parse_string_state{};
             return;
         }
 
 escape:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape;
+            string_state_ = parse_string_state::escape;
             return;
         }
         switch (*input_ptr_)
@@ -2275,42 +2267,42 @@ escape:
             string_buffer_.push_back('\"');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case '\\': 
             string_buffer_.push_back('\\');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case '/':
             string_buffer_.push_back('/');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 'b':
             string_buffer_.push_back('\b');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 'f':
             string_buffer_.push_back('\f');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 'n':
             string_buffer_.push_back('\n');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 'r':
             string_buffer_.push_back('\r');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 't':
             string_buffer_.push_back('\t');
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         case 'u':
              cp_ = 0;
              ++input_ptr_;
@@ -2320,21 +2312,21 @@ escape:
             err_handler_(json_errc::illegal_escaped_character, *this);
             ec = json_errc::illegal_escaped_character;
             more_ = false;
-            state_ = json_parse_state::escape;
+            string_state_ = parse_string_state::escape;
             return;
         }
 
 escape_u1:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u1;
+            string_state_ = parse_string_state::escape_u1;
             return;
         }
         {
             cp_ = append_to_codepoint(0, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u1;
+                string_state_ = parse_string_state::escape_u1;
                 return;
             }
             ++input_ptr_;
@@ -2345,14 +2337,14 @@ escape_u1:
 escape_u2:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u2;
+            string_state_ = parse_string_state::escape_u2;
             return;
         }
         {
             cp_ = append_to_codepoint(cp_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u2;
+                string_state_ = parse_string_state::escape_u2;
                 return;
             }
             ++input_ptr_;
@@ -2363,14 +2355,14 @@ escape_u2:
 escape_u3:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u3;
+            string_state_ = parse_string_state::escape_u3;
             return;
         }
         {
             cp_ = append_to_codepoint(cp_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u3;
+                string_state_ = parse_string_state::escape_u3;
                 return;
             }
             ++input_ptr_;
@@ -2381,14 +2373,14 @@ escape_u3:
 escape_u4:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u4;
+            string_state_ = parse_string_state::escape_u4;
             return;
         }
         {
             cp_ = append_to_codepoint(cp_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u4;
+                string_state_ = parse_string_state::escape_u4;
                 return;
             }
             if (unicode_traits::is_high_surrogate(cp_))
@@ -2402,7 +2394,7 @@ escape_u4:
                 unicode_traits::convert(&cp_, 1, string_buffer_);
                 sb = ++input_ptr_;
                 ++position_;
-                state_ = json_parse_state::string;
+                string_state_ = parse_string_state{};
                 return;
             }
         }
@@ -2410,7 +2402,7 @@ escape_u4:
 escape_expect_surrogate_pair1:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_expect_surrogate_pair1;
+            string_state_ = parse_string_state::escape_expect_surrogate_pair1;
             return;
         }
         {
@@ -2425,7 +2417,7 @@ escape_expect_surrogate_pair1:
                 err_handler_(json_errc::expected_codepoint_surrogate_pair, *this);
                 ec = json_errc::expected_codepoint_surrogate_pair;
                 more_ = false;
-                state_ = json_parse_state::escape_expect_surrogate_pair1;
+                string_state_ = parse_string_state::escape_expect_surrogate_pair1;
                 return;
             }
         }
@@ -2433,7 +2425,7 @@ escape_expect_surrogate_pair1:
 escape_expect_surrogate_pair2:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_expect_surrogate_pair2;
+            string_state_ = parse_string_state::escape_expect_surrogate_pair2;
             return;
         }
         {
@@ -2447,7 +2439,7 @@ escape_expect_surrogate_pair2:
                 err_handler_(json_errc::expected_codepoint_surrogate_pair, *this);
                 ec = json_errc::expected_codepoint_surrogate_pair;
                 more_ = false;
-                state_ = json_parse_state::escape_expect_surrogate_pair2;
+                string_state_ = parse_string_state::escape_expect_surrogate_pair2;
                 return;
             }
         }
@@ -2455,14 +2447,14 @@ escape_expect_surrogate_pair2:
 escape_u5:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u5;
+            string_state_ = parse_string_state::escape_u5;
             return;
         }
         {
             cp2_ = append_to_codepoint(0, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u5;
+                string_state_ = parse_string_state::escape_u5;
                 return;
             }
         }
@@ -2473,14 +2465,14 @@ escape_u5:
 escape_u6:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u6;
+            string_state_ = parse_string_state::escape_u6;
             return;
         }
         {
             cp2_ = append_to_codepoint(cp2_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u6;
+                string_state_ = parse_string_state::escape_u6;
                 return;
             }
             ++input_ptr_;
@@ -2491,14 +2483,14 @@ escape_u6:
 escape_u7:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u7;
+            string_state_ = parse_string_state::escape_u7;
             return;
         }
         {
             cp2_ = append_to_codepoint(cp2_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u7;
+                string_state_ = parse_string_state::escape_u7;
                 return;
             }
             ++input_ptr_;
@@ -2509,21 +2501,21 @@ escape_u7:
 escape_u8:
         if (JSONCONS_UNLIKELY(input_ptr_ >= local_input_end)) // Buffer exhausted               
         {
-            state_ = json_parse_state::escape_u8;
+            string_state_ = parse_string_state::escape_u8;
             return;
         }
         {
             cp2_ = append_to_codepoint(cp2_, *input_ptr_, ec);
             if (ec)
             {
-                state_ = json_parse_state::escape_u8;
+                string_state_ = parse_string_state::escape_u8;
                 return;
             }
             uint32_t cp = 0x10000 + ((cp_ & 0x3FF) << 10) + (cp2_ & 0x3FF);
             unicode_traits::convert(&cp, 1, string_buffer_);
             sb = ++input_ptr_;
             ++position_;
-            goto string_u1;
+            goto text;
         }
 
         JSONCONS_UNREACHABLE();               
@@ -2686,38 +2678,38 @@ private:
         }
         switch (parent())
         {
-        case json_parse_state::member_name:
+        case parse_state::member_name:
             more_ = visitor.key(sv, *this, ec);
             pop_state();
-            state_ = json_parse_state::expect_colon;
+            state_ = parse_state::expect_colon;
             break;
-        case json_parse_state::object:
-        case json_parse_state::array:
+        case parse_state::object:
+        case parse_state::array:
         {
             auto it = std::find_if(string_double_map_.begin(), string_double_map_.end(), string_maps_to_double{ sv });
             if (it != string_double_map_.end())
             {
-                more_ = visitor.double_value(it->second, semantic_tag::none, *this, ec);
+                more_ = visitor.double_value((*it).second, semantic_tag::none, *this, ec);
             }
             else
             {
                 more_ = visitor.string_value(sv, semantic_tag::none, *this, ec);
             }
-            state_ = json_parse_state::expect_comma_or_end;
+            state_ = parse_state::expect_comma_or_end;
             break;
         }
-        case json_parse_state::root:
+        case parse_state::root:
         {
             auto it = std::find_if(string_double_map_.begin(),string_double_map_.end(),string_maps_to_double{sv});
             if (it != string_double_map_.end())
             {
-                more_ = visitor.double_value(it->second, semantic_tag::none, *this, ec);
+                more_ = visitor.double_value((*it).second, semantic_tag::none, *this, ec);
             }
             else
             {
                 more_ = visitor.string_value(sv, semantic_tag::none, *this, ec);
             }
-            state_ = json_parse_state::accept;
+            state_ = parse_state::accept;
             break;
         }
         default:
@@ -2735,13 +2727,13 @@ private:
     {
         switch (parent())
         {
-        case json_parse_state::object:
-            state_ = json_parse_state::expect_member_name;
+        case parse_state::object:
+            state_ = parse_state::expect_member_name;
             break;
-        case json_parse_state::array:
-            state_ = json_parse_state::expect_value;
+        case parse_state::array:
+            state_ = parse_state::expect_value;
             break;
-        case json_parse_state::root:
+        case parse_state::root:
             break;
         default:
             more_ = err_handler_(json_errc::syntax_error, *this);
@@ -2758,12 +2750,12 @@ private:
     {
         switch (parent())
         {
-        case json_parse_state::array:
-        case json_parse_state::object:
-            state_ = json_parse_state::expect_comma_or_end;
+        case parse_state::array:
+        case parse_state::object:
+            state_ = parse_state::expect_comma_or_end;
             break;
-        case json_parse_state::root:
-            state_ = json_parse_state::accept;
+        case parse_state::root:
+            state_ = parse_state::accept;
             break;
         default:
             more_ = err_handler_(json_errc::syntax_error, *this);
@@ -2776,16 +2768,16 @@ private:
         }
     }
 
-    void push_state(json_parse_state state)
+    void push_state(parse_state state)
     {
         state_stack_.push_back(state);
         //std::cout << "max_nesting_depth: " << options_.max_nesting_depth() << ", capacity: " << state_stack_.capacity() << ", nesting_depth: " << nesting_depth_ << ", stack size: " << state_stack_.size() << "\n";
     }
 
-    json_parse_state pop_state()
+    parse_state pop_state()
     {
         JSONCONS_ASSERT(!state_stack_.empty())
-        json_parse_state state = state_stack_.back();
+        parse_state state = state_stack_.back();
         state_stack_.pop_back();
         return state;
     }

@@ -4,22 +4,23 @@
 
 // See https://github.com/danielaparker/jsoncons for latest version
 
-#ifndef JSONCONS_BIGINT_HPP
-#define JSONCONS_BIGINT_HPP
+#ifndef JSONCONS_UTILITY_BIGINT_HPP
+#define JSONCONS_UTILITY_BIGINT_HPP
 
-#include <cstdint>
-#include <vector> // std::vector
-#include <iostream>
-#include <climits>
-#include <cassert> // assert
-#include <limits> // std::numeric_limits
 #include <algorithm> // std::max, std::min, std::reverse
-#include <string> // std::string
-#include <cstring> // std::memcpy
+#include <cassert> // assert
+#include <climits>
 #include <cmath> // std::fmod
+#include <cstdint>
+#include <cstring> // std::memcpy
+#include <iostream>
+#include <limits> // std::numeric_limits
 #include <memory> // std::allocator
-#include <initializer_list> // std::initializer_list
+#include <string> // std::string
 #include <type_traits> // std::enable_if
+#include <vector> // std::vector
+
+#include <jsoncons/config/compiler_support.hpp>
 #include <jsoncons/config/jsoncons_config.hpp>
 
 namespace jsoncons {
@@ -30,7 +31,6 @@ Ammeraal, L. (1996) Algorithms and Data Structures in C++,
 Chichester: John Wiley.
 
 */
-
 
 namespace detail {
 
@@ -181,6 +181,7 @@ private:
         }
 
         short_storage& operator=(const short_storage& stor) = delete;
+        short_storage& operator=(short_storage&& stor) = delete;
     };
 
     struct dynamic_storage
@@ -203,14 +204,23 @@ private:
         {
         }
 
-        dynamic_storage(const dynamic_storage& stor, const real_allocator_type& alloc)
+        dynamic_storage(const dynamic_storage& stor, real_allocator_type alloc)
             : is_dynamic_(true), 
               is_negative_(stor.is_negative_),
               length_(stor.length_),
-              capacity_(0),
+              capacity_(round_up(stor.length_)),
               data_(nullptr)
         {
-            create(stor.length_, alloc);
+            data_ = std::allocator_traits<real_allocator_type>::allocate(alloc, capacity_);
+            JSONCONS_TRY
+            {
+                std::allocator_traits<real_allocator_type>::construct(alloc, extension_traits::to_plain_pointer(data_));
+            }
+            JSONCONS_CATCH(...)
+            {
+                std::allocator_traits<real_allocator_type>::deallocate(alloc, data_, capacity_);
+                JSONCONS_RETHROW;
+            }
             std::memcpy(data_, stor.data_, size_type(stor.length_*sizeof(uint64_t)));
         }
 
@@ -224,21 +234,6 @@ private:
             stor.length_ = 0;
             stor.capacity_ = 0;
             stor.data_ = nullptr;
-        }
-
-        void create(size_type length, real_allocator_type alloc)
-        {
-            capacity_ = round_up(length);
-            data_ = std::allocator_traits<real_allocator_type>::allocate(alloc, capacity_);
-            JSONCONS_TRY
-            {
-                std::allocator_traits<real_allocator_type>::construct(alloc, extension_traits::to_plain_pointer(data_));
-            }
-            JSONCONS_CATCH(...)
-            {
-                std::allocator_traits<real_allocator_type>::deallocate(alloc, data_, capacity_);
-                JSONCONS_RETHROW;
-            }
         }
 
         void destroy(const real_allocator_type& a) noexcept
@@ -271,7 +266,7 @@ private:
         }
 
         // Find suitable new block size
-        constexpr size_type round_up(size_type i) const 
+        constexpr size_type round_up(size_type i) const noexcept 
         {
             return (i/word_length + 1) * word_length;
         }
@@ -1006,7 +1001,7 @@ public:
     {
         basic_bigint<Allocator> v(*this);
 
-        size_t len = (v.length() * basic_type_bits / 3) + 2;
+        std::size_t len = (v.length() * basic_type_bits / 3) + 2;
         data.reserve(len);
 
         static uint64_t p10 = 1;
@@ -1627,6 +1622,6 @@ private:
 
 using bigint = basic_bigint<std::allocator<uint8_t>>;
 
-}
+} // namespace jsoncons
 
-#endif
+#endif // JSONCONS_UTILITY_BIGINT_HPP

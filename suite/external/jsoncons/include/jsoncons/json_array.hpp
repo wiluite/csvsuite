@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,20 +7,19 @@
 #ifndef JSONCONS_JSON_ARRAY_HPP
 #define JSONCONS_JSON_ARRAY_HPP
 
-#include <string>
-#include <vector>
-#include <exception>
-#include <cstring>
 #include <algorithm> // std::sort, std::stable_sort, std::lower_bound, std::unique
-#include <utility>
+#include <cassert> // assert
+#include <cstring>
 #include <initializer_list>
 #include <iterator> // std::iterator_traits
 #include <memory> // std::allocator
-#include <utility> // std::move
-#include <cassert> // assert
 #include <type_traits> // std::enable_if
-#include <jsoncons/json_exception.hpp>
+#include <utility>
+#include <utility> // std::move
+#include <vector>
+
 #include <jsoncons/allocator_holder.hpp>
+#include <jsoncons/json_type.hpp>
 
 namespace jsoncons {
 
@@ -172,27 +171,27 @@ namespace jsoncons {
         // push_back
 
         template <typename T,typename A=allocator_type>
-        typename std::enable_if<extension_traits::is_stateless<A>::value,void>::type 
+        typename std::enable_if<std::allocator_traits<A>::is_always_equal::value,void>::type 
         push_back(T&& value)
         {
             elements_.emplace_back(std::forward<T>(value));
         }
 
         template <typename T,typename A=allocator_type>
-        typename std::enable_if<!extension_traits::is_stateless<A>::value,void>::type 
+        typename std::enable_if<!std::allocator_traits<A>::is_always_equal::value,void>::type 
         push_back(T&& value)
         {
             elements_.emplace_back(std::forward<T>(value));
         }
 
         template <typename T,typename A=allocator_type>
-        typename std::enable_if<extension_traits::is_stateless<A>::value,iterator>::type 
+        typename std::enable_if<std::allocator_traits<A>::is_always_equal::value,iterator>::type 
         insert(const_iterator pos, T&& value)
         {
             return elements_.emplace(pos, std::forward<T>(value));
         }
         template <typename T,typename A=allocator_type>
-        typename std::enable_if<!extension_traits::is_stateless<A>::value,iterator>::type 
+        typename std::enable_if<!std::allocator_traits<A>::is_always_equal::value,iterator>::type 
         insert(const_iterator pos, T&& value)
         {
             return elements_.emplace(pos, std::forward<T>(value));
@@ -205,7 +204,7 @@ namespace jsoncons {
         }
 
         template <typename A=allocator_type,typename... Args>
-        typename std::enable_if<extension_traits::is_stateless<A>::value,iterator>::type 
+        typename std::enable_if<std::allocator_traits<A>::is_always_equal::value,iterator>::type 
         emplace(const_iterator pos, Args&&... args)
         {
             return elements_.emplace(pos, std::forward<Args>(args)...);
@@ -235,9 +234,13 @@ namespace jsoncons {
         {
             return elements_ < rhs.elements_;
         }
-    private:
 
-        json_array& operator=(const json_array&) = delete;
+        json_array& operator=(const json_array& other)
+        {
+            elements_ = other.elements_;
+            return *this;
+        }
+    private:
 
         void flatten_and_destroy() noexcept
         {
@@ -251,7 +254,8 @@ namespace jsoncons {
                     {
                         for (auto&& item : current.array_range())
                         {
-                            if (item.size() > 0) // non-empty object or array
+                            if ((item.storage_kind() == json_storage_kind::array || item.storage_kind() == json_storage_kind::object)
+                                && !item.empty()) // non-empty object or array
                             {
                                 elements_.push_back(std::move(item));
                             }
@@ -263,7 +267,8 @@ namespace jsoncons {
                     {
                         for (auto&& kv : current.object_range())
                         {
-                            if (kv.value().size() > 0) // non-empty object or array
+                            if ((kv.value().storage_kind() == json_storage_kind::array || kv.value().storage_kind() == json_storage_kind::object)
+                                && !kv.value().empty()) // non-empty object or array
                             {
                                 elements_.push_back(std::move(kv.value()));
                             }
@@ -280,4 +285,4 @@ namespace jsoncons {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_ARRAY_HPP

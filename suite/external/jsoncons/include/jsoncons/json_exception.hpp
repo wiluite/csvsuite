@@ -1,18 +1,21 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 // See https://github.com/danielaparker/jsoncons for latest version
 
-#ifndef JSON_EXCEPTION_HPP
-#define JSON_EXCEPTION_HPP
+#ifndef JSONCONS_JSON_EXCEPTION_HPP
+#define JSONCONS_JSON_EXCEPTION_HPP
 
+#include <cstddef>
+#include <exception>
+#include <stdexcept>
 #include <string> // std::string
-#include <sstream> // std::ostringstream
 #include <system_error> // std::error_code
-#include <jsoncons/unicode_traits.hpp> // unicode_traits::convert
-#include <jsoncons/config/jsoncons_config.hpp>
-#include <jsoncons/extension_traits.hpp>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/utility/extension_traits.hpp>
+#include <jsoncons/utility/unicode_traits.hpp> // unicode_traits::convert
 
 namespace jsoncons {
 
@@ -21,7 +24,7 @@ namespace jsoncons {
     class json_exception
     {
     public:
-        virtual ~json_exception() noexcept = default;
+        virtual ~json_exception() = default;
         virtual const char* what() const noexcept = 0;
     };
 
@@ -217,4 +220,4 @@ namespace jsoncons {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_EXCEPTION_HPP

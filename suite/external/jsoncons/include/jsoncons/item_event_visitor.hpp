@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,8 +7,26 @@
 #ifndef JSONCONS_ITEM_EVENT_VISITOR_HPP
 #define JSONCONS_ITEM_EVENT_VISITOR_HPP
 
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <system_error>
+#include <type_traits>
+#include <vector>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/config/jsoncons_config.hpp>
+#include <jsoncons/utility/byte_string.hpp>
+#include <jsoncons/json_exception.hpp>
+#include <jsoncons/json_options.hpp>
 #include <jsoncons/json_visitor.hpp>
-#include <jsoncons/json_encoder.hpp>
+#include <jsoncons/ser_context.hpp>
+#include <jsoncons/sink.hpp>
+#include <jsoncons/tag_type.hpp>
+#include <jsoncons/detail/write_number.hpp>
+#include <jsoncons/utility/extension_traits.hpp>
 
 namespace jsoncons { 
 
@@ -32,7 +50,7 @@ namespace jsoncons {
 
         basic_item_event_visitor() = default;
 
-        virtual ~basic_item_event_visitor() noexcept = default;
+        virtual ~basic_item_event_visitor() = default;
 
         void flush()
         {
@@ -762,11 +780,11 @@ namespace jsoncons {
             target_t state_;
             container_t type_;
             int even_odd_;
-            std::size_t count_;
+            std::size_t count_{0};
         public:
 
             level(target_t state, container_t type) noexcept
-                : state_(state), type_(type), even_odd_(type == container_t::object ? 0 : 1), count_(0)
+                : state_(state), type_(type), even_odd_(type == container_t::object ? 0 : 1)
             {
             }
 
@@ -1982,63 +2000,63 @@ namespace jsoncons {
     {
         bool visit_begin_object(semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_begin_object" << std::endl; 
+            std::cout << "visit_begin_object" << '\n'; 
             return true;
         }
 
         bool visit_begin_object(std::size_t length, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_begin_object " << length << std::endl; 
+            std::cout << "visit_begin_object " << length << '\n'; 
             return true;
         }
 
         bool visit_end_object(const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_end_object" << std::endl; 
+            std::cout << "visit_end_object" << '\n'; 
             return true;
         }
 
         bool visit_begin_array(semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_begin_array" << std::endl;
+            std::cout << "visit_begin_array" << '\n';
             return true;
         }
 
         bool visit_begin_array(std::size_t length, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_begin_array " << length << std::endl; 
+            std::cout << "visit_begin_array " << length << '\n'; 
             return true;
         }
 
         bool visit_end_array(const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_end_array" << std::endl; 
+            std::cout << "visit_end_array" << '\n'; 
             return true;
         }
 
         bool visit_string(const string_view_type& s, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_string " << s << std::endl; 
+            std::cout << "visit_string " << s << '\n'; 
             return true;
         }
         bool visit_int64(int64_t val, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_int64 " << val << std::endl; 
+            std::cout << "visit_int64 " << val << '\n'; 
             return true;
         }
         bool visit_uint64(uint64_t val, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_uint64 " << val << std::endl; 
+            std::cout << "visit_uint64 " << val << '\n'; 
             return true;
         }
         bool visit_bool(bool val, semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_bool " << val << std::endl; 
+            std::cout << "visit_bool " << val << '\n'; 
             return true;
         }
         bool visit_null(semantic_tag, const ser_context&, std::error_code&) override
         {
-            std::cout << "visit_null " << std::endl; 
+            std::cout << "visit_null " << '\n'; 
             return true;
         }
 
@@ -2047,12 +2065,12 @@ namespace jsoncons {
                                     const ser_context&, 
                                     std::error_code&) override  
         {
-            std::cout << "visit_typed_array uint16_t " << tag << std::endl; 
+            std::cout << "visit_typed_array uint16_t " << tag << '\n'; 
             for (auto val : s)
             {
-                std::cout << val << "" << std::endl;
+                std::cout << val << "" << '\n';
             }
-            std::cout << "" << std::endl;
+            std::cout << "" << '\n';
             return true;
         }
 
@@ -2061,12 +2079,12 @@ namespace jsoncons {
             const ser_context&,
             std::error_code&) override
         {
-            std::cout << "visit_typed_array half_arg_t uint16_t " << tag << "" << std::endl;
+            std::cout << "visit_typed_array half_arg_t uint16_t " << tag << "" << '\n';
             for (auto val : s)
             {
-                std::cout << val << "" << std::endl;
+                std::cout << val << "" << '\n';
             }
-            std::cout << "" << std::endl;
+            std::cout << "" << '\n';
             return true;
         }
     };
@@ -2077,4 +2095,4 @@ namespace jsoncons {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_ITEM_EVENT_VISITOR_HPP

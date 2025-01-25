@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -8,21 +8,28 @@
 #define JSONCONS_JSON_ENCODER_HPP
 
 #include <array> // std::array
-#include <string>
-#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <cmath> // std::isfinite, std::isnan
 #include <limits> // std::numeric_limits
 #include <memory>
+#include <string>
 #include <utility> // std::move
+#include <vector>
+
+#include <jsoncons/utility/byte_string.hpp>
+#include <jsoncons/config/compiler_support.hpp>
 #include <jsoncons/config/jsoncons_config.hpp>
-#include <jsoncons/json_exception.hpp>
-#include <jsoncons/byte_string.hpp>
-#include <jsoncons/bigint.hpp>
-#include <jsoncons/json_options.hpp>
-#include <jsoncons/json_error.hpp>
-#include <jsoncons/json_visitor.hpp>
-#include <jsoncons/sink.hpp>
 #include <jsoncons/detail/write_number.hpp>
+#include <jsoncons/json_error.hpp>
+#include <jsoncons/json_exception.hpp>
+#include <jsoncons/json_options.hpp>
+#include <jsoncons/json_visitor.hpp>
+#include <jsoncons/ser_context.hpp>
+#include <jsoncons/sink.hpp>
+#include <jsoncons/tag_type.hpp>
+#include <jsoncons/utility/bigint.hpp>
+#include <jsoncons/utility/unicode_traits.hpp>
 
 namespace jsoncons { 
 namespace detail {
@@ -219,12 +226,12 @@ namespace detail {
         class encoding_context
         {
             container_type type_;
-            std::size_t count_;
+            std::size_t count_{0};
             line_split_kind line_splits_;
             bool indent_before_;
             bool new_line_after_;
-            std::size_t begin_pos_;
-            std::size_t data_pos_;
+            std::size_t begin_pos_{0};
+            std::size_t data_pos_{0};
         public:
             encoding_context(container_type type, line_split_kind split_lines, bool indent_once,
                              std::size_t begin_pos, std::size_t data_pos) noexcept
@@ -234,6 +241,9 @@ namespace detail {
             }
 
             encoding_context(const encoding_context&) = default;
+            
+            ~encoding_context() = default;
+            
             encoding_context& operator=(const encoding_context&) = default;
 
             void set_position(std::size_t pos)
@@ -318,11 +328,12 @@ namespace detail {
         std::basic_string<CharT> open_array_bracket_str_;
         std::basic_string<CharT> close_array_bracket_str_;
         int nesting_depth_;
+    public:
 
         // Noncopyable and nonmoveable
         basic_json_encoder(const basic_json_encoder&) = delete;
-        basic_json_encoder& operator=(const basic_json_encoder&) = delete;
-    public:
+        basic_json_encoder(basic_json_encoder&&) = delete;
+
         basic_json_encoder(Sink&& sink, 
                            const Allocator& alloc = Allocator())
             : basic_json_encoder(std::forward<Sink>(sink), basic_json_encode_options<CharT>(), alloc)
@@ -402,6 +413,9 @@ namespace detail {
             {
             }
         }
+
+        basic_json_encoder& operator=(const basic_json_encoder&) = delete;
+        basic_json_encoder& operator=(basic_json_encoder&&) = delete;
 
         void reset()
         {
@@ -684,7 +698,7 @@ namespace detail {
                 case semantic_tag::bigdec:
                 {
                     // output lossless number
-                    if (options_.bigint_format() == bigint_chars_format::number)
+                    if (options_.bignum_format() == bignum_format_kind::raw)
                     {
                         write_bigint_value(sv);
                 break;
@@ -950,15 +964,15 @@ namespace detail {
 
         void write_bigint_value(const string_view_type& sv)
         {
-            switch (options_.bigint_format())
+            switch (options_.bignum_format())
             {
-                case bigint_chars_format::number:
+                case bignum_format_kind::raw:
                 {
                     sink_.append(sv.data(),sv.size());
                     column_ += sv.size();
                     break;
                 }
-                case bigint_chars_format::base64:
+                case bignum_format_kind::base64:
                 {
                     bigint n = bigint::from_string(sv.data(), sv.length());
                     bool is_neg = n < 0;
@@ -981,7 +995,7 @@ namespace detail {
                     column_ += (length+2);
                     break;
                 }
-                case bigint_chars_format::base64url:
+                case bignum_format_kind::base64url:
                 {
                     bigint n = bigint::from_string(sv.data(), sv.length());
                     bool is_neg = n < 0;
@@ -1120,11 +1134,12 @@ namespace detail {
         jsoncons::detail::write_double fp_;
         std::vector<encoding_context,encoding_context_allocator_type> stack_;
         int nesting_depth_;
-
-        // Noncopyable
-        basic_compact_json_encoder(const basic_compact_json_encoder&) = delete;
-        basic_compact_json_encoder& operator=(const basic_compact_json_encoder&) = delete;
     public:
+
+        // Noncopyable and nonmoveable
+        basic_compact_json_encoder(const basic_compact_json_encoder&) = delete;
+        basic_compact_json_encoder(basic_compact_json_encoder&&) = delete;
+
         basic_compact_json_encoder(Sink&& sink, 
             const Allocator& alloc = Allocator())
             : basic_compact_json_encoder(std::forward<Sink>(sink), basic_json_encode_options<CharT>(), alloc)
@@ -1142,9 +1157,6 @@ namespace detail {
         {
         }
 
-        basic_compact_json_encoder(basic_compact_json_encoder&&) = default;
-        basic_compact_json_encoder& operator=(basic_compact_json_encoder&&) = default;
-
         ~basic_compact_json_encoder() noexcept
         {
             JSONCONS_TRY
@@ -1155,6 +1167,9 @@ namespace detail {
             {
             }
         }
+
+        basic_compact_json_encoder& operator=(const basic_compact_json_encoder&) = delete;
+        basic_compact_json_encoder& operator=(basic_compact_json_encoder&&) = delete;
 
         void reset()
         {
@@ -1270,14 +1285,14 @@ namespace detail {
 
         void write_bigint_value(const string_view_type& sv)
         {
-            switch (options_.bigint_format())
+            switch (options_.bignum_format())
             {
-                case bigint_chars_format::number:
+                case bignum_format_kind::raw:
                 {
                     sink_.append(sv.data(),sv.size());
                     break;
                 }
-                case bigint_chars_format::base64:
+                case bignum_format_kind::base64:
                 {
                     bigint n = bigint::from_string(sv.data(), sv.length());
                     bool is_neg = n < 0;
@@ -1298,7 +1313,7 @@ namespace detail {
                     sink_.push_back('\"');
                     break;
                 }
-                case bigint_chars_format::base64url:
+                case bignum_format_kind::base64url:
                 {
                     bigint n = bigint::from_string(sv.data(), sv.length());
                     bool is_neg = n < 0;
@@ -1344,7 +1359,7 @@ namespace detail {
                 case semantic_tag::bigdec:
                 {
                     // output lossless number
-                    if (options_.bigint_format() == bigint_chars_format::number)
+                    if (options_.bignum_format() == bignum_format_kind::raw)
                     {
                         write_bigint_value(sv);
                         break;
@@ -1377,7 +1392,7 @@ namespace detail {
                 case semantic_tag::bigdec:
                 {
                     // output lossless number
-                    if (options_.bigint_format() == bigint_chars_format::number)
+                    if (options_.bignum_format() == bignum_format_kind::raw)
                     {
                         write_bigint_value(sv);
                         break;
@@ -1601,4 +1616,4 @@ namespace detail {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_ENCODER_HPP

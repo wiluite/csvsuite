@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,29 +7,32 @@
 #ifndef JSONCONS_JSON_TYPE_TRAITS_HPP
 #define JSONCONS_JSON_TYPE_TRAITS_HPP
 
-#include <chrono>
-#include <array>
-#include <string>
-#include <vector>
-#include <valarray>
-#include <exception>
-#include <cstring>
-#include <utility>
 #include <algorithm> // std::swap
-#include <limits> // std::numeric_limits
-#include <type_traits> // std::enable_if
+#include <array>
+#include <bitset> // std::bitset
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <functional>
 #include <iterator> // std::iterator_traits, std::input_iterator_tag
-#include <jsoncons/json_type.hpp>
-#include <jsoncons/bigint.hpp>
-#include <jsoncons/json_visitor.hpp>
-#include <jsoncons/extension_traits.hpp>
+#include <map>
+#include <memory>
 #include <string>
 #include <tuple>
-#include <map>
-#include <functional>
-#include <memory>
-#include <bitset> // std::bitset
+#include <type_traits> // std::enable_if
+#include <utility>
+#include <valarray>
+#include <vector>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/config/jsoncons_config.hpp>
+#include <jsoncons/utility/byte_string.hpp>
 #include <jsoncons/conv_error.hpp>
+#include <jsoncons/json_type.hpp>
+#include <jsoncons/json_visitor.hpp>
+#include <jsoncons/tag_type.hpp>
+#include <jsoncons/utility/bigint.hpp>
+#include <jsoncons/utility/extension_traits.hpp>
 #include <jsoncons/value_converter.hpp>
 
 #if defined(JSONCONS_HAS_STD_VARIANT)
@@ -1076,7 +1079,7 @@ has_can_convert = extension_traits::is_detected<traits_can_convert_t, Json, T>;
             {
             }
         };
-    } // namespace detail
+    } // namespace tuple_detail
 
     template <typename Json,typename... E>
     struct json_type_traits<Json, std::tuple<E...>>
@@ -1898,6 +1901,6 @@ namespace variant_detail
         }
     };
 
-} // jsoncons
+} // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_TYPE_TRAITS_HPP

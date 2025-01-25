@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,25 +7,26 @@
 #ifndef JSONCONS_STAJ_EVENT_READER_HPP
 #define JSONCONS_STAJ_EVENT_READER_HPP
 
-#include <memory> // std::allocator
-#include <string>
-#include <stdexcept>
-#include <system_error>
-#include <ios>
-#include <type_traits> // std::enable_if
 #include <array> // std::array
+#include <cstddef>
+#include <cstdint>
 #include <functional> // std::function
-#include <jsoncons/json_exception.hpp>
+#include <ios>
+#include <memory> // std::allocator
+#include <system_error>
+
+#include <jsoncons/conv_error.hpp>
+#include <jsoncons/detail/write_number.hpp>
 #include <jsoncons/item_event_visitor.hpp>
-#include <jsoncons/bigint.hpp>
 #include <jsoncons/json_parser.hpp>
+#include <jsoncons/json_type_traits.hpp>
 #include <jsoncons/ser_context.hpp>
 #include <jsoncons/sink.hpp>
-#include <jsoncons/detail/write_number.hpp>
-#include <jsoncons/json_type_traits.hpp>
-#include <jsoncons/typed_array_view.hpp>
-#include <jsoncons/value_converter.hpp>
 #include <jsoncons/staj_event.hpp>
+#include <jsoncons/tag_type.hpp>
+#include <jsoncons/typed_array_view.hpp>
+#include <jsoncons/utility/bigint.hpp>
+#include <jsoncons/value_converter.hpp>
 
 namespace jsoncons {
 
@@ -630,7 +631,7 @@ namespace jsoncons {
     class basic_staj_event_reader
     {
     public:
-        virtual ~basic_staj_event_reader() noexcept = default;
+        virtual ~basic_staj_event_reader() = default;
 
         virtual void array_expected(std::error_code& ec)
         {
@@ -735,5 +736,5 @@ namespace jsoncons {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_STAJ_EVENT_READER_HPP
 

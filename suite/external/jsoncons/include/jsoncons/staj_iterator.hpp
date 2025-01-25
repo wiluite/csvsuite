@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,17 +7,22 @@
 #ifndef JSONCONS_STAJ_ITERATOR_HPP
 #define JSONCONS_STAJ_ITERATOR_HPP
 
-#include <new> // placement new
-#include <memory>
-#include <string>
-#include <stdexcept>
-#include <system_error>
+#include <exception>
 #include <ios>
 #include <iterator> // std::input_iterator_tag
-#include <jsoncons/json_exception.hpp>
-#include <jsoncons/staj_cursor.hpp>
+#include <memory>
+#include <new> // placement new
+#include <string>
+#include <system_error>
+#include <type_traits>
+#include <utility>
+
+#include <jsoncons/config/compiler_support.hpp>
 #include <jsoncons/basic_json.hpp>
 #include <jsoncons/decode_traits.hpp>
+#include <jsoncons/json_exception.hpp>
+#include <jsoncons/staj_event.hpp>
+#include <jsoncons/staj_cursor.hpp>
 
 namespace jsoncons {
 
@@ -425,5 +430,5 @@ namespace jsoncons {
 
 } // namespace jsoncons
 
-#endif
+#endif // JSONCONS_STAJ_ITERATOR_HPP
 

@@ -1,23 +1,24 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 // See https://github.com/danielaparker/jsoncons for latest version
 
-#ifndef JSONCONS_EXTENSION_TRAITS_HPP
-#define JSONCONS_EXTENSION_TRAITS_HPP
+#ifndef JSONCONS_UTILITY_EXTENSION_TRAITS_HPP
+#define JSONCONS_UTILITY_EXTENSION_TRAITS_HPP
 
-#include <stdexcept>
-#include <string>
-#include <cmath>
-#include <type_traits> // std::enable_if, std::true_type
-#include <memory>
-#include <iterator> // std::iterator_traits
-#include <exception>
 #include <array> // std::array
-#include <cstddef> // std::byte
-#include <utility> // std::declval
 #include <climits> // CHAR_BIT
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <cstddef> // std::byte
+#include <iterator> // std::iterator_traits
+#include <memory>
+#include <string>
+#include <type_traits> // std::enable_if, std::true_type
+#include <utility> // std::declval
+
 #include <jsoncons/config/compiler_support.hpp>
 
 #if defined(JSONCONS_HAS_POLYMORPHIC_ALLOCATOR)
@@ -217,13 +218,6 @@ namespace extension_traits {
     template< class To, template <typename...> class Op,typename... Args >
     using
     is_detected_convertible = std::is_convertible< is_detected_t<Op, Args...>, To >;
-
-    template <typename T>
-    struct is_stateless
-     : public std::integral_constant<bool,  
-          (std::is_default_constructible<T>::value &&
-          std::is_empty<T>::value)>
-    {};
 
     // to_plain_pointer
 
@@ -922,7 +916,8 @@ namespace impl {
             (is_detected<allocator_outer_allocator_type_t,T>::value && is_detected<allocator_inner_allocator_type_t,T>::value)>::type
     > : std::true_type{};
 
+    
 } // extension_traits
-} // jsoncons
+} // namespace jsoncons
 
-#endif
+#endif // JSONCONS_UTILITY_EXTENSION_TRAITS_HPP

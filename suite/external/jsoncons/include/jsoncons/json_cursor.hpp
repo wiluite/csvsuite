@@ -1,4 +1,4 @@
-// Copyright 2013-2024 Daniel Parker
+// Copyright 2013-2025 Daniel Parker
 // Distributed under the Boost license, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -7,21 +7,24 @@
 #ifndef JSONCONS_JSON_CURSOR_HPP
 #define JSONCONS_JSON_CURSOR_HPP
 
-#include <memory> // std::allocator
-#include <string>
-#include <vector>
-#include <stdexcept>
-#include <system_error>
+#include <cstddef>
+#include <functional>
 #include <ios>
-#include <istream> // std::basic_istream
-#include <jsoncons/byte_string.hpp>
+#include <memory> // std::allocator
+#include <system_error>
+
+#include <jsoncons/config/compiler_support.hpp>
+#include <jsoncons/utility/byte_string.hpp>
 #include <jsoncons/config/jsoncons_config.hpp>
-#include <jsoncons/json_visitor.hpp>
+#include <jsoncons/conv_error.hpp>
 #include <jsoncons/json_exception.hpp>
 #include <jsoncons/json_parser.hpp>
-#include <jsoncons/staj_cursor.hpp>
+#include <jsoncons/json_visitor.hpp>
+#include <jsoncons/ser_context.hpp>
 #include <jsoncons/source.hpp>
 #include <jsoncons/source_adaptor.hpp>
+#include <jsoncons/staj_cursor.hpp>
+#include <jsoncons/utility/unicode_traits.hpp>
 
 namespace jsoncons {
 
@@ -42,10 +45,6 @@ private:
     basic_staj_visitor<CharT> cursor_visitor_;
     bool done_;
 
-    // Noncopyable and nonmoveable
-    basic_json_cursor(const basic_json_cursor&) = delete;
-    basic_json_cursor& operator=(const basic_json_cursor&) = delete;
-
 public:
 
     // Constructors that throw parse exceptions
@@ -63,7 +62,19 @@ public:
     {
         if (!done())
         {
-            next();
+            std::error_code local_ec;
+            read_next(local_ec);
+            if (local_ec)
+            {
+                if (local_ec == json_errc::unexpected_eof)
+                {
+                    done_ = true;
+                }
+                else
+                {
+                    JSONCONS_THROW(ser_error(local_ec, 1, 1));
+                }
+            }
         }
     }
 
@@ -133,7 +144,19 @@ public:
     {
         if (!done())
         {
-            next(ec);
+            std::error_code local_ec;
+            read_next(local_ec);
+            if (local_ec)
+            {
+                if (local_ec == json_errc::unexpected_eof)
+                {
+                    done_ = true;
+                }
+                else
+                {
+                    ec = local_ec;
+                }
+            }
         }
     }
 
@@ -151,6 +174,16 @@ public:
     {
         initialize_with_string_view(std::forward<Sourceable>(source), ec);
     }
+    
+    basic_json_cursor(const basic_json_cursor&) = delete;
+    basic_json_cursor(basic_json_cursor&&) = default;
+    
+    ~basic_json_cursor() = default;
+
+    // Noncopyable and nonmoveable
+
+    basic_json_cursor& operator=(const basic_json_cursor&) = delete;
+    basic_json_cursor& operator=(basic_json_cursor&&) = default;
 
     void reset()
     {
@@ -292,7 +325,7 @@ public:
         if (source_.eof())
         {
             parser_.check_done(ec);
-            if (ec) return;
+            if (ec) {return;}
         }
         else
         {
@@ -301,7 +334,7 @@ public:
                 if (parser_.source_exhausted())
                 {
                     auto s = source_.read_buffer(ec);
-                    if (ec) return;
+                    if (ec) {return;}
                     if (s.size() > 0)
                     {
                         parser_.update(s.data(),s.size());
@@ -310,7 +343,7 @@ public:
                 if (!parser_.source_exhausted())
                 {
                     parser_.check_done(ec);
-                    if (ec) return;
+                    if (ec) {return;}
                 }
             }
             while (!eof());
@@ -348,18 +381,11 @@ private:
 
     void initialize_with_string_view(string_view_type sv)
     {
-        auto r = unicode_traits::detect_json_encoding(sv.data(), sv.size());
-        if (!(r.encoding == unicode_traits::encoding_kind::utf8 || r.encoding == unicode_traits::encoding_kind::undetected))
+        std::error_code local_ec;
+        initialize_with_string_view(sv, local_ec);
+        if (local_ec)
         {
-            JSONCONS_THROW(ser_error(json_errc::illegal_unicode_character,parser_.line(),parser_.column()));
-        }
-        std::size_t offset = (r.ptr - sv.data());
-        parser_.update(sv.data()+offset,sv.size()-offset);
-
-        bool is_done = parser_.done() || done_;
-        if (!is_done)
-        {
-            read_next();
+            JSONCONS_THROW(ser_error(local_ec, 1, 1));
         }
     }
 
@@ -376,7 +402,19 @@ private:
         bool is_done = parser_.done() || done_;
         if (!is_done)
         {
-            read_next(ec);
+            std::error_code local_ec;
+            read_next(local_ec);
+            if (local_ec)
+            {
+                if (local_ec == json_errc::unexpected_eof)
+                {
+                    done_ = true;
+                }
+                else
+                {
+                    ec = local_ec;
+                }
+            }
         }
     }
 
@@ -403,16 +441,16 @@ private:
             if (parser_.source_exhausted())
             {
                 auto s = source_.read_buffer(ec);
-                if (ec) return;
+                if (ec) {return;}
                 if (s.size() > 0)
                 {
                     parser_.update(s.data(),s.size());
-                    if (ec) return;
+                    if (ec) {return;}
                 }
             }
             bool eof = parser_.source_exhausted() && source_.eof();
             parser_.parse_some(visitor, ec);
-            if (ec) return;
+            if (ec) {return;}
             if (eof)
             {
                 if (parser_.enter())
@@ -435,7 +473,7 @@ using json_string_cursor = basic_json_cursor<char,jsoncons::string_source<char>>
 using wjson_stream_cursor = basic_json_cursor<wchar_t,jsoncons::stream_source<wchar_t>>;
 using wjson_string_cursor = basic_json_cursor<wchar_t,jsoncons::string_source<wchar_t>>;
 
-}
+} // namespace jsoncons
 
-#endif
+#endif // JSONCONS_JSON_CURSOR_HPP
 

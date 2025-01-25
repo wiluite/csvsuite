@@ -753,6 +753,16 @@ add_custom_command(
 add_custom_command(
         TARGET In2csv_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/testjson_nested.json
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/testjson_nested.json)
+add_custom_command(
+        TARGET In2csv_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/testjson_nested_converted.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/testjson_nested_converted.csv)
+add_custom_command(
+        TARGET In2csv_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test.xls
         ${CMAKE_CURRENT_BINARY_DIR}/examples/test.xls)
 add_custom_command(

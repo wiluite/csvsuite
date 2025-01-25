@@ -82,7 +82,13 @@ namespace in2csv::detail::json {
                 }
             }
             void obtain_csv(std::ostream & os) {
+#if 1
+                auto options = csv::csv_options{}
+                    .flat(true);
+                csv::csv_stream_encoder encoder(os, options);
+#else
                 csv::csv_stream_encoder encoder(os);
+#endif
                 ptr->dump(encoder);
 
             }
