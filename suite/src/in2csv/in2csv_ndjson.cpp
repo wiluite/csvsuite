@@ -43,7 +43,7 @@ namespace in2csv::detail::ndjson {
 #endif
         std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
                 compose_bool_1_arg < elem_type >
-                , [&](elem_type const & e) {
+                , [args](elem_type const & e) {
                     static std::ostringstream ss;
                     typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
                     compose_numeric(ss, another_rep, args);

@@ -41,7 +41,7 @@ namespace in2csv::detail::csv {
 #endif
             std::array<func_type, static_cast<std::size_t>(column_type::sz)> type2func {
                     compose_bool<elem_type>
-                    , [&](elem_type const & e, std::any const & info) {
+                    , [args](elem_type const & e, std::any const & info) {
                         static std::ostringstream ss;
                         typename elem_type::template rebind<csv_co::unquoted>::other const & another_rep = e;
                         if (!compose_numeric_corner_cases(ss, another_rep, args)) {
