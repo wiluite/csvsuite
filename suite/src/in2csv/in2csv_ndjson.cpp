@@ -107,51 +107,46 @@ namespace in2csv::detail::ndjson {
 
         total_rows = 0;
         csv_map.clear();
-        while (!doc.reader().eof())
-        {
+        while (!doc.reader().eof()) {
             doc.reader().read_next();
 
-            if (!doc.reader().eof())
-            {
-                ojson _ = doc.decoder().get_result();
-                std::ostringstream oss;
-                oss << '[' << print(_) << ']';
-                ojson next_csv = ojson::parse(oss.str());
-                oss.str({});
-                csv::csv_stream_encoder encoder(oss);
-                next_csv.dump(encoder);
+            ojson _ = doc.decoder().get_result();
+            std::ostringstream oss;
+            oss << '[' << print(_) << ']';
+            ojson next_csv = ojson::parse(oss.str());
+            oss.str({});
+            csv::csv_stream_encoder encoder(oss);
+            next_csv.dump(encoder);
 
-                a.skip_lines = 0;
-                a.no_header = false;
-                std::variant<std::monostate, notrimming_reader_type, skipinitspace_reader_type> variants;
-                if (!a.skip_init_space)
-                    variants = notrimming_reader_type(recode_source(oss.str(), a));
-                else
-                    variants = skipinitspace_reader_type(recode_source(oss.str(), a));
+            a.skip_lines = 0;
+            a.no_header = false;
+            std::variant<std::monostate, notrimming_reader_type, skipinitspace_reader_type> variants;
+            if (!a.skip_init_space)
+                variants = notrimming_reader_type(recode_source(oss.str(), a));
+            else
+                variants = skipinitspace_reader_type(recode_source(oss.str(), a));
 
-                std::visit([&](auto & reader) {
-                    if constexpr(!std::is_same_v<std::decay_t<decltype(reader)>, std::monostate>) {
-                        // no skip_lines() needed
-                        auto types_and_blanks = std::get<1>(typify(reader, a, typify_option::typify_without_precisions));
-                        // no skip_lines() needed again
-                        auto header = string_header(obtain_header_and_<skip_header>(reader, a));
-                        update_result_header(header);
+            std::visit([&](auto & reader) {
+                if constexpr(!std::is_same_v<std::decay_t<decltype(reader)>, std::monostate>) {
+                    // no skip_lines() needed
+                    auto types_and_blanks = std::get<1>(typify(reader, a, typify_option::typify_without_precisions));
+                    // no skip_lines() needed again
+                    auto header = string_header(obtain_header_and_<skip_header>(reader, a));
+                    update_result_header(header);
 
-                        reader.run_rows([&](auto span) {
-                            unsigned col = 0;
-                            using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;
-                            for (auto & e : span)
-                                fill_func(elem_type{e}, header, col++, types_and_blanks, a);
+                    reader.run_rows([&](auto span) {
+                        unsigned col = 0;
+                        using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;
+                        for (auto & e : span)
+                            fill_func(elem_type{e}, header, col++, types_and_blanks, a);
                             
-                            total_rows++;
-                            for (auto & e : result_header)
-                                if (csv_map[e].size() != total_rows)
-                                    csv_map[e].emplace_back("");
-
-                        });
-                    }
-                }, variants);
-            }
+                        total_rows++;
+                        for (auto & e : result_header)
+                            if (csv_map[e].size() != total_rows)
+                                csv_map[e].emplace_back("");
+                    });
+                }
+            }, variants);
         }
 
         std::cout << result_header.front();

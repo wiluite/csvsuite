@@ -242,7 +242,7 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/test_geojson.csv"));
         }));
     };
-#if 0
+
     "convert ndjson"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "examples/testjson_multiline.json"; format = "ndjson"; }
@@ -252,7 +252,6 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/testjson_multiline_converted.csv"));
         }));
     };
-#endif
 
     "convert nested json"_test = [&] {
         struct Args : In2csv_args {
@@ -323,9 +322,9 @@ int main() {
         expect(nothrow([&] {
             CALL_TEST_AND_REDIRECT_TO_COUT(in2csv::in2csv(args))
             //TODO: fixme: do a byte-by-byte comparison, and allow the only 1 byte to be different
-#if 0
+    #if 0
             expect(cout_buffer.str().size() == get_source("examples/testxlsx_converted.csv").size());
-#endif
+    #endif
             expect(cout_buffer.str().size() == get_source("examples/testxlsx_converted.csv").size());
         }));
     };
@@ -436,7 +435,7 @@ int main() {
             expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
     };
-#if 0
+
     "ndjson no inference"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "_"; format = "ndjson"; no_inference = true; }
@@ -449,7 +448,7 @@ int main() {
             expect(cout_buffer.str() == "a,b,c\n1,2,3\n");
         }));
     };
-#endif
+
     "convert xls with write sheets"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "examples/sheets.xls"; sheet = "data"; d_excel = "2"; dt_excel = "6"; write_sheets = "ʤ,1"; }
