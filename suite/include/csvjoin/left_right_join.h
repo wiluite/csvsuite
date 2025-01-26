@@ -72,13 +72,18 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
 
                     if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, reader_type>) {
                         compromise_table_MxN this_table(arg, args);
-                        std::vector<rows_t> join_vec(this_table.rows());
+                        auto const rows = this_table.rows();
+                        assert(rows);
+                        std::vector<rows_t> join_vec(rows);
                         process(this_table, join_vec);
                     } else {
                         static_assert(std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>);
                         auto const & this_table = arg.operator typename reader_fake<reader_type>::table &();
-                        std::vector<rows_t> join_vec(this_table.size());
-                        process(this_table, join_vec);
+                        auto const sz = this_table.size();
+                        if (sz) {
+                            std::vector<rows_t> join_vec(sz);
+                            process(this_table, join_vec);
+                        }
                     }
                 }
                 catch (typename reader_type::implementation_exception const &) {}

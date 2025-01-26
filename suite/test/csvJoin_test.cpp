@@ -125,6 +125,7 @@ int main() {
                 notrimming_reader_type new_reader (cout_buffer.str());
                 expect(5 == new_reader.rows());
             }
+
             "max field size in this mode"_test = [&] {
                 auto args_copy = args;
                 args_copy.files = std::vector<std::string>{"examples/test_field_size_limit.csv", "examples/test_field_size_limit.csv"};
@@ -140,6 +141,7 @@ int main() {
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_1, header::has_header, 13, "FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.")
                 Z_CHECK0(csvjoin::join_wrapper(args_copy), skip_lines::skip_lines_1, header::no_header, 13, R"(FieldSizeLimitError: CSV contains a field longer than the maximum length of 13 characters on line 1.)")
             };
+            // fixed UB: runtime error: reference binding to null pointer of type 'const value_type' (aka 'const std::vector<std::string>')
             "indices absent in rest files"_test = [&] {
                 auto args_copy = args;
                 args_copy.columns = "3,1,1";

@@ -210,7 +210,8 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/dummy.csv"));
         }));
     };
-    //TODO: fix me (memory error and so on...)
+
+    //TODO: fix me in Linux (memory error and so on...)
 #if defined(__MINGW32__)
     "convert dbf"_test = [&] {
         struct Args : In2csv_args {
@@ -304,7 +305,9 @@ int main() {
             expect(cout_buffer.str() == get_source("examples/testxls_converted.csv"));
         }));
     };
-#if 1 // works with "store to misaligned address 0x6160000048ff for type ...." in zippy.hpp, fno-sanitize=alignment is the key
+
+    // Sometime working with "store to misaligned address 0x6160000048ff for type ...." in zippy.hpp:
+    //   fno-sanitize=alignment is the key
     "convert xlsx"_test = [&] {
         struct Args : In2csv_args {
             Args() { file = "examples/test.xlsx"; d_excel = "2"; dt_excel = "6"; is1904 = true;}
@@ -328,7 +331,6 @@ int main() {
             expect(cout_buffer.str().size() == get_source("examples/testxlsx_converted.csv").size());
         }));
     };
-#endif
 
     "convert xlsx with unicode sheet"_test = [&] {
         struct Args : In2csv_args {
