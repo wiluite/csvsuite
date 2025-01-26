@@ -30,6 +30,7 @@ int main() {
         std::string format;
         std::string schema;
         std::string key;
+        bool non_flat = false;
         bool names = false;
         std::string sheet;
         std::string write_sheets;
