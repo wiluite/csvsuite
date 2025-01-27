@@ -643,7 +643,7 @@ if (IO_CSVSUITE_UTILS)
         endif()
     endif()
 
-  endif() //NOT _SANITY_CHECK
+  endif() #NOT _SANITY_CHECK
 
 add_definitions("-DCSVSUITE_UNIT_TEST=1")
 

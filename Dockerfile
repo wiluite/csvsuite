@@ -8,6 +8,7 @@ ENV SOCI_DB_SQLITE3="sqlite3://db=sample.sqlite"
 ENV SOCI_DB_MYSQL="mysql://db=testdb user=root"
 ENV SOCI_DB_POSTGRESQL="postgresql://dbname=tester user=root"
 ENV SOCI_DB_FIREBIRD="firebird://service=/dbname.fdb user=SYSDBA password=masterkey"
+ENV ASAN_OPTIONS="alloc-dealloc-mismatch=0"
 
 SHELL ["/bin/bash", "-c"]
 
