@@ -336,6 +336,17 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/suite/test/examples/test_field_size_limit.csv
         ${CMAKE_CURRENT_BINARY_DIR}/examples/test_field_size_limit.csv)
+add_custom_command(
+        TARGET csvJoin_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/dummy_col_shuffled.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/dummy_col_shuffled.csv)
+add_custom_command(
+        TARGET csvJoin_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/suite/test/examples/dummy_col_shuffled_ragged.csv
+        ${CMAKE_CURRENT_BINARY_DIR}/examples/dummy_col_shuffled_ragged.csv)
+
 target_link_libraries(csvJoin_test libcppp-reiconv.static simdutf bz2_connector ranav-glob -lpthread)
 add_test(csvJoin_test csvJoin_test)
 
@@ -632,7 +643,7 @@ if (IO_CSVSUITE_UTILS)
         endif()
     endif()
 
-  endif()
+  endif() //NOT _SANITY_CHECK
 
 add_definitions("-DCSVSUITE_UNIT_TEST=1")
 
@@ -887,6 +898,6 @@ add_custom_command(
 target_link_libraries(In2csv_fixed_format_test libcppp-reiconv.static simdutf dbf xls geojson OpenXLSX::OpenXLSX bz2_connector -lpthread)
 add_test(In2csv_fixed_format_test In2csv_fixed_format_test)
 
-endif()
+endif() # IO_CSVSUITE_UTILS
 
 enable_testing ()
