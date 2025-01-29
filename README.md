@@ -144,7 +144,7 @@ details, see the description of the --db option in the utilities [_csvSql_](#csv
 
 
 ### Statistics performance
-There were measured the performances of three tools: [csvkit(1.5.0)'s csvstat](https://pypi.org/project/csvkit/), 
+There were measured the performances of three tools: [csvkit(2.0.1)'s csvstat](https://pypi.org/project/csvkit/), 
 [xsv(0.13.0)' stats](https://github.com/BurntSushi/xsv/releases/tag/0.13.0) and [_csvStat_](#csvstat) at files: 
 crime.csv, worldcitiespop.csv, flights.csv and question_tags.csv with (or with no) a limited number of columns
 (so as not to break up screenshots). Here are the result screenshots:  
@@ -152,13 +152,13 @@ crime.csv, worldcitiespop.csv, flights.csv and question_tags.csv with (or with n
 **CRIME.CSV**
 
 <h4>(csvkit)</h4>
-<img alt="image info" height="888" src="./img/crime_csvkit.png" width="830"/>
+<img alt="image info" height="794" src="./img/stat_crime_kit.png" width="471"/>
 
 <h4>(xsv)</h4>
-![image info](./img/crime_xsv.png) 
+<img alt="image info" height="144" src="./img/stat_crime_xsv.png" width="1054"/>
 
-<h4>(csvsuite)</h4> 
-![image info](./img/crime_csv_co.png) 
+<h4>(csvsuite)</h4>
+<img alt="image info" height="767" src="./img/stat_crime_suite.png" width="480"/>
 
 Here, xsv is the winner. It produces results in less than a second.
 
