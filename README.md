@@ -167,29 +167,30 @@ Here, xsv is the winner. It produces results in less than a second.
 **WORLDCITIESPOP.CSV**  
 
 <h4>(csvkit)</h4>
-![image info](./img/worldcitiespop_csvkit.png)
+<img alt="image info" height="846" src="./img/stat_worldcitiespop_kit.png" width="456"/>
 
 <h4>(xsv)</h4>
-![image info](./img/worldcitiespop_xsv.png)
+<img alt="image info" height="143" src="./img/stat_worldcitiespop_xsv.png" width="912"/>
 
 <h4>(csvsuite)</h4>
-![image info](./img/worldcitiespop_csv_co.png)
+<img alt="image info" height="807" src="./img/stat_worldcitiespop_suite.png" width="539"/>
 
-Here, we are the winner. Note: since _xsv_ does not calculate 'most decimal places' in its statistics, unlike _csvkit_ ,
-we have disabled this option at ours.
+Here, we are the winner. Note: since the _xsv_ does not calculate 'most decimal places' in its statistics, unlike
+_csvkit_ , we have disabled this option at ours.
 
 ---
 
 **FLIGHTS.CSV**
 
 <h4>(csvkit)</h4>
-![image info](./img/flights_c_1_10_csvkit.png)
+<img alt="image info" height="105" src="./img/stat_flights_kit.png" width="457"/>
 
 <h4>(xsv)</h4>
-![image info](./img/flights_c_1_10_xsv.png)
+<img alt="image info" height="233" src="./img/stat_flights_xsv.png" width="827"/>
 
 <h4>(csvsuite)</h4>
-![image info](./img/flights_c_1_10_csv_co.png)
+<img alt="image info" height="1053" src="./img/stat_flights_suite.png" width="407"/>
+
 
 Here we again beat xsv by more than 2 times by doing statistics on the first 10 columns. If we did full statistics on
 all the columns, xsv would run out of memory on our current machine (we had 12 GB RAM), as in the following test.
