@@ -234,7 +234,34 @@ the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjo
 We see that the results calculated using the _csvjoin_ and the _csvJoin_ are the same, which is not the case with
 the _xsv_, whose results are incorrect, although they are mind-blowingly fast.
 Despite the _xsv_'s enormous performance in all previous tests (in many tests not shown, the _xsv_ simply outperforms
-the _csvsuite_ by many times), it doesn't do everything right. Let's criticize it a little more.
+the _csvsuite_ by many-many times), it doesn't do everything right. Let's criticize it a little more.
+
+File a.csv
+>a,b,c<br>
+>" test",20,1
+
+File b.csv
+>d,e,f<br>
+>"test ",2e1,1<br>
+>,,string
+
+Correct join results for each of the pairwise columns:
+
+<img alt="image info" height="151" src="./img/join_checks.png" width="582"/>
+
+And not such correct results in the case of the _xsv_:
+
+<img alt="image info" height="169" src="./img/join_checks_xsv.png" width="581"/>
+
+In the first case, the _xsv_ ignores the spaces to the left and right of the significant part of the fields, resulting
+in the equality of two unequal values.<br>
+In the second case, it does not define the numeric values 20 and 2e1 as equal.<br>
+In the third case, it considers the pairwise values of “1” to be identical, ignoring the type of the third
+column of the second file as text. When it becomes erroneous to compare numeric values with the numeric values of the
+third column of the first file.
+
+Thus, despite its undeniable speed and possible practical benefits, in some cases this product clearly simplifies its
+task, which affects the reliability of the results.
 
 
 ### Build All
@@ -290,7 +317,8 @@ mkdir build && cd build
 cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=OFF ..
 make -j 6
 ```
-NOTE: You may have to specify an explicit compiler version (example: clang++-16 instead of clang, clang-16 instead of clang). 
+NOTE: You may have to specify an explicit compiler version (example: clang++-16 instead of clang++, clang-16 instead of
+clang). 
  
 _Alternative 2 (Linux, with Clang, libc++-dev, libc++abi-dev packages installed):_
 ```bash
