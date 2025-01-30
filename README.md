@@ -201,10 +201,10 @@ The _csvkit_ is out of the competition.
 **QUESTION_TAGS.CSV**
 
 <h4>(xsv)</h4>
-![image info](./img/question_tags_xsv.png)
+<img alt="image info" height="103" src="./img/stat_qtags_xsv.png" width="629"/>
 
 <h4>(csvsuite)</h4>
-![image info](./img/question_tags_csv_co.png)
+<img alt="image info" height="521" src="./img/stat_qtags_suite.png" width="465"/>
 
 Our tool gives the result in about 42 seconds. Here we could not wait for the result from csvkit within a reasonable
 time. Thus, both the _csvkit_ and the _xsv_ are unable to produce their results where for out tool the reason why this
@@ -212,26 +212,23 @@ is not possible is not the case. This is a subject for further research.
 
 
 ### Sorting performance
-If we talk about sorting by columns of string types, then the xsv is unrivaled, far ahead of other means in time, because
-it obviously uses efficient algorithms for sorting strings, and without the use of parallelism. However, let's see how
-effective it is to sort a group of columns where there is one numeric type (the -N option is required, otherwise the
-results will be incorrect). We only need about 7 seconds versus 21 at the xsv. The csvkit is more than a minute behind us.
-
-![image info](./img/sort_worldcitiespop.png)
+If we talk about sorting by columns of string types, then the _xsv_ is unrivaled, far ahead of other means in time,
+because it obviously uses efficient algorithms for sorting strings, and without the use of parallelism. However, let's
+see how effective it is to sort a group of columns where there is one numeric type (the -N option at the _xsv_ is
+required, otherwise the results will be incorrect). We only need about 6 seconds versus 22 at the _xsv_. The _csvsort_
+is more than a minute behind us.
+<img alt="image info" height="612" src="./img/sort.png" width="593"/>
 
 
 ### SQL performance
-C++ is said to outperform Python in general, non-specialized areas by about 3 times. In this case, it is so. And even
-better. In light of the impossibility of parallelizing the filling of the database table using language tools.
-Here it turned out 4 times faster, because the csvkit spends a significant part of the time determining column types,
-unlike our tool.
-
-![image info](./img/csvsql_worldcitiespop.png)
+C++ is said to outperform Python in general, non-specialized areas by about 3 times. In light of the impossibility of
+parallelizing the filling of the SQL database table using language tools. Here it turned out, we are 8 times faster,
+probably because the _csvsql_ spends a significant part of the time determining column types, unlike our tool.
+<img alt="image info" height="547" src="./img/sql.png" width="761"/>
 
 ### Joining performance
 Now we will try to display the first 10 results corresponding to the conditions when the City and AccentCity fields in
 the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ only by a factor of 4.
-
 <img alt="image info" height="612" src="./img/join.png" width="708"/>
 
 We see that the results calculated using the _csvjoin_ and the _csvJoin_ are the same, which is not the case with
