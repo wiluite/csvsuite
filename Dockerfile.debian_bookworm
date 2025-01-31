@@ -16,7 +16,6 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     cmake \
     gdb \
     wget \
-    python3 \
     clang-19 \
     libc++-19-dev \
     libc++abi-19-dev \
@@ -25,7 +24,8 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     libpq-dev \
     curl \
     git \
-    nano
+    nano \
+    locales-all
 
 # Install Python's csvkit to be able to compare everything.
 RUN apt install -qy python3-csvkit
