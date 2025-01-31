@@ -236,26 +236,21 @@ the _xsv_, whose results are incorrect, although they are mind-blowingly fast.
 Despite the _xsv_'s enormous performance in all previous tests (in many tests not shown, the _xsv_ simply outperforms
 the _csvsuite_ by many-many times), it doesn't do everything right. Let's criticize it a little more.
 
-File a.csv
->a,b,c<br>
->" test",20,1
+Suppose we have got two CSV files: a.csv and b.csv:
 
-File b.csv
->d,e,f<br>
->"test ",2e1,1<br>
->,,string
+<img src="./img/a_and_b.png" alt="image info" height="143" width="367" />
 
 Correct join results for each of the pairwise columns:
 
-<img alt="image info" height="151" src="./img/join_checks.png" width="582"/>
+<img alt="image info" height="157" src="./img/join_checks.png" width="470"/>
 
 And not such correct results in the case of the _xsv_:
 
-<img alt="image info" height="169" src="./img/join_checks_xsv.png" width="581"/>
+<img alt="image info" height="130" src="./img/join_checks_xsv.png" width="473"/>
 
 In the first case, the _xsv_ ignores the spaces to the left and right of the significant part of the fields, resulting
 in the equality of two unequal values.<br>
-In the second case, it does not define the numeric values 20 and 2e1 as equal.<br>
+In the second case, it does not detect the numeric values 20 and 2e1 as equal.<br>
 In the third case, it considers the pairwise values of “1” to be identical, ignoring the type of the third
 column of the second file as text. When it becomes erroneous to compare numeric values with the numeric values of the
 third column of the first file.
