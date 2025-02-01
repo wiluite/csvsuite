@@ -41,7 +41,7 @@ non-traditional areas. These utilities (from 14) seem to be almost fully operati
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
-  > The _csvsuite_ is in the active stage of development. But, as you will see, is already quite usable. Bug reports,
+  > The _csvsuite_ is in the active stage of development, but, as you will see, already quite usable. Bug reports,
   scenarios that failed are very welcome. Well, it is imperfect, but it will improve.
 
 
@@ -73,16 +73,16 @@ whistles if this is not the case.
 
 4) When handling date and datetime data types and their localization, the _csvkit_ relies on the rich Python datetime
 library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
-The _csvsuite_ , though, is tightly bound to the --date-format and --datetime-format options and works well only on
-those platforms where this is supported by the environment/compiler/standard library. And the --date-lib-parser
-option engages the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure
-consistency everywhere (on most platforms). For more info see tests located in the
+The _csvsuite_ , though, is tightly bound to the `--date-format` and `--datetime-format` options and works well only on
+those platforms where this is supported by the environment/compiler/runtime. And the `--date-lib-parser` option engages
+the special [date](https://github.com/HowardHinnant/date) library to improve the situation and ensure consistency
+everywhere (on most platforms). For more info see tests located in the
 [csvsuite_core_test.cpp](https://github.com/wiluite/csvsuite/blob/main/suite/test/csvsuite_core_test.cpp) module. For
 complete info see [formatting section](https://howardhinnant.github.io/date/date.html#from_stream_formatting) of the
 documentation.
 
-5) Locale support for numbers is provided out of the box, that is, by the development tool. If there is no such support
-somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.
+5) Locale-formatted support for numbers is provided out of the box, that is, by the development tool. If there is no
+such support somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.
 
 6) Other restrictions and some substitutions are presented in section [Reference](#reference), describing utilities.
 
@@ -90,7 +90,9 @@ somewhere (for example MinGW/Windows), you will not be able to work with locale-
 ### Tutorial
 ### 1. Getting started
 #### 1.1. About this tutorial
-This tutorial should be almost exactly the same as the original tutorial.
+This tutorial should be almost exactly the same as the original
+[tutorial](https://csvkit.readthedocs.io/en/latest/tutorial.html).
+
 #### 1.2. Installing csvsuite
 The best way to install the tool is to simply download a required binary archive from the
 [release](https://github.com/wiluite/csvsuite/releases) page and unpack it. Then add the path to the unpacked directory
@@ -107,39 +109,40 @@ Just repeat the lessons from the original training:
 [4.1](https://csvkit.readthedocs.io/en/latest/tutorial/4_going_elsewhere.html), and make sure everything works,
 but first pay attention to the following notes for changes for you to do.  
 
-**_Note 1._** Parts of utility names that reflect their purpose are capitalized to avoid confusion between the
+> Parts of utility names that reflect their purpose are capitalized to avoid confusion between the
 _csvsuite_ and the _csvkit_ on case-sensitive systems. Thus, you must type their names correctly. See their names in the
 [About](#about) section.  
 
-**_Note 2._** In paragraph 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
+> In paragraph 1.4, note that in the resulting data.csv document in the 10th column (ship_date), there is a
 number, not a date. If this is too important for you right now, then to improve it, run the following command instead of
 the one suggested:
-
-    In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv
-
-The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
+> 
+>    **In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv**
+> 
+>> The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
 like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/), which do
-not guarantee that dates/datetimes are correctly recognized, since Excel documents themselves do not have a date or
+not guarantee that Dates/DateTimes are correctly recognized, since Excel documents themselves do not have a date or
 datetime storage type. So you are facing the necessity to always specify which numeric columns and using which era you
 want to convert to dates or datetimes.  
 
-**_Note 3._** In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
+>  In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
 on the screen, unlike _csvStat_ which displays number separator according to the current global locale. This is because
 in the _csvkit_ there is a difference between the locales according to which numbers are output in the two utilities.
 To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
 them. For example:
+> 
+> **csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US**
+> 
+> Or:  
+>	
+> **csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8**
+> 
+> where -G option is a "Superseded global locale".  
 
-    csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US
-or  
-	
-    csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8  
-where -G option is a "Superseded global locale".  
+> In the [_csvStat_](#csvstat) utility, "Most common values" with the same number of repetitions may not be the same as in the
+original utility, due to different sorting algorithms. To display more data, use the `--freq-count` option.
 
-**_Note 4._**
-In the _csvStat_ utility, "Most common values" with the same number of repetitions may not be the same as in the
-original utility, due to different sorting algorithms. To display more data, use the --freq-count option.
-
-**_Note 5._** In paragraph 3.3 you must use: `--db sqlite3://leso.db` instead of `--db sqlite:///leso.db`. For more
+> In paragraph 3.3 you must use: `--db sqlite3://leso.db` instead of `--db sqlite:///leso.db`. For more
 details, see the description of the --db option in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
 
 
@@ -147,7 +150,10 @@ details, see the description of the --db option in the utilities [_csvSql_](#csv
 There were measured the performances of three tools: [csvkit(2.0.1)'s csvstat](https://pypi.org/project/csvkit/), 
 [xsv(0.13.0)' stats](https://github.com/BurntSushi/xsv/releases/tag/0.13.0) and [_csvStat_](#csvstat) at files: 
 crime.csv, worldcitiespop.csv, flights.csv and question_tags.csv with (or with no) a limited number of columns
-(so as not to break up screenshots). Here are the result screenshots:  
+(so as not to break up screenshots). These files may be available among [Kaggle](https://www.kaggle.com/datasets) open
+datasets, and one of them (worldcitiespop.csv) can be found [here](https://burntsushi.net/stuff/worldcitiespop.csv).
+
+Here are the resulting screenshots:  
 
 **CRIME.CSV**
 
