@@ -1,4 +1,4 @@
-**DOCUMENTATION IS UNDER CONSTRUCTION**
+**THIS PAGE IS UNDER CONSTRUCTION**
 
 # csvsuite
 ## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
@@ -125,11 +125,11 @@ not guarantee that Dates/DateTimes are correctly recognized, since Excel documen
 datetime storage type. So you are facing the necessity to always specify which numeric columns and using which era you
 want to convert to dates or datetimes.  
 
->  In paragraphs where _csvLook_ is used, you will not see (by default) separators in the numbers displayed
-on the screen, unlike _csvStat_ which displays number separator according to the current global locale. This is because
-in the _csvkit_ there is a difference between the locales according to which numbers are output in the two utilities.
-To overcome this contradiction and still see separators in numbers, simply specify the locale in which you want to see
-them. For example:
+>  In paragraphs where [_csvLook_](#csvlook) is used, you will not see (by default) separators in the numbers displayed
+on the screen, unlike [_csvStat_](#csvstat) which displays number separator according to the current global locale.
+This is because in the _csvkit_ there is a difference between the locales according to which numbers are output in the
+two utilities. To overcome this contradiction and still see separators in numbers, simply specify the locale in which
+you want to see them. For example:
 > 
 > **csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US**
 > 
@@ -137,82 +137,86 @@ them. For example:
 >	
 > **csvCut -c acquisition_cost data.csv | csvLook data.csv -G en_US.utf-8**
 > 
-> where -G option is a "Superseded global locale".  
+> where `-G` option is a "Superseded global locale".  
 
-> In the [_csvStat_](#csvstat) utility, "Most common values" with the same number of repetitions may not be the same as in the
+> In the _csvStat_ utility, "Most common values" with the same number of repetitions may not be the same as in the
 original utility, due to different sorting algorithms. To display more data, use the `--freq-count` option.
 
-> In paragraph 3.3 you must use: `--db sqlite3://leso.db` instead of `--db sqlite:///leso.db`. For more
-details, see the description of the --db option in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
+> In paragraph 3.3 you must use: **--db sqlite3://leso.db** instead of **--db sqlite:///leso.db**. For more details, see
+the description of the `--db option` in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
 
 
 ### Statistics performance
 There were measured the performances of three tools: [csvkit(2.0.1)'s csvstat](https://pypi.org/project/csvkit/), 
 [xsv(0.13.0)' stats](https://github.com/BurntSushi/xsv/releases/tag/0.13.0) and [_csvStat_](#csvstat) at files: 
-crime.csv, worldcitiespop.csv, flights.csv and question_tags.csv with (or with no) a limited number of columns
-(so as not to break up screenshots). These files may be available among [Kaggle](https://www.kaggle.com/datasets) open
-datasets, and one of them (worldcitiespop.csv) can be found [here](https://burntsushi.net/stuff/worldcitiespop.csv).
+crime.csv(102M), worldcitiespop.csv(145M), flights.csv(565M) and question_tags.csv(844M) with (or with not) a limited
+number of columns (so as not to break up screenshots). These files may be available among
+[Kaggle open datasets](https://www.kaggle.com/datasets), and one of them (worldcitiespop.csv) can be found
+[here](https://burntsushi.net/stuff/worldcitiespop.csv).
 
-Here are the resulting screenshots:  
+Here are the competition screenshots:  
 
-**CRIME.CSV**
+**crime.csv/csvkit**
 
-<h4>(csvkit)</h4>
 <img alt="image info" height="794" src="./img/stat_crime_kit.png" width="471"/>
 
-<h4>(xsv)</h4>
+**crime.csv/xsv**
+
 <img alt="image info" height="144" src="./img/stat_crime_xsv.png" width="1054"/>
 
-<h4>(csvsuite)</h4>
+**crime.csv/csvsuite**
+
 <img alt="image info" height="767" src="./img/stat_crime_suite.png" width="480"/>
 
-Here, xsv is the winner. It produces results in less than a second.
+File size crime.csv is 102M. Here, the _xsv_ is the winner. It produces results in less than a second.
 
 ---
 
-**WORLDCITIESPOP.CSV**  
+**worldcitiespop.csv/csvkit**  
 
-<h4>(csvkit)</h4>
 <img alt="image info" height="846" src="./img/stat_worldcitiespop_kit.png" width="456"/>
 
-<h4>(xsv)</h4>
+**worldcitiespop.csv/xsv**
+
 <img alt="image info" height="143" src="./img/stat_worldcitiespop_xsv.png" width="912"/>
 
-<h4>(csvsuite)</h4>
+**worldcitiespop.csv/csvsuite**
+
 <img alt="image info" height="807" src="./img/stat_worldcitiespop_suite.png" width="539"/>
 
-Here, we are the winner. Note: since the _xsv_ does not calculate 'most decimal places' in its statistics, unlike
-_csvkit_ , we have disabled this option at ours.
+Here, the _csvsuite_ is the winner. Since the _xsv_ does not calculate 'most decimal places' in its statistics, unlike
+_csvkit_ , we have disabled this option at ours (`--no-mdp` option).
 
 ---
 
-**FLIGHTS.CSV**
+**flights.csv/csvkit**
 
-<h4>(csvkit)</h4>
 <img alt="image info" height="105" src="./img/stat_flights_kit.png" width="457"/>
 
-<h4>(xsv)</h4>
+**flights.csv/xsv**
+
 <img alt="image info" height="233" src="./img/stat_flights_xsv.png" width="827"/>
 
-<h4>(csvsuite)</h4>
+**flights.csv/csvsuite**
+
 <img alt="image info" height="1053" src="./img/stat_flights_suite.png" width="407"/>
 
+Here we again beat the _xsv_ by more than 2 times by doing statistics on the first 10 columns. If we did full statistics
+on all the columns, the _xsv_ would run out of memory on our current machine (we had 12 GB RAM), as in the next test.
 
-Here we again beat xsv by more than 2 times by doing statistics on the first 10 columns. If we did full statistics on
-all the columns, xsv would run out of memory on our current machine (we had 12 GB RAM), as in the following test.
 The _csvkit_ is out of the competition.
 
 ---
 
-**QUESTION_TAGS.CSV**
+**question_tags.csv/xsv**
 
-<h4>(xsv)</h4>
 <img alt="image info" height="103" src="./img/stat_qtags_xsv.png" width="629"/>
 
-<h4>(csvsuite)</h4>
+**question_tags.csv/csvsuite**
+
 <img alt="image info" height="521" src="./img/stat_qtags_suite.png" width="465"/>
 
-Our tool gives the result in about 42 seconds. Here we could not wait for the result from csvkit within a reasonable
+Our tool gives the result in about 42 seconds. Here we could not wait for the result from _csvkit_ within a reasonable
 time. Thus, both the _csvkit_ and the _xsv_ are unable to produce their results where for out tool the reason why this
 is not possible is not the case. This is a subject for further research.
 
@@ -223,6 +227,7 @@ because it obviously uses efficient algorithms for sorting strings, and without 
 see how effective it is to sort a group of columns where there is one numeric type (the -N option at the _xsv_ is
 required, otherwise the results will be incorrect). We only need about 6 seconds versus 22 at the _xsv_. The _csvsort_
 is more than a minute behind us.
+
 <img alt="image info" height="612" src="./img/sort.png" width="593"/>
 
 
@@ -230,11 +235,13 @@ is more than a minute behind us.
 C++ is said to outperform Python in general, non-specialized areas by about 3 times. In light of the impossibility of
 parallelizing the filling of the SQL database table using language tools. Here it turned out, we are 8 times faster,
 probably because the _csvsql_ spends a significant part of the time determining column types, unlike our tool.
+
 <img alt="image info" height="547" src="./img/sql.png" width="761"/>
 
 ### Joining performance
 Now we will try to display the first 10 results corresponding to the conditions when the City and AccentCity fields in
 the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ only by a factor of 4.
+
 <img alt="image info" height="612" src="./img/join.png" width="708"/>
 
 We see that the results calculated using the _csvjoin_ and the _csvJoin_ are the same, which is not the case with
@@ -272,7 +279,7 @@ task, which affects the reliability of the results.
 #### PREPARATION
 
 Install the necessary SQL database servers and client libraries for them into the system, if not already done. This is
-necessary for the build system to create the appropriate libraries for the [csvSql](#csvsql) and [Sql2csv](#sql2csv)
+necessary for the build system to create the appropriate libraries for the [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv)
 utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com/SOCI/soci) and
 [OCILIB - Driver for Oracle](https://vrogier.github.io/ocilib/) the _csvsuite_ supports the following SQL databases:
 
@@ -285,22 +292,22 @@ utilities. Thanks to [SOCI - The C++ Database Access Library](https://github.com
 
 * **Linux**
 
-  It seems that no additional preparations required. Except for, you may need to create ORACLE_HOME environment
+It seems that no additional preparations required. Except for, you may need to create ORACLE_HOME environment
   variable. Example:
-  > export ORACLE_HOME=~/product/21c/dbhomeXE
+> export ORACLE_HOME=~/product/21c/dbhomeXE
 
-  in your user's  ~/.profile, and reboot.
+in your user's  ~/.profile, and reboot.
 
 * **Windows**
 
-  Add to the PATH environment variable the access paths to the bin and lib directories of your databases (except for
+Add to the PATH environment variable the access paths to the bin and lib directories of your databases (except for
   for SQLite3). Examples:
-  > C:\Program Files\MySQL\MySQL Server 8.0\bin;<br>
-  > C:\Program Files\MySQL\MySQL Server 8.0\lib;<br>
-  > C:\Program Files\Firebird\Firebird_5_0;
+> C:\Program Files\MySQL\MySQL Server 8.0\bin;<br>
+> C:\Program Files\MySQL\MySQL Server 8.0\lib;<br>
+> C:\Program Files\Firebird\Firebird_5_0;
 
-  Create ORACLE_HOME environment variable. Example:
-  > ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE
+Create ORACLE_HOME environment variable. Example:
+> ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE
   
 
 #### BUILD VARIANTS
@@ -335,7 +342,7 @@ mkdir build && cd build
 cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=ON -D_SANITY_CHECK=ON -DCMAKE_BUILD_TYPE=Debug ..
 make -j 4
 ```
-NOTE: You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
+> You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
 
 _MSVC (Windows, in x64 Native Tools Command Prompt):_
 ```bash
@@ -346,7 +353,7 @@ msbuild /property:Configuration=Release csvsuite.sln
 
 _Docker container (Linux):_
 
-Go to the csvsuite directory, then build a necessary docker image:
+Go to the _csvsuite_ directory, then build a necessary docker image:
 ```bash
 docker build -t foo/your_image_name -f ./a_dockerfile .
 ```
@@ -367,20 +374,20 @@ in a Docker container, where the environment is completely customized.
 
 * **Linux**
 
-  > SOCI_DB_SQLITE3="sqlite3://db=test.sqlite3" <br>
-  > SOCI_DB_MYSQL="mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306" <br>
-  > SOCI_DB_MARIADB="mariadb://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307" <br>
-  > SOCI_DB_POSTGRESQL="postgresql://dbname=your_db user=your_user password=your_password" <br>
-  > SOCI_DB_FIREBIRD="firebird://service=/path_to/your_db.fdb user=SYSDBA password=masterkey"
+> SOCI_DB_SQLITE3="sqlite3://db=test.sqlite3" <br>
+> SOCI_DB_MYSQL="mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306" <br>
+> SOCI_DB_MARIADB="mariadb://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307" <br>
+> SOCI_DB_POSTGRESQL="postgresql://dbname=your_db user=your_user password=your_password" <br>
+> SOCI_DB_FIREBIRD="firebird://service=/path_to/your_db.fdb user=SYSDBA password=masterkey"
 
 * **Windows**
 
-  > SOCI_DB_SQLITE3=sqlite3://db=test.sqlite3 timeout=2 share-cache=true <br>
-  > SOCI_DB_MYSQL=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306 <br>
-  > SOCI_DB_MARIADB=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307 <br>
-  > SOCI_DB_POSTGRESQL=postgresql://dbname=your_db user=your_user password=your_password <br>
-  > SOCI_DB_FIREBIRD=firebird://service=d:\\your_directory_path\\your_db.fdb user=SYSDBA password=masterkey <br>
-  > SOCI_DB_ORACLE="oracle://service=//127.0.0.1:1521/xepdb1 user=hr password=hr"
+> SOCI_DB_SQLITE3=sqlite3://db=test.sqlite3 timeout=2 share-cache=true <br>
+> SOCI_DB_MYSQL=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3306 <br>
+> SOCI_DB_MARIADB=mysql://db=your_db user=your_user password=your_password host=127.0.0.1 port=3307 <br>
+> SOCI_DB_POSTGRESQL=postgresql://dbname=your_db user=your_user password=your_password <br>
+> SOCI_DB_FIREBIRD=firebird://service=d:\\your_directory_path\\your_db.fdb user=SYSDBA password=masterkey <br>
+> SOCI_DB_ORACLE="oracle://service=//127.0.0.1:1521/xepdb1 user=hr password=hr"
 
 Go to your build/suite/test directory and run all the unit tests:
 
@@ -398,15 +405,15 @@ to establish global paths.
 * **Linux**
 
   - If you've built it, please modify your ~/.profile to have:
-  > export PATH=$PATH:/path/to/csvsuite/suite/build/
+  >  export PATH=$PATH:/path/to/csvsuite/suite/build/
 
-  and reboot.
+    and reboot.
 
   - If you've downloaded it as a binary release, please modify your ~/.profile to have:
-  > export PATH=$PATH:/path/to/unpacked/archive <br>
-  > export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
+  >  export PATH=$PATH:/path/to/unpacked/archive <br>
+     export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
-  and reboot.
+    and reboot.
 
 * **Windows**
 
@@ -415,6 +422,7 @@ to establish global paths.
     environment variable.
   - If you've downloaded a MSVC binary archive, please install a redistributable package as well.
 
+---
 
 ### Reference
 
