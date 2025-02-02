@@ -853,9 +853,8 @@ Join a set of files for different years:
     csvStack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
 
 Add a single column to the left of a CSV:  
-    **Not supported. Will be supported soon.** But as a workaroud you may do:
 
-    csvStack -n NEWCOL -g " " examples/dummy.csv
+    csvStack -n NEWCOL -g "" examples/dummy.csv
 
 ---
 
