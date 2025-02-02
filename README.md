@@ -1,5 +1,3 @@
-**THIS PAGE IS UNDER CONSTRUCTION**
-
 # csvsuite
 ## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
 
@@ -119,11 +117,11 @@ the one suggested:
 > 
 >    **In2csv ne_1033_data.xlsx --d-excel ship_date --is1904=0 > data.csv**
 > 
->> The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of packages
-like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/), which do
-not guarantee that Dates/DateTimes are correctly recognized, since Excel documents themselves do not have a date or
-datetime storage type. So you are facing the necessity to always specify which numeric columns and using which era you
-want to convert to dates or datetimes.  
+>> The reason the _csvkit_ can detect the date automatically is because it relies on the heuristic capabilities of
+packages like [xlrd](https://xlrd.readthedocs.io/en/latest/) and [openpyxl](https://openpyxl.readthedocs.io/en/stable/),
+which do not guarantee that Dates/DateTimes are correctly recognized, since Excel documents themselves do not have a
+date or datetime storage type. So you are facing the necessity to always specify which numeric columns and using which
+era you want to convert to dates or datetimes.  
 
 >  In paragraphs where [_csvLook_](#csvlook) is used, you will not see (by default) separators in the numbers displayed
 on the screen, unlike [_csvStat_](#csvstat) which displays number separator according to the current global locale.
@@ -276,7 +274,7 @@ task, which affects the reliability of the results.
 
 > For now, you need Python installed to configure several libraries used. Over time, this dependence will be removed.
 
-#### PREPARATION
+#### _PREPARATION_
 
 Install the necessary SQL database servers and client libraries for them into the system, if not already done. This is
 necessary for the build system to create the appropriate libraries for the [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv)
@@ -301,7 +299,7 @@ in your user's  ~/.profile, and reboot.
 * **Windows**
 
 Add to the PATH environment variable the access paths to the bin and lib directories of your databases (except for
-  for SQLite3). Examples:
+SQLite3). Examples:
 > C:\Program Files\MySQL\MySQL Server 8.0\bin;<br>
 > C:\Program Files\MySQL\MySQL Server 8.0\lib;<br>
 > C:\Program Files\Firebird\Firebird_5_0;
@@ -310,7 +308,7 @@ Create ORACLE_HOME environment variable. Example:
 > ORACLE_HOME=C:\app\youruser\product\21c\dbhomeXE
   
 
-#### BUILD VARIANTS
+#### _BUILD VARIANTS_
 
 _Conventional (Linux/GCC, Windows/MinGW):_
 ```bash
@@ -325,7 +323,7 @@ mkdir build && cd build
 cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=OFF ..
 make -j 6
 ```
-NOTE: You may have to specify an explicit compiler version (example: clang++-16 instead of clang++, clang-16 instead of
+> You may have to specify an explicit compiler version (example: clang++-16 instead of clang++, clang-16 instead of
 clang). 
  
 _Alternative 2 (Linux, with Clang, libc++-dev, libc++abi-dev packages installed):_
@@ -334,7 +332,7 @@ mkdir build && cd build
 cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -D_STDLIB_LIBCPP=ON ..
 make -j 6
 ```
-NOTE: You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
+> You may have to specify an explicit compiler version (example: clang++-16, clang-16). 
 
 _Test build for memory safety (Linux, with Clang, libc++-dev, libc++abi-dev, and Clang sanitizers packages installed):_
 ```bash
@@ -405,15 +403,15 @@ to establish global paths.
 * **Linux**
 
   - If you've built it, please modify your ~/.profile to have:
-  >  export PATH=$PATH:/path/to/csvsuite/suite/build/
+    >  export PATH=$PATH:/path/to/csvsuite/suite/build/
 
     and reboot.
 
-  - If you've downloaded it as a binary release, please modify your ~/.profile to have:
-  >  export PATH=$PATH:/path/to/unpacked/archive <br>
-     export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
+    - If you've downloaded it as a binary release, please modify your ~/.profile to have:
+    >  export PATH=$PATH:/path/to/unpacked/archive <br>
+       export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
-    and reboot.
+      and reboot.
 
 * **Windows**
 
@@ -490,13 +488,16 @@ Standardize the formatting of a CSV file (quoting, line endings, etc.):
 
     In2csv examples/realdata/FY09_EDU_Recipients_by_State.csv -L en_US.utf-8  
 
-Unlike the _csvkit_ , which defaults to en_US as the locale for any formatted numbers, here you must specify this locale
-explicitly, since the utility uses the C/Posix locale by default.
+> Unlike the _csvkit_ , which defaults to en_US as the locale for any formatted numbers, here you must specify this
+> locale explicitly, since the utility uses the C/Posix locale by default.
 
 Fetch csvkit’s open issues from the GitHub API, convert the JSON response into a CSV and write it to a file:  
 
-    This example cannot be demonstrated at the moment because the [jsoncons](https://github.com/danielaparker/jsoncons)
-    underlying the conversion does not know how to map nested json documents to csv.
+    Not supported some complex JSONs. To be implemented.
+
+Convert a JSON with nested structures into a CSV:
+
+    In2csv examples/testjson_nested.json --non-flat
 
 Convert a DBase DBF file to an equivalent CSV:
 
@@ -508,10 +509,10 @@ If an error like the following occurs when providing an input file in one of the
 
     The document has 1 column at NNN row...  
 
-Then the input file might have initial rows before the header and data rows. You can skip such rows with --skip-lines
-(-K):
+Then the input file might have initial rows before the header and data rows. You can skip such rows with `--skip-lines
+(-K)`:
 
-    in2csv --skip-lines 3 examples/test_skip_lines.csv
+    In2csv -K 3 examples/test_skip_lines.csv
 
 ---
 
@@ -536,28 +537,29 @@ Options:
 
 Load sample data into a table using [csvSql](#csvsql) and then query it using _Sql2csv_:
 
-    csvSql --db "sqlite3://dummy.db" --tables "test" --insert dummy.csv
+    csvSql --db "sqlite3://dummy.db" --tables "test" --insert examples/dummy.csv
     Sql2csv --db "sqlite3://dummy.db" --query "select * from test"
 
 alternatively (too verbose):
 
-    csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert dummy.csv
+    csvSql --db "sqlite3://dbname=dummy.db" --tables "test" --insert examples/dummy.csv
     Sql2csv --db "sqlite3://dbname=dummy.db" --query "select * from test"
 
-To access databases, the *csvsuite* uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
+To access databases, the _csvsuite_ uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
 Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this particular case, you must specify the value
 for the --db option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).  
 
 Load data about financial aid recipients into PostgreSQL. 
 
-    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvSql -L en_US --db "postgresql://dbname=database user=name password=pass" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
 
-Again, you must specify en_US (or en_US.utf-8) locale explicitly, since the utility uses the C/Posix locale by default.
-Otherwise, the numeric columns will not be recognized as such and the database table will end up with text values.
+> Again, you must specify `en_US` (or `en_US.utf-8`) numeric locale option value explicitly, since the utility uses the
+> C/Posix locale by default. Otherwise, the numeric columns will not be recognized as such and the database table will
+> end up with text values.
 
 Then find the three states that received the most, while also filtering out empty rows:  
 
-    Sql2csv --db "postgresql://dbname=databasename user=username password=pswrd" --query "select * from fy09 where \"State Name\" != '' order by fy09.\"TOTAL\" limit 3"
+    Sql2csv --db "postgresql://dbname=database user=name password=pass" --query "select * from fy09 where \"State Name\" != '' order by fy09.\"TOTAL\" limit 3"
 
 You can even use it as a simple SQL calculator (in this example an in-memory SQLite database is used as the default):
 
@@ -598,13 +600,13 @@ documents, until csvClean gains similar functionality.
 
 Report rows that have a different number of columns than the header row:
 
-    $ csvClean test/examples/bad.csv -n
+    $ csvClean examples/bad.csv -n
     Line 1: Expected 3 columns, found 4 columns
     Line 2: Expected 3 columns, found 2 columns
 
 Fix this document:
 
-    $ csvClean test/examples/bad.csv
+    $ csvClean examples/bad.csv
     2 errors logged to bad_err.csv
 
     $ cat bad_out.csv
@@ -615,6 +617,7 @@ Fix this document:
     line_number,msg,column_a,column_b,column_c
     1,"Expected 3 columns, found 4 columns",1,27,,I'm too long!
     2,"Expected 3 columns, found 2 columns",,I'm too short!
+
 ---
 
 #### csvCut
@@ -681,7 +684,7 @@ Extract a column that may not exist in all files:
 
     echo d, | csvJoin examples/join_no_header_row.csv _ | csvCut -c d
 
-NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
+> NOTE: _csvsuite_ uses `_` (instead of `-`) as a placeholder for piped source.
 
 Display a column’s unique values:
 
@@ -689,7 +692,8 @@ Display a column’s unique values:
 
 Or:
 
-    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvsql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+    csvCut -c 1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSql --query "SELECT DISTINCT(\"State Name\") FROM stdin"
+
 ---
 
 #### csvGrep
@@ -719,7 +723,7 @@ NOTE: the C++ standard only requires conformance to the POSIX regular expression
 extensions like this one) and conformance to the ECMAScript regular expression specification (with minor exceptions, per
 ISO 14882-2011§28.13), which is described in ECMA-262, §15.10.2. ECMAScript's regular expression grammar **does not**
 include the use of modifiers in the form of the (?) syntax.
-This is why there is the --r-icase option if you need the case-insensitive comparision.
+This is why there is the --r-icase option if you need the case-insensitive comparison.
 
 **Examples**
 
@@ -777,15 +781,19 @@ last join, which is necessary in some cases.
 
     csvJoin -c 1 examples/join_a.csv examples/join_b.csv
 
-Add two empty columns to the right of a CSV:  
+Add two empty noname columns to the right of a CSV:  
 
     echo , | csvJoin examples/dummy.csv _
+
+Add two named columns (a,b) (as a matter of fact a2 and b2) to the right of a CSV:
+
+    echo a,b | csvJoin examples/dummy.csv _
 
 Add a single column to the right of a CSV:  
 
     echo "new-column" | csvJoin examples/dummy.csv _
 
-NOTE: _csvsuite_ uses _ (instead of -) as a placeholder for piped source.
+> NOTE: _csvsuite_ uses `_` (instead of `-`) as a placeholder for piped source.
 
 ---
 
@@ -908,7 +916,7 @@ locale):
 
 Convert locations of public art into GeoJSON:
 
-    $ csvJson --date-format=%m/%d/%y --lat latitude --lon longitude --k slug --crs EPSG:4269 -i 4 test/examples/test_geo.csv
+    $ csvJson --date-format=%m/%d/%y --lat latitude --lon longitude --k slug --crs EPSG:4269 -i 4 examples/test_geo.csv
     {
         "type": "FeatureCollection",
         "bbox": [
@@ -1051,7 +1059,7 @@ NOTE: Each further example assumes that you have already created your test datab
 
 Create a table and import data from the CSV directly into PostgreSQL:
 
-    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
+    csvSql -L en_US --db "postgresql://dbname=database user=name password=pass" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 For large tables it may not be practical to process the entire table. One solution to this is to analyze a sample of the
 table. In this case it can be useful to turn off length limits and null checks with the --no-constraints option:
@@ -1060,11 +1068,11 @@ table. In this case it can be useful to turn off length limits and null checks w
 
 Create tables for an entire directory of CSVs and import data from those files directly into PostgreSQL:
 
-    csvSql -L en_US --db "postgresql://dbname=databasename user=username password=pswrd" --insert examples/*_converted.csv
+    csvSql -L en_US --db "postgresql://dbname=database user=user password=pass" --insert examples/*_converted.csv
 
 If those CSVs have identical headers, you can import them into the same table by using csvstack first:
 
-    csvStack test/examples/dummy?.csv | csvSql --db "postgresql://dbname=databasename user=username password=pswrd" --insert
+    csvStack examples/dummy?.csv | csvSql --db "postgresql://dbname=database user=user password=pass" --insert
 
 NOTE: in this case you will have a table named stdin in your database.
 
