@@ -1004,14 +1004,7 @@ _not supported, see notation above._
 #### csvSql
 ##### Description
 Generate SQL statements for a CSV file or execute those statements directly on a database. In the latter case supports
-both creating tables and inserting data
-
-##### Requirements
-Skip this section if you intend to use this utility only with the built-in SQL database (SQLite3), always available, and
-do not need to use other SQL databases. Otherwise, read the [section](#sql-database-support) carefully. It provides steps
-for preparing the _csvsuite_ to work with supported versions of common SQL databases without having to rebuild the
-_csvsuite_, and steps for rebuilding the _csvsuite_ to work with your current versions of those databases. Information
-on running unit tests of utilities working with supported databases is also provided.
+both creating tables and inserting data.
 
     Usage: csvSql arg_0  [options...]
     arg_0 : The CSV files to operate on. [default: unknown]
