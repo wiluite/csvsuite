@@ -367,7 +367,7 @@ cd src && mkdir build && cd build && cmake .. && make -j 4 all
 ### Testing
 This assumes that you have successfully [built](#build-all) the product.  
 Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
-successfully test all branches of the [csvSql](#csvsql) utility. This step is not necessary if you've built the product
+successfully test all branches of the [_csvSql_](#csvsql) utility. This step is not necessary if you've built the product
 in a Docker container, where the environment is completely customized.
 
 * **Linux**
@@ -394,7 +394,7 @@ ctest -j 1 --repeat until-fail:10 --stop-on-failure
 ```
   > You could run tests in parallel as well (ctest -j 6), but keep in mind csvSql_test and Sql2csv_test executables may
     have non-shared states.
-
+  
 ### Installation
 In general, the _csvsuite_ should not be installed into system directories. It is enough to leave binary build results
 in place. Or, unpack a ready-made binary archive from the releases page into any directory. In both cases, you only need
@@ -407,12 +407,13 @@ to establish global paths.
 
     and reboot.
 
-    - If you've downloaded it as a binary release, please modify your ~/.profile to have:
+  - If you've downloaded it as a binary release, please modify your ~/.profile to have:
     >  export PATH=$PATH:/path/to/unpacked/archive <br>
        export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
       and reboot.
-
+  
+  
 * **Windows**
 
   - If you've built it, add the path to your build\suite directory to the Path environment variable.

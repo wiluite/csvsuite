@@ -25,7 +25,7 @@ namespace csvsort {
         bool & ignore_case = flag("i,ignore-case", "Perform case-independent sorting.");
         bool & no_inference = flag("I,no-inference", "Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input.");
         bool & date_lib_parser = flag("date-lib-parser", "Use date library as Dates and DateTimes parser backend instead compiler-supported.").set_default(true);
-        bool & parallel_sort = flag("p,parallel-sort", "Use parallel sort.");
+        bool & parallel_sort = flag("p,parallel-sort", "Use parallel sort.").set_default(true);
         bool & asap = flag("ASAP","Print result output stream as soon as possible.").set_default(true);
 
         void welcome() final {
