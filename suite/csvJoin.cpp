@@ -132,17 +132,17 @@ namespace csvjoin::detail {
                 if (args.linenumbers)
                     os << "line_number,";
 
-                auto optionally_quoted = [](std::ostream & os_, auto const & elem)->std::ostream& {
+                auto optionally_quoted = [this](auto const & elem)->std::ostream& {
                     if (elem.find(',') != std::string::npos)
-                        os_ << std::quoted(elem);
+                        os << std::quoted(elem);
                     else
-                        os_ << elem;
-                    return os_;
+                        os << elem;
+                    return os;
                 };
-                std::for_each(printable.begin(), printable.end()-1, [&](auto const & elem) {
-                    optionally_quoted(os, elem) << ',';
+                std::for_each(printable.begin(), printable.end() - 1, [&](auto const & elem) {
+                    optionally_quoted(elem) << ',';
                 });
-                optionally_quoted(os, printable.back());
+                optionally_quoted(printable.back());
                 print_LF(os);
             } else if constexpr (std::is_same_v<std::vector<std::string>, std::decay_t<decltype(std::declval<T>()[0])>>) { // print body
                 for (auto && elem : printable) {
@@ -151,22 +151,19 @@ namespace csvjoin::detail {
                         os << ++line_nums << ',';
                     }
 
-                    auto col = 0u;
-                    std::for_each(elem.begin(), elem.end()-1, [&](auto const & e) {
-                        if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>) {
-                            using elem_type = typename std::decay_t<T>::reader_type::template typed_span<csv_co::unquoted>;
-                            static_assert(std::is_same_v<std::decay_t<decltype(e)>, std::string>);
+                    if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>, ts_n_blanks_type>) {
+                        auto col = 0u;
+                        using elem_type = typename std::decay_t<T>::reader_type::template typed_span<csv_co::unquoted>;
+                        static_assert(std::is_same_v<std::decay_t<decltype(elem.front())>, std::string>);
+                        std::for_each(elem.begin(), elem.end() - 1, [&](auto const & e) {
                             print_func(elem_type{e}, col++, types_n_blanks, args);
                             os << ',';
-                        }  else
-                            os << e << ',';
-                    });
-                    if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>) {
-                        using elem_type = typename std::decay_t<T>::reader_type::template typed_span<csv_co::unquoted>;
-                        static_assert(std::is_same_v<std::decay_t<decltype(elem.back())>, std::string>);
+                        });
                         print_func(elem_type{elem.back()}, col, types_n_blanks, args);
-                    } else
+                    } else {
+                        std::for_each(elem.begin(), elem.end() - 1, [&](auto const & e) { os << e << ','; });
                         os << elem.back();
+                    }
                     print_LF(os);
                 }
             } else {
@@ -184,19 +181,21 @@ namespace csvjoin::detail {
                     static std::size_t line_nums = 0;
                     os << ++line_nums << ',';
                 }
-                auto col = 0u;
-                using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;
-                std::for_each(span.begin(), span.end()-1, [&](auto const & e) {
-                    if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>) {
+
+                if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>, ts_n_blanks_type>) {
+                    auto col = 0u;
+                    using elem_type = typename std::decay_t<decltype(span.back())>::reader_type::template typed_span<csv_co::unquoted>;
+                    std::for_each(span.begin(), span.end() - 1, [&](auto const & e) {
                         print_func(elem_type{e}, col++, types_n_blanks, args);
                         os << ',';
-                    } else
-                        os << e.operator csv_co::cell_string() << ',';
-                });
-                if constexpr (std::is_same_v<std::decay_t<decltype(types_n_blanks)>,ts_n_blanks_type>)
+                    });
                     print_func(elem_type{span.back()}, col, types_n_blanks, args);
-                else
+                } else {
+                    std::for_each(span.begin(), span.end() - 1, [&](auto const & e) {
+                        os << e.operator csv_co::cell_string() << ',';
+                    });
                     os << (span.back()).operator csv_co::cell_string();
+                }
                 print_LF(os);
             });
         }
