@@ -720,9 +720,9 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
 
-NOTE: Even though ‘-m’, ‘-r’, and ‘-f’ are listed as “optional” arguments, you must specify one of them.  
+> NOTE: Even though ‘-m’, ‘-r’, and ‘-f’ are listed as “optional” arguments, you must specify one of them.  
 
-NOTE: the C++ standard only requires conformance to the POSIX regular expression syntax(which does not include Perl
+> NOTE: the C++ standard only requires conformance to the POSIX regular expression syntax(which does not include Perl
 extensions like this one) and conformance to the ECMAScript regular expression specification (with minor exceptions, per
 ISO 14882-2011§28.13), which is described in ECMA-262, §15.10.2. ECMAScript's regular expression grammar **does not**
 include the use of modifiers in the form of the (?) syntax.
@@ -777,7 +777,7 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
 
-NOTE: There has been introduced the `--honest-outer` option here. Well, the _csvkit_ does not recalculate types after the
+> NOTE: There has been introduced the `--honest-outer` option here. Well, the _csvkit_ does not recalculate types after the
 last join, which is necessary in some cases.
 
 **Examples**
@@ -983,7 +983,7 @@ form, the _csvLook_, like all other utilities in the _csvsuite_ , will simply re
 [-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the _csvClean_ utility or its
 original.  
 
-NOTE: There has been introduced `-G,--glob-locale` option, superseded global locale for numerics, for you to still see
+> NOTE: There has been introduced `-G,--glob-locale` option, superseded global locale for numerics, for you to still see
 separator signs in your numbers. Do not mix it with still existent `-L` option, which is the "input" locale for numerics.
 
 **Examples**
@@ -1069,7 +1069,7 @@ If those CSVs have identical headers, you can import them into the same table by
 
     csvStack examples/dummy?.csv | csvSql --db "postgresql://dbname=database user=name password=pass" --insert
 
-NOTE: in this case you will have a table named stdin in your database.
+> NOTE: in this case you will have a table named stdin in your database.
 
 ***Query and output CSV files using SQL***
 
@@ -1166,7 +1166,7 @@ When a statistic name is passed, only that stat will be printed:
     10. : None
 
 > In all cases of numeric output, the numeric locale is the global locale of your system environment (again, do not
-mix with the -L option which is the "input" locale for numerics).
+mix with the `-L` option which is the "input" locale for numerics).
 
 If a single stat and a single column are requested, only a value will be returned:
 
@@ -1194,7 +1194,7 @@ If a single stat and a single column are requested, only a value will be returne
     --date-lib-parser : Use date library as Dates and DateTimes parser backend instead compiler-supported [implicit: "true", default: true]
     --ASAP : Print result output stream as soon as possible. [implicit: "true", default: true]
 
-There are 3 new options here:
+There are 3 NEW options (compared to the _csvkit_) here:
 
 * `-Q,--quick-check` to make sure that the sources are in matrix form. Default is ON.<br>
 * `--date-lib-parser` to turn on a professional date and date-time parser for cross-platform use. Default is ON. <br>
