@@ -141,7 +141,7 @@ you want to see them. For example:
 original utility, due to different sorting algorithms. To display more data, use the `--freq-count` option.
 
 > In paragraph 3.3 you must use: **--db sqlite3://leso.db** instead of **--db sqlite:///leso.db**. For more details, see
-the description of the `--db option` in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
+the description of the `--db` option in the utilities [_csvSql_](#csvsql) and [_Sql2csv_](#sql2csv).
 
 
 ### Statistics performance
@@ -441,7 +441,7 @@ to establish global paths.
 ##### Description
 Converts various tabular data formats into CSV.
 
-Converting fixed width requires that you provide a schema file with the “-s” option. The schema file should have the
+Converting fixed width requires that you provide a schema file with the `-s` option. The schema file should have the
 following format:
 
     column,start,length
@@ -548,7 +548,9 @@ alternatively (too verbose):
 
 To access databases, the _csvsuite_ uses 2 libraries: the [ocilib](https://github.com/vrogier/ocilib) for accessing
 Oracle and the [soci](https://github.com/SOCI/soci) for the rest. In this particular case, you must specify the value
-for the --db option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).  
+for the `--db` option as the library expects it: see [connections](https://soci.sourceforge.net/doc/master/connections/).  
+
+> NOTE: Two next examples assume that you have already created your test database.
 
 Load data about financial aid recipients into PostgreSQL. 
 
@@ -724,7 +726,7 @@ NOTE: the C++ standard only requires conformance to the POSIX regular expression
 extensions like this one) and conformance to the ECMAScript regular expression specification (with minor exceptions, per
 ISO 14882-2011§28.13), which is described in ECMA-262, §15.10.2. ECMAScript's regular expression grammar **does not**
 include the use of modifiers in the form of the (?) syntax.
-This is why there is the --r-icase option if you need the case-insensitive comparison.
+This is why there is the `--r-icase` option if you need the case-insensitive comparison.
 
 **Examples**
 
@@ -775,7 +777,7 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).  
 
-NOTE: There has been introduced the --honest-outer option here. Well, the _csvkit_ does not recalculate types after the
+NOTE: There has been introduced the `--honest-outer` option here. Well, the _csvkit_ does not recalculate types after the
 last join, which is necessary in some cases.
 
 **Examples**
@@ -813,11 +815,11 @@ Options:
     -r,--reverse : Sort in descending order. [implicit: "true", default: false]
     -i,--ignore-case : Perform case-independent sorting. [implicit: "true", default: false]
     -I,--no-inference : Disable type inference (and --locale, --date-format, --datetime-format, --no-leading-zeroes) when parsing the input. [implicit: "true", default: false]
-    -p,--parallel-sort : Use parallel sort. [implicit: "true", default: false]
+    -p,--parallel-sort : Use parallel sort. [implicit: "true", default: true]
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: There has been introduced the --parallel-sort option to speed up the operation.
+> NOTE: There has been introduced the `--parallel-sort` option to speed up the operation. It is ON by default now.
 
 **Examples**
 
@@ -888,7 +890,7 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: --geometry option for now is not supported.
+> NOTE: `--geometry` option for now is not supported.
 
 **Examples**  
 
@@ -976,13 +978,13 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-NOTE: Unlike the _csvkit_ , where this utility can ignore extra or missing cells in the absence of a strictly tabular
-form, the csvLook, like all other utilities in the _csvsuite_ , will simply report this by default (see the 
-[-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the csvClean utility or its
+> NOTE: Unlike the _csvkit_ , where this utility can ignore extra or missing cells in the absence of a strictly tabular
+form, the _csvLook_, like all other utilities in the _csvsuite_ , will simply report this by default (see the 
+[-Q, --quick_check option](#arguments-common-to-all-tools)), and you need to anyway use the _csvClean_ utility or its
 original.  
 
-NOTE: There has been introduced -G,--glob-locale option, superseded global locale for numerics, for you to still see
-separator signs in your numbers. Do not mix it with still existent -L option, which is the "input" locale for numerics.
+NOTE: There has been introduced `-G,--glob-locale` option, superseded global locale for numerics, for you to still see
+separator signs in your numbers. Do not mix it with still existent `-L` option, which is the "input" locale for numerics.
 
 **Examples**
 
@@ -1046,7 +1048,7 @@ Generate a statement in the PostgreSQL dialect:
 
     csvSql -L en_US -i postgresql examples/realdata/FY09_EDU_Recipients_by_State.csv
 
-NOTE: Each further example assumes that you have already created your test database.
+> NOTE: Each further example assumes that you have already created your test database.
 
 ***Interact with a SQL database***
 
@@ -1055,17 +1057,17 @@ Create a table and import data from the CSV directly into PostgreSQL:
     csvSql -L en_US --db "postgresql://dbname=database user=name password=pass" --tables "fy09" --insert examples/realdata/FY09_EDU_Recipients_by_State.csv
 
 For large tables it may not be practical to process the entire table. One solution to this is to analyze a sample of the
-table. In this case it can be useful to turn off length limits and null checks with the --no-constraints option:
+table. In this case it can be useful to turn off length limits and null checks with the `--no-constraints` option:
 
     head -n 20 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvSql -L en_US --no-constraints --tables fy09
 
 Create tables for an entire directory of CSVs and import data from those files directly into PostgreSQL:
 
-    csvSql -L en_US --db "postgresql://dbname=database user=user password=pass" --insert examples/*_converted.csv
+    csvSql -L en_US --db "postgresql://dbname=database user=name password=pass" --insert examples/*_converted.csv
 
 If those CSVs have identical headers, you can import them into the same table by using csvstack first:
 
-    csvStack examples/dummy?.csv | csvSql --db "postgresql://dbname=database user=user password=pass" --insert
+    csvStack examples/dummy?.csv | csvSql --db "postgresql://dbname=database user=name password=pass" --insert
 
 NOTE: in this case you will have a table named stdin in your database.
 
@@ -1136,7 +1138,7 @@ Options:
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
-> There has been introduced --no-mdp,--no-max-precision option to turn off the most decimal places calculation if
+> There has been introduced `--no-mdp,--no-max-precision` option to turn off the most decimal places calculation if
 it is not necessary for you right now: if this calculation is performed through the boost::multiprecision library, then
 this greatly slows down the work of the main purpose of the utility - other statistics. You can find out whether most
 decimal places are calculated using the quick method (by default) or via boost::multiprecision library by looking at the
@@ -1194,6 +1196,6 @@ If a single stat and a single column are requested, only a value will be returne
 
 There are 3 new options here:
 
-* -Q,--quick-check to make sure that the sources are in matrix form. Default is ON.<br>
-* --date-lib-parser to turn on a professional date and date-time parser for cross-platform use. Default is ON. <br>
-* --ASAP to emit the results of work without waiting for the source to be fully processed.
+* `-Q,--quick-check` to make sure that the sources are in matrix form. Default is ON.<br>
+* `--date-lib-parser` to turn on a professional date and date-time parser for cross-platform use. Default is ON. <br>
+* `--ASAP` to emit the results of work without waiting for the source to be fully processed. Default is ON.
