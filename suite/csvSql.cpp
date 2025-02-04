@@ -273,6 +273,7 @@ namespace csvsql::detail {
                 auto index = 0ull;
                 for (auto e : types) {
                     auto header_cell_name = header[index].operator csv_co::cell_string();
+                    // TODO: add std::cerr warning if col name is empty, like in csvkit.
                     if (header_cell_name.empty())
                         header_cell_name = csvsuite::cli::letter_name(index) + "_col";
                     printer_map[dialect]->print_name(header_cell_name);
@@ -289,6 +290,7 @@ namespace csvsql::detail {
                 auto index = 0ull;
                 for (auto e : types) {
                     auto header_cell_name = header[index].operator csv_co::cell_string();
+                    // TODO: add std::cerr warning as well
                     if (header_cell_name.empty())
                         header_cell_name = csvsuite::cli::letter_name(index) + "_col";
                     printer_map[dialect]->print_name(header_cell_name);

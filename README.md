@@ -39,8 +39,8 @@ non-traditional areas. These utilities (from 14) seem to be almost fully operati
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
-  > The _csvsuite_ is in the active stage of development, but, as you will see, already quite usable. Bug reports,
-  scenarios that failed are very welcome. Well, it is imperfect, but it will improve.
+> The _csvsuite_ is in the active stage of development, but already may be usable. Bug reports, scenarios that failed
+> are very welcome. Well, it is imperfect, but it will improve.
 
 
 ### Restrictions
@@ -837,7 +837,7 @@ numeric locale):
 #### csvStack
 ##### Description
 Stack up the rows from multiple CSV files, optionally adding a grouping value to each row:
-    
+
     Usage: csvStack arg_0  [options...]
     arg_0 : The CSV files to operate on. [default: unknown]
 
@@ -851,7 +851,7 @@ Options:
 **Examples**
 
 Join a set of files for different years:
-    
+
     csvStack -g 2009,2010 examples/realdata/FY09_EDU_Recipients_by_State.csv examples/realdata/Datagov_FY10_EDU_recp_by_State.csv
 
 Add a single column to the left of a CSV:  
@@ -957,6 +957,7 @@ Convert locations of public art into GeoJSON:
             }
         }
     }
+
 ---
 
 #### csvLook
@@ -1001,6 +1002,7 @@ _not supported, see notation above._
 
 To ignore missing cells:  
 _not supported, see notation above._
+
 ---
 
 #### csvSql
@@ -1065,7 +1067,7 @@ Create tables for an entire directory of CSVs and import data from those files d
 
     csvSql -L en_US --db "postgresql://dbname=database user=name password=pass" --insert examples/*_converted.csv
 
-If those CSVs have identical headers, you can import them into the same table by using csvstack first:
+If those CSVs have identical headers, you can import them into the same table by using the _csvStack_ first:
 
     csvStack examples/dummy?.csv | csvSql --db "postgresql://dbname=database user=name password=pass" --insert
 
@@ -1075,7 +1077,7 @@ If those CSVs have identical headers, you can import them into the same table by
 
 You can use csvSql to “directly” query one or more CSV files. Please note that this will create an in-memory SQLite
 database, so it won’t be very fast:
-    
+
     csvSql --query "SELECT m.usda_id, avg(i.sepal_length) AS mean_sepal_length FROM iris AS i JOIN irismeta AS m ON (i.species = m.species) GROUP BY m.species" examples/iris.csv examples/irismeta.csv
 
 Group rows by one column:
