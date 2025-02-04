@@ -746,10 +746,12 @@ Perform a case-insensitive search:
 
     csvGrep -c 1 -r "^illinois" --r-icase examples/realdata/FY09_EDU_Recipients_by_State.csv
 
-Remove comment rows:  
+Remove comment rows:
+
     **This example can not be demonstrated due to the _csvsuite_ does not support non-tabular forms.**
 
-Get the indices of the columns that contain matching text (\x1e is the Record Separator (RS) character):  
+Get the indices of the columns that contain matching text (\x1e is the Record Separator (RS) character):
+
     **This example can not be demonstrated due to the _csvsuite_ does not support the csvformat utility.**
 
 ---
@@ -998,10 +1000,12 @@ Serve as the final operation when piping through other tools:
     csvCut -c 9,1 examples/realdata/FY09_EDU_Recipients_by_State.csv | csvLook
 
 To ignore extra cells:  
-_not supported, see notation above._
 
-To ignore missing cells:  
-_not supported, see notation above._
+    _not supported, see notation above._
+
+To ignore missing cells:
+
+    _not supported, see notation above._
 
 ---
 
