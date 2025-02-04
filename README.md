@@ -1155,17 +1155,17 @@ Basic use:
 
 When a statistic name is passed, only that stat will be printed:
 
-    $ csvStat -L en_US --min examples/realdata/FY09_EDU_Recipients_by_State.csv    
-    1. State Name: None
-    2. State Abbreviate: None
-    3. Code: 1,
-    4. Montgomery GI Bill-Active Duty: 435,
-    5. Montgomery GI Bill- Selective Reserve: 48,
-    6. Dependents' Educational Assistance: 118,
-    7. Reserve Educational Assistance Program: 60,
-    8. Post-Vietnam Era Veteran's Educational Assistance Program: 1,
-    9. TOTAL: 768,
-    10. : None
+     $ csvStat -L en_US --min examples/realdata/FY09_EDU_Recipients_by_State.csv
+     1. State Name: None
+     2. State Abbreviate: None
+     3. Code: 1,
+     4. Montgomery GI Bill-Active Duty: 435,
+     5. Montgomery GI Bill- Selective Reserve: 48,
+     6. Dependents' Educational Assistance: 118,
+     7. Reserve Educational Assistance Program: 60,
+     8. Post-Vietnam Era Veteran's Educational Assistance Program: 1,
+     9. TOTAL: 768,
+    10. j: None
 
 > In all cases of numeric output, the numeric locale is the global locale of your system environment (again, do not
 mix with the `-L` option which is the "input" locale for numerics).

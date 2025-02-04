@@ -106,7 +106,10 @@ namespace csvstat {
         void operation_result() const;
         // accessors
         [[nodiscard]] auto column() const { return column_; }
-        [[nodiscard]] auto column_name() const { return column_name_; }
+        [[nodiscard]] auto column_name() const {
+            //TODO: add warning message (see csvSql.cpp)
+            return !column_name_.empty() ? column_name_ : letter_name(phys_index_);
+        }
         [[nodiscard]] auto phys_index() const { return phys_index_; }
         [[nodiscard]] inline auto blanks() const { return blanks_; }
         [[nodiscard]] auto nulls() const { return null_values_; }
@@ -666,8 +669,7 @@ namespace csvstat {
 
     template<class TabularType, class ArgsType>
     void base<TabularType, ArgsType>::print_column_header(std::ostream & os) const {
-        assert(!column_name_.empty());
-        os << std::setw(3) << phys_index_ + 1 << ". " << static_cast<const decltype(column_name_)>(column_name_) << ": ";
+        os << std::setw(3) << phys_index_ + 1 << ". " << static_cast<const decltype(column_name())>(column_name()) << ": ";
     }
 
     template<class TabularType, class ArgsType>
@@ -1754,7 +1756,6 @@ namespace csvstat {
         }
 
         void print_col_header(auto const & o) {
-            assert(!o.column_name().empty());
             to_stream(std::cout, std::setw(3), o.phys_index() + 1, ". ", std::quoted(static_cast<const decltype(o.column_name())>(o.column_name())));
         }
     };
