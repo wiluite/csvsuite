@@ -51,6 +51,9 @@ RUN tar -xzvf Firebird-5.0.0.1306-0-linux-x64.tar.gz && rm -f Firebird-5.0.0.130
 RUN cd Firebird-5.0.0.1306-0-linux-x64 && y masterkey | ./install.sh && \
     echo "CREATE DATABASE '/dbname.fdb' PAGE_SIZE 4096 USER 'sysdba' PASSWORD 'masterkey' ;" | isql-fb -q
 
+ENV LANG="en_US.UTF-8"
+ENV LC_NUMERIC="en_US.UTF-8"
+
 # Finalize.
 ENTRYPOINT service postgresql start && service mysql start && service firebird start && bash
 
