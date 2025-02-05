@@ -367,8 +367,8 @@ cd src && mkdir build && cd build && cmake .. && make -j 4 all
 ### Testing
 This assumes that you have successfully [built](#build-all) the product.  
 Create necessary testing SQL databases, and the following environment variables with your own corresponding values, to
-successfully test all branches of the [_csvSql_](#csvsql) utility. This step is not necessary if you've built the product
-in a Docker container, where the environment is completely customized.
+successfully test all branches of the [_csvSql_](#csvsql) utility. This step is not necessary if you've built the
+product in a Docker container, where the environment is completely customized.
 
 * **Linux**
 
@@ -416,8 +416,8 @@ to establish global paths.
   
 * **Windows**
 
-  - If you've built it, add the path to your build\suite directory to the Path environment variable.
-  - If you've downloaded it as a binary release, add the path to the root of the unpacked archive to the Path
+  - If you've built it, add the path to your\build\suite directory to the Path environment variable.
+  - If you've downloaded it as a binary release, add the path to the suite directory of the unpacked archive to the Path
     environment variable.
   - If you've downloaded a MSVC binary archive, please install a redistributable package as well.
 
@@ -594,7 +594,7 @@ Options:
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
 
 This utility currently has very basic functionality.
-See [changelog](https://csvkit.readthedocs.io/en/latest/changelog.html) for what was done for original csvclean in 2.0.0,
+See [changelog](https://csvkit.readthedocs.io/en/latest/changelog.html) for what was done for original csvclean 2.0.0,
 and what you will not see here. Please use original
 [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html#) utility to fix sophisticated problems in your
 documents, until csvClean gains similar functionality.
