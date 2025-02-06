@@ -152,6 +152,12 @@ number of columns (so as not to break up screenshots). These files may be availa
 [Kaggle open datasets](https://www.kaggle.com/datasets), and one of them (worldcitiespop.csv) can be found
 [here](https://burntsushi.net/stuff/worldcitiespop.csv).
 
+You can also download all the files in packaged form from [this link](https://disk.yandex.ru/d/HqpSmLX9OuopRg).
+
+As to all tests. It should be said that for the _csvsuite_ to successfully compete with the _xsv_, it would be good to
+have a fast external storage device, since when processing data through mentioned CSV parser, memory-mapped file
+technology is used.
+
 Here are the competition screenshots:  
 
 **crime.csv/csvkit**
@@ -166,7 +172,8 @@ Here are the competition screenshots:
 
 <img alt="image info" height="767" src="./img/stat_crime_suite.png" width="480"/>
 
-File size crime.csv is 102M. Here, the _xsv_ is the winner. It produces results in less than a second.
+Here, the _xsv_ is the winner. It produces results in less than a second. (Note, however, slight difference at StDev in
+the first case).
 
 ---
 
