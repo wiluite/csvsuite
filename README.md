@@ -225,6 +225,21 @@ Our tool gives the result in about 42 seconds. Here we could not wait for the re
 time. Thus, both the _csvkit_ and the _xsv_ are unable to produce their results where for out tool the reason why this
 is not possible is not the case. This is a subject for further research.
 
+UPDATE:
+
+We've managed to get results from the _xsv_ in Windows:
+
+**question_tags.csv/xsv/Windows**
+
+<img alt="image info" height="115" src="./img/stat_qtags_xsv_windows.png" width="1257"/>
+
+**question_tags.csv/suite/Windows**
+
+<img alt="image info" height="706" src="./img/stat_qtags_suite_windows.png" width="587"/>
+
+We see, the performance of both utilities is most likely lower than in Linux. Between themselves they are relatively
+equal.
+
 
 ### Sorting performance
 If we talk about sorting by columns of string types, then the _xsv_ is unrivaled, far ahead of other means in time,
