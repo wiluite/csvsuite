@@ -36,12 +36,14 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                     using row_t = std::vector<std::string>;
                     using rows_t = std::vector<row_t>;
 
-                    auto process = [&](auto & this_table, auto & join_vec) {
-                        auto const table_addr = std::addressof(this_table[0]); 
-                        std::for_each(poolstl::par, this_table.begin(), this_table.end(), [&](auto & row) {
-
-                            auto const key = elem_t{row[c_ids[0]]};
-                            const auto p = std::equal_range(other.begin(), other.end(), key, equal_range_comparator<reader_type>(compare_fun));
+                    auto process = [&](auto & this_table, std::size_t sz) {
+                        if (!sz)
+                            return;
+                        std::vector<rows_t> join_vec(sz);
+                        auto const table_addr = std::addressof(this_table[0]);
+                        auto erc = equal_range_comparator<reader_type>(compare_fun);
+                        std::for_each(poolstl::par, this_table.cbegin(), this_table.cend(), [&](auto & row) {
+                            const auto p = std::equal_range(other.begin(), other.end(), elem_t{row[c_ids[0]]}, erc);
                             for (auto next = p.first; next != p.second; ++next) {
                                 std::vector<std::string> joins;
 
@@ -60,18 +62,11 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                     if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, reader_type>) {
                         compromise_table_MxN this_table(arg, args);
-                        auto const rows = this_table.rows();
-                        assert(rows);
-                        std::vector<rows_t> join_vec(rows);
-                        process(this_table, join_vec);
+                        process(this_table, this_table.rows());
                     } else {
                         static_assert(std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>);
                         auto const & this_table = arg.operator typename reader_fake<reader_type>::table &();
-                        auto const sz = this_table.size();
-                        if (sz) {
-                            std::vector<rows_t> join_vec(sz);
-                            process(this_table, join_vec);
-                        }
+                        process(this_table, this_table.size());
                     }
                 }
                 catch (typename reader_type::implementation_exception const &) {}

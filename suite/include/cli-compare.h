@@ -369,12 +369,12 @@ namespace csvsuite::cli::compare {
 
     template <typename R, typename F = std::tuple<unsigned, compare_fun<typed_span_t<R>>>>
     struct equal_range_comparator {
-        explicit equal_range_comparator(F f) : f_(std::move(f)) {}
+        explicit equal_range_comparator(F const & f) : column(std::get<0>(f)), cmp_func(std::get<1>(f)) {}
         bool operator()(typed_span_t<R> key, const std::vector<typed_span_t<R>>& v) const {
             int result;
             std::visit([&](auto & c_cmp) {
-                result = c_cmp(key, v[std::get<0>(f_)]);
-            }, std::get<1>(f_));
+                result = c_cmp(key, v[column]);
+            }, cmp_func);
 
             return result != 0 && std::less<>()(result, 0);
         }
@@ -382,13 +382,14 @@ namespace csvsuite::cli::compare {
         bool operator()(const std::vector<typed_span_t<R>>& v, typed_span_t<R> key) const {
             int result;
             std::visit([&](auto & c_cmp) {
-                result = c_cmp(v[std::get<0>(f_)], key);
-            }, std::get<1>(f_));
+                result = c_cmp(v[column], key);
+            }, cmp_func);
 
             return result != 0 && std::less<>()(result, 0);
         }
     private:
-        F f_;
+        unsigned column;
+        compare_fun<typed_span_t<R>> cmp_func;
     };
 
 }
