@@ -282,8 +282,10 @@ And not such correct results in the case of the _xsv_:
 <img alt="image info" height="130" src="./img/join_checks_xsv.png" width="473"/>
 
 In the first case, the _xsv_ ignores the spaces to the left and right of the significant part of the fields, resulting
-in the equality of two unequal values.<br>
-In the second case, it does not detect the numeric values 20 and 2e1 as equal.<br>
+in the equality of two unequal values.
+
+In the second case, it does not detect the numeric values 20 and 2e1 as equal.
+
 In the third case, it considers the pairwise values of “1” to be identical, ignoring the type of the third
 column of the second file as text. When it becomes erroneous to compare numeric values with the numeric values of the
 third column of the first file.
@@ -1224,6 +1226,6 @@ If a single stat and a single column are requested, only a value will be returne
 
 There are 3 NEW options (compared to the _csvkit_) here:
 
-* `-Q,--quick-check` to make sure that the sources are in matrix form. Default is ON.<br>
-* `--date-lib-parser` to turn on a professional date and date-time parser for cross-platform use. Default is ON. <br>
+* `-Q,--quick-check` to make sure that the sources are in matrix form. Default is ON.
+* `--date-lib-parser` to turn on a professional date and date-time parser for cross-platform use. Default is ON.
 * `--ASAP` to emit the results of work without waiting for the source to be fully processed. Default is ON.
