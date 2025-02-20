@@ -14,7 +14,7 @@ if (MSVC)
     add_definitions(/wd5026)
     add_definitions(/wd4244)
     add_definitions(/wd4365)
-
+    add_definitions(/wd4702)
 else()
     add_definitions(-Wno-old-style-cast)
     add_definitions(-Wno-narrowing)

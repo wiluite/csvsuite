@@ -269,8 +269,6 @@ namespace csvjoin::detail {
         if (deq.empty())
             return;
 
-        bool const join = deq.size() > 1;
-
         if (c_ids.empty())  // column ids are unspecified : UNION
             union_join();
         else if (!args.outer_join && !args.left_join && !args.right_join)        // just -c 1
@@ -280,17 +278,19 @@ namespace csvjoin::detail {
         else
             outer_join();
 
-        auto print_results = [&](auto join_flag) {
+        auto print_results = [&] {
             std::ostringstream oss;
             std::ostream & oss_ = args.asap ? std::cout : oss;
             printer p(oss_);
             struct non_typed_output {};
             p.write(headers[0], non_typed_output{}, args);
-            join_flag ? p.write(std::get<1>(deq.front()), ts_n_blanks[0], args) : p.write(std::get<0>(deq.front()), ts_n_blanks[0], args);
+            std::visit([&](auto && arg){
+                p.write(arg, ts_n_blanks[0], args);
+            }, deq.front());
             if (!args.asap)
                 std::cout << oss.str();
         };
-        print_results(join);
+        print_results();
     }
 
 } //  namespace csvjoin
