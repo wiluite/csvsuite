@@ -1,0 +1,13 @@
+- Add the need to install libstdc++6 to the documentation.
+  sudo apt-get update
+  sudo apt-get install libstdc++6
+- Process appropriately -inf, inf, nan in csvStat.
+- Memory management in csvJoin.
+- Enumerate for which systems there are ready-made packages (documentation).
+- Sharing csvsuite and csvkit (documentation).
+- Testing functionality under yet another user profile.
+
+
+
+
+
