@@ -5,7 +5,6 @@
 - Memory management in csvJoin.
 - Enumerate for which systems there are ready-made packages (documentation).
 - Sharing csvsuite and csvkit (documentation).
-- Testing functionality under yet another user profile.
 - Mentioning SOCI and all external libraries in introduction section
 - reddit
  
