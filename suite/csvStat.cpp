@@ -57,6 +57,9 @@ namespace csvstat {
         }
     };
 
+    template<class B>
+    struct number_class;
+
     template<class TabularType, class ArgsType>
     struct base {
         base(std::reference_wrapper<TabularType> _2d, std::reference_wrapper<ArgsType const> args, std::size_t col = 0, std::string col_name = "", unsigned index = 0, bool has_blanks = false);
@@ -97,6 +100,8 @@ namespace csvstat {
         std::size_t non_null_values_{0};
         std::size_t unique_values_{0};
         std::size_t numeric_NaNs {0};
+        void set_numeric_NaNs(std::size_t nans) { numeric_NaNs = nans; }
+        friend class number_class<base<TabularType, ArgsType>>;
     protected:
         [[nodiscard]] std::reference_wrapper<TabularType> const & dim_2() const { return _2d_; };
         template <typename OutputType = std::string>
@@ -118,7 +123,6 @@ namespace csvstat {
         [[nodiscard]] std::size_t non_nulls() const { return non_null_values_; }
         [[nodiscard]] std::size_t uniques() const { return unique_values_; }
         [[nodiscard]] std::reference_wrapper<ArgsType const> const & args() const { return args_; }
-        void set_numeric_NaNs(std::size_t nans) { numeric_NaNs = nans; }
     };
 
     template<class B>
@@ -1153,12 +1157,19 @@ namespace csvstat {
 
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
+        std::size_t NaNs = 0;
         for (auto const & elem : slice) {
             if (elem.is_null_or_null_value())
                 null_num++;
-            else
-                mcv_map_[elem.num()]++;
+            else {
+                auto const value = elem.num();
+                if (!std::isnan(value))
+                    mcv_map_[value]++;
+                else
+                    NaNs++;
+            }
         }
+        B::set_numeric_NaNs(NaNs);
         B::complete(null_num, mcv_map_, mcv_vec_);
         B::compose_operation_result(output_lines, "{ " + mcv(*this, freq_none_print, freq_space_print, &value_caller) + " }");
     }
