@@ -939,13 +939,19 @@ namespace csvstat {
     void number_class<B>::unique(std::size_t output_lines) {
         auto &&slice = B::dim_2().get()[B::column()];
         std::size_t null_num = 0;
+        std::size_t NaNs = 0;
         for (auto const & elem : slice) {
             if (elem.is_null_or_null_value())
                 null_num++;
-            else
-                mcv_map_[elem.num()]++;
+            else {
+                auto const value = elem.num();
+                if (!std::isnan(value))
+                    mcv_map_[value]++;
+                else
+                    NaNs++;
+            }
         }
-        B::compose_operation_result(output_lines, std::to_string(mcv_map_.size() + (null_num ? 1 : 0)));
+        B::compose_operation_result(output_lines, std::to_string(mcv_map_.size() + NaNs + (null_num ? 1 : 0)));
     }
 
     template<class B>
