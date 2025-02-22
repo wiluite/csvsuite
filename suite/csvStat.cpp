@@ -952,7 +952,7 @@ namespace csvstat {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
                 if (std::isnan(value)) {
-                    B::compose_operation_result(output_lines, "None");
+                    B::compose_operation_result(output_lines, NAN);
                     return;
                 }
                 min_ = std::min(value, min_);
@@ -969,7 +969,7 @@ namespace csvstat {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
                 if (std::isnan(value)) {
-                    B::compose_operation_result(output_lines, "None");
+                    B::compose_operation_result(output_lines, NAN);
                     return;
                 }
                 max_ = std::max(value, max_);
