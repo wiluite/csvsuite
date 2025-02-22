@@ -287,6 +287,10 @@ namespace csvsuite::cli {
 
     public:
         void write(std::ostream& stream) const {
+            if (std::isnan(value)) {
+                stream << "NaN";
+                return;
+            }
             std::ios_base::fmtflags flags = stream.flags();
             if (flags & std::ios::fixed) {
                 stream.unsetf(std::ios_base::floatfield);
