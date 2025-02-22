@@ -764,8 +764,12 @@ namespace csvstat {
     inline void base<TabularType, ArgsType>::compose_operation_result(std::size_t lines, OutputType const & value) const {
         if constexpr(std::is_same_v<OutputType, std::string> or std::is_same_v<std::decay_t<OutputType>, char*> or std::is_same_v<std::decay_t<OutputType>, char const*>)
             *single_op_ostream << (lines == 1 ? (value) : (print_column_header(*single_op_ostream), value));
-        else if constexpr (std::is_same_v<long double, std::remove_reference_t<std::decay_t<OutputType>>>)
-            *single_op_ostream << (lines == 1 ? (spec_prec(value)) : (print_column_header(*single_op_ostream), spec_prec(value)));
+        else if constexpr (std::is_same_v<long double, std::remove_reference_t<std::decay_t<OutputType>>>) {
+            if (std::isnan(value))
+                *single_op_ostream << "NaN";
+            else
+                *single_op_ostream << (lines == 1 ? (spec_prec(value)) : (print_column_header(*single_op_ostream), spec_prec(value)));
+        }
         else if constexpr (std::is_same_v<unsigned char, std::remove_reference_t<std::decay_t<OutputType>>>)
             *single_op_ostream << (lines == 1 ? (static_cast<int>(value)) : (print_column_header(*single_op_ostream), static_cast<int>(value)));
         else {
@@ -951,6 +955,7 @@ namespace csvstat {
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
+                //TODO: it requires strong analysis compared to csvkit
                 if (std::isnan(value)) {
                     B::compose_operation_result(output_lines, NAN);
                     return;
@@ -968,6 +973,7 @@ namespace csvstat {
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
+                //TODO: it requires strong analysis compared to csvkit
                 if (std::isnan(value)) {
                     B::compose_operation_result(output_lines, NAN);
                     return;
