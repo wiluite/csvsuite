@@ -768,6 +768,10 @@ namespace csvstat {
             *single_op_ostream << (lines == 1 ? (spec_prec(value)) : (print_column_header(*single_op_ostream), spec_prec(value)));
         else if constexpr (std::is_same_v<unsigned char, std::remove_reference_t<std::decay_t<OutputType>>>)
             *single_op_ostream << (lines == 1 ? (static_cast<int>(value)) : (print_column_header(*single_op_ostream), static_cast<int>(value)));
+        else {
+            if (std::isnan(value))
+                *single_op_ostream << "NaN";
+        }
         *single_op_ostream << '\n';
     }
 
@@ -832,11 +836,12 @@ namespace csvstat {
     void number_class<B>::prepare() {
         auto &&slice = B::dim_2().get()[B::column()];
         long double current_rolling_mean = 0, current_rolling_var = 0, current_n = 0, sum = 0;
-        long double min_ = std::numeric_limits<long double>::max(), max_ = std::numeric_limits<long double>::lowest();
+        long double min_ = INFINITY, max_ = -INFINITY;
 
         std::function<void(long double const &elem_val)> common_lambda;
 
         auto rest_loops_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             auto const delta = elem_val - current_rolling_mean;
             current_rolling_mean += delta / current_n;
             auto const delta2 = elem_val - current_rolling_mean;
@@ -844,6 +849,7 @@ namespace csvstat {
         };
 
         auto first_loop_lambda = [&](auto const &elem_val) {
+            current_n++;
             current_rolling_mean = elem_val;
             common_lambda = rest_loops_lambda;
         };
@@ -863,7 +869,6 @@ namespace csvstat {
         for (auto & elem : slice) {
             assert(elem.is_num() || elem.is_null_or_null_value());
             if (!elem.is_null_or_null_value()) {
-                current_n++;
                 auto const element_value = elem.num();
                 sum += element_value;
                 //TODO: probably 'if' would be faster
@@ -882,8 +887,8 @@ namespace csvstat {
         if (!null_number) {
             auto const mm = slice.begin() + slice.size() / 2;
             std::nth_element(slice.begin(), mm, slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? INFINITY : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? INFINITY : elem2.num();
                 return left < right;
             });
 
@@ -899,8 +904,8 @@ namespace csvstat {
             auto const good_size = slice.size() - null_number;
 
             std::sort(slice.begin(), slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? INFINITY : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? INFINITY : elem2.num();
                 return left < right;
             });
 
@@ -912,6 +917,9 @@ namespace csvstat {
         r->sum = sum;
         r->mean = current_rolling_mean;
         r->median = median;
+#if 0
+        assert(current_n >= 1);
+#endif
         r->stdev = std::sqrt(current_rolling_var / (current_n - 1));
         r->mdp = mdp;
 
@@ -939,10 +947,16 @@ namespace csvstat {
     template<class B>
     void number_class<B>::min(std::size_t output_lines) noexcept {
         auto &&slice = B::dim_2().get()[B::column()];
-        auto min_ = std::numeric_limits<long double>::max();
+        long double min_ = INFINITY;
         for (auto const & elem : slice) {
-            if (!elem.is_null_or_null_value())
-                min_ = std::min(elem.num(), min_);
+            if (!elem.is_null_or_null_value()) {
+                auto const value = elem.num();
+                if (std::isnan(value)) {
+                    B::compose_operation_result(output_lines, "None");
+                    return;
+                }
+                min_ = std::min(value, min_);
+            }
         }
         B::compose_operation_result(output_lines, min_);
     }
@@ -950,10 +964,16 @@ namespace csvstat {
     template<class B>
     void number_class<B>::max(std::size_t output_lines) noexcept {
         auto &&slice = B::dim_2().get()[B::column()];
-        long double max_ = std::numeric_limits<long double>::lowest();
+        long double max_ = -INFINITY;
         for (auto const & elem : slice) {
-            if (!elem.is_null_or_null_value())
-                max_ = std::max(elem.num(), max_);
+            if (!elem.is_null_or_null_value()) {
+                auto const value = elem.num();
+                if (std::isnan(value)) {
+                    B::compose_operation_result(output_lines, "None");
+                    return;
+                }
+                max_ = std::max(value, max_);
+            }
         }
         B::compose_operation_result(output_lines, max_);
     }
@@ -977,11 +997,13 @@ namespace csvstat {
         std::function<void(long double const &elem_val)> common_lambda;
 
         auto rest_loops_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             auto const delta = elem_val - current_rolling_mean;
             current_rolling_mean += delta / current_n;
         };
 
         auto first_loop_lambda = [&](auto const &elem_val) {
+            current_n++;
             current_rolling_mean = elem_val;
             common_lambda = rest_loops_lambda;
         };
@@ -990,10 +1012,8 @@ namespace csvstat {
 
         for (auto const & elem : slice) {
             assert(elem.is_num() || elem.is_null_or_null_value());
-            if (!elem.is_null_or_null_value()) {
-                current_n++;
+            if (!elem.is_null_or_null_value())
                 common_lambda(elem.num());
-            }
         }
         B::compose_operation_result(output_lines, current_rolling_mean);
     }
@@ -1012,8 +1032,8 @@ namespace csvstat {
         if (!null_number) {
             auto const mm = slice.begin() + slice.size() / 2;
             std::nth_element(slice.begin(), mm, slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? INFINITY : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? INFINITY : elem2.num();
                 return left < right;
             });
 
@@ -1029,8 +1049,8 @@ namespace csvstat {
             auto const good_size = slice.size() - null_number;
 
             std::sort(slice.begin(), slice.end(), [](auto &elem, auto &elem2) {
-                auto const left = elem.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem.num();
-                auto const right = elem2.is_null_or_null_value() ? std::numeric_limits<long double>::max() : elem2.num();
+                auto const left = elem.is_null_or_null_value() ? INFINITY : elem.num();
+                auto const right = elem2.is_null_or_null_value() ? INFINITY : elem2.num();
                 return left < right;
             });
 
@@ -1048,6 +1068,7 @@ namespace csvstat {
         std::function<void(long double const &elem_val)> common_lambda;
 
         auto rest_loops_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             auto const delta = elem_val - current_rolling_mean;
             current_rolling_mean += delta / current_n;
             auto const delta2 = elem_val - current_rolling_mean;
@@ -1055,6 +1076,7 @@ namespace csvstat {
         };
 
         auto first_loop_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             current_rolling_mean = elem_val;
             common_lambda = rest_loops_lambda;
         };
@@ -1063,15 +1085,19 @@ namespace csvstat {
 
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
-                current_n++;
-                common_lambda(elem.num());
+                auto const value = elem.num();
+                if (!std::isnan(value))
+                    common_lambda(elem.num());
+                else {
+                    B::compose_operation_result(output_lines, NAN);
+                    return;
+                }
             }
         }
-
-        auto const stdev = std::sqrt(current_rolling_var / (current_n - 1));
-        if (!std::isnan(stdev))
+        if (current_n > 1) {
+            auto const stdev = std::sqrt(current_rolling_var / (current_n - 1));
             B::compose_operation_result(output_lines, stdev);
-        else
+        } else
             B::compose_operation_result(output_lines, "None");
     }
 
@@ -1134,11 +1160,12 @@ namespace csvstat {
 
         auto &&slice = B::dim_2().get()[B::column()];
         long double current_rolling_mean = 0, current_rolling_var = 0, current_n = 0, sum = 0;
-        long double min_ = std::numeric_limits<long double>::max(), max_ = std::numeric_limits<long double>::lowest();
+        long double min_ = INFINITY, max_ = -INFINITY;
 
         std::function<void(long double const &elem_val)> common_lambda;
 
         auto rest_loops_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             auto const delta = elem_val - current_rolling_mean;
             current_rolling_mean += delta / current_n;
             auto const delta2 = elem_val - current_rolling_mean;
@@ -1146,6 +1173,7 @@ namespace csvstat {
         };
 
         auto first_loop_lambda = [&](auto const &elem_val) {
+            current_n++;
             current_rolling_mean = elem_val;
             common_lambda = rest_loops_lambda;
         };
@@ -1155,7 +1183,6 @@ namespace csvstat {
         std::size_t null_number = 0;
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
-                current_n++;
                 auto const element_value = elem.timedelta_seconds();
                 sum += element_value;
                 max_ = std::max(element_value, max_);
@@ -1196,7 +1223,7 @@ namespace csvstat {
     template<class B>
     void timedelta_class<B>::min(std::size_t output_lines) noexcept {
         auto &&slice = B::dim_2().get()[B::column()];
-        auto min_ = std::numeric_limits<long double>::max();
+        auto min_ = INFINITY;
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const current = elem.timedelta_seconds();
@@ -1210,7 +1237,7 @@ namespace csvstat {
     template<class B>
     void timedelta_class<B>::max(std::size_t output_lines) noexcept {
         auto &&slice = B::dim_2().get()[B::column()];
-        auto max_ = std::numeric_limits<long double>::lowest();
+        auto max_ = -INFINITY;
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const current = elem.timedelta_seconds();
@@ -1240,11 +1267,13 @@ namespace csvstat {
         std::function<void(long double const &elem_val)> common_lambda;
 
         auto rest_loops_lambda = [&](auto const &elem_val) noexcept {
+            current_n++;
             auto const delta = elem_val - current_rolling_mean;
             current_rolling_mean += delta / current_n;
         };
 
         auto first_loop_lambda = [&](auto const &elem_val) {
+            current_n++;
             current_rolling_mean = elem_val;
             common_lambda = rest_loops_lambda;
         };
@@ -1252,10 +1281,8 @@ namespace csvstat {
         common_lambda = first_loop_lambda;
 
         for (auto const & elem : slice) {
-            if (!elem.is_null_or_null_value()) {
-                current_n++;
+            if (!elem.is_null_or_null_value())
                 common_lambda(elem.timedelta_seconds());
-            }
         }
         B::compose_operation_result(output_lines, csv_co::time_storage().str(current_rolling_mean));
     }
