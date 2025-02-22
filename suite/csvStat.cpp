@@ -96,6 +96,7 @@ namespace csvstat {
         std::size_t null_values_{0};
         std::size_t non_null_values_{0};
         std::size_t unique_values_{0};
+        std::size_t numeric_NaNs {0};
     protected:
         [[nodiscard]] std::reference_wrapper<TabularType> const & dim_2() const { return _2d_; };
         template <typename OutputType = std::string>
@@ -117,6 +118,7 @@ namespace csvstat {
         [[nodiscard]] std::size_t non_nulls() const { return non_null_values_; }
         [[nodiscard]] std::size_t uniques() const { return unique_values_; }
         [[nodiscard]] std::reference_wrapper<ArgsType const> const & args() const { return args_; }
+        void set_numeric_NaNs(std::size_t nans) { numeric_NaNs = nans; }
     };
 
     template<class B>
@@ -782,7 +784,7 @@ namespace csvstat {
     template<class TabularType, class ArgsType>
     inline void base<TabularType, ArgsType>::complete(std::size_t null_number, auto & mcv_map, auto & mcv_vec) {
         null_values_ = null_number;
-        unique_values_ = mcv_map.size() + (null_number ? 1 : 0);
+        unique_values_ = mcv_map.size() + numeric_NaNs + (null_number ? 1 : 0);
         mcv_vec = prepare_mcv_vec(mcv_map);
     }
 
@@ -862,6 +864,7 @@ namespace csvstat {
 
         std::size_t null_number = 0;
         unsigned char mdp = 0;
+        std::size_t NaNs = 0;
 
         using elem_t = decltype(slice[0]);
         std::function<unsigned char(elem_t&)> mdp_calc;
@@ -879,7 +882,10 @@ namespace csvstat {
                 max_ = std::max(element_value, max_);
                 min_ = std::min(element_value, min_);
                 common_lambda(element_value);
-                mcv_map_[element_value]++;
+                if (!std::isnan(element_value))
+                    mcv_map_[element_value]++;
+                else
+                    NaNs++;
                 ++B::non_nulls();
                 mdp = mdp_calc(elem);
             } else
@@ -926,7 +932,7 @@ namespace csvstat {
 #endif
         r->stdev = std::sqrt(current_rolling_var / (current_n - 1));
         r->mdp = mdp;
-
+        B::set_numeric_NaNs(NaNs);
         B::complete(null_number, mcv_map_, mcv_vec_);
     }
 
