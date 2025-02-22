@@ -955,7 +955,7 @@ namespace csvstat {
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
-                //TODO: it requires strong analysis compared to csvkit
+                //TODO: it requires strong analysis (NaN or None) compared to csvkit
                 if (std::isnan(value)) {
                     B::compose_operation_result(output_lines, NAN);
                     return;
@@ -973,7 +973,7 @@ namespace csvstat {
         for (auto const & elem : slice) {
             if (!elem.is_null_or_null_value()) {
                 auto const value = elem.num();
-                //TODO: it requires strong analysis compared to csvkit
+                //TODO: it requires strong analysis (NaN or None) compared to csvkit
                 if (std::isnan(value)) {
                     B::compose_operation_result(output_lines, NAN);
                     return;
@@ -995,6 +995,7 @@ namespace csvstat {
         B::compose_operation_result(output_lines, sum);
     }
 
+    // It requires no investigation as to NaN
     template<class B>
     void number_class<B>::mean(std::size_t output_lines) {
         auto &&slice = B::dim_2().get()[B::column()];
@@ -1024,6 +1025,7 @@ namespace csvstat {
         B::compose_operation_result(output_lines, current_rolling_mean);
     }
 
+    //TODO: it requires strong analysis (NaN or None) compared to csvkit
     template<class B>
     void number_class<B>::median(std::size_t output_lines) {
         auto &&slice = B::dim_2().get()[B::column()];
