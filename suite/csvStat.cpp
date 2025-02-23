@@ -1733,6 +1733,7 @@ namespace csvstat {
         B::compose_operation_result(output_lines, "{ " + mcv(*this, freq_none_print, freq_space_print, &value_caller) + " }");
     }
 
+    /// Prints most common values
     template <typename ObjectType, typename NonePrintFun, typename SpacePrintFun, class Variant>
     [[nodiscard]] auto mcv(ObjectType const& o, NonePrintFun none_print_fun, SpacePrintFun space_print_fun, Variant const & vo) {
 
@@ -2092,7 +2093,18 @@ namespace csvstat {
             inc_indent();
             to_stream(oss, add_indent(), '{');
             inc_indent();
-            to_stream(oss, add_indent(), R"("value": )", elem.first, ',');
+
+            auto format_value = [&](auto const & value) -> std::variant<char const*, long double> {
+                //TODO: note we currently do not print NaNs
+#if 0
+                if (std::isnan(value))
+                    return "NaN";
+#endif
+                if (std::isinf(value))
+                    return (value < 0.0 ? "-Infinity" : "Infinity");
+                return value;
+            };
+            std::visit([&](auto && val) { to_stream(oss, add_indent(), R"("value": )", val, ','); }, format_value(elem.first));
             to_stream(oss, add_indent(), (indent() >= 0 ? R"("count": )" : R"( "count": )"), elem.second);
             dec_indent();
             to_stream(oss, add_indent(), '}');
@@ -2252,14 +2264,23 @@ namespace csvstat {
                   , prep->add_indent(), R"("type": "Number")", ", "
                   , prep->add_indent(), R"("nulls": )", std::boolalpha, o.nulls() > 0, ", "
                   , prep->add_indent(), R"("nonnulls": )", o.non_nulls(), ", "
-                  , prep->add_indent(), R"("unique": )", o.uniques(), ", "
-                  , prep->add_indent(), R"("min": )", o.r->smallest_value, ", "
-                  , prep->add_indent(), R"("max": )", o.r->largest_value, ", "
-                  , prep->add_indent(), R"("sum": )", o.r->sum, ", "
-                  , prep->add_indent(), R"("mean": )", o.r->mean, ", "
-                  , prep->add_indent(), R"("median": )", o.r->median, ", ");
+                  , prep->add_indent(), R"("unique": )", o.uniques(), ", ");
+
+        auto format_value = [&](auto const & value) -> std::variant<char const*, long double> {
+            if (std::isnan(value))
+                return "NaN";
+            if (std::isinf(value))
+                return (value < 0.0 ? "-Infinity" : "Infinity");
+            return value;
+        };
+
+        std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("min": )", val, ", "); }, format_value(o.r->smallest_value));
+        std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("max": )", val, ", "); }, format_value(o.r->largest_value));
+        std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("sum": )", val, ", "); }, format_value(o.r->sum));
+        std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("mean": )", val, ", "); }, format_value(o.r->mean));
+        std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("median": )", val, ", "); }, format_value(o.r->median));
         if (!o.r->stdev_none)
-            to_stream(std::cout, prep->add_indent(), R"("stdev": )", o.r->stdev, ", ");
+            std::visit([&](auto && val) { to_stream(std::cout, prep->add_indent(), R"("stdev": )", val, ", "); }, format_value(o.r->stdev));
         if (!o.args().get().no_mdp)
             to_stream(std::cout, prep->add_indent(), R"("maxprecision": )", o.r->mdp, ", ");
 
