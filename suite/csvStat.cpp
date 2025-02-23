@@ -835,6 +835,7 @@ namespace csvstat {
         long double mean;
         long double median;
         long double stdev;
+        bool stdev_none;
         unsigned    mdp;
     };
 
@@ -931,11 +932,19 @@ namespace csvstat {
         r->sum = sum;
         r->mean = current_rolling_mean;
         r->median = median;
-#if 0
-        assert(current_n >= 1);
-#endif
-        r->stdev = std::sqrt(current_rolling_var / (current_n - 1));
+
+        if (current_n > 1) {
+            r->stdev = std::sqrt(current_rolling_var / (current_n - 1));
+            r->stdev_none = false;
+        } else
+        if (NaNs) {
+            r->stdev = NAN;
+            r->stdev_none = false;
+        } else
+            r->stdev_none = true;
+
         r->mdp = mdp;
+
         B::set_numeric_NaNs(NaNs);
         B::complete(null_number, mcv_map_, mcv_vec_);
     }
@@ -1838,7 +1847,7 @@ namespace csvstat {
                   , "\n\tUnique values:         ", o.uniques(), "\n\tSmallest value:        ", spec_prec(o.r->smallest_value)
                   , "\n\tLargest value:         ", spec_prec(o.r->largest_value), "\n\tSum:                   ", spec_prec(o.r->sum)
                   , "\n\tMean:                  ", spec_prec(o.r->mean), "\n\tMedian:                ", spec_prec(o.r->median));
-        if (!std::isnan(o.r->stdev))
+        if (!o.r->stdev_none)
             to_stream(std::cout, "\n\tStDev:                 ", spec_prec(o.r->stdev));
         if (!o.args().get().no_mdp)
             to_stream(std::cout, "\n\tMost decimal places:   ", o.r->mdp);
@@ -1963,26 +1972,19 @@ namespace csvstat {
     template<class T>
     void csv_print_visitor::operator()(number_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            to_stream(std::cout, "Number,", std::boolalpha, o.nulls() > 0, ',');
-            to_stream(std::cout, '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',');
-            to_stream(std::cout, '"', spec_prec(o.r->smallest_value), '"', ',');
-            to_stream(std::cout, '"', spec_prec(o.r->largest_value), '"', ',');
-            to_stream(std::cout, '"', spec_prec(o.r->sum), '"', ',');
-            to_stream(std::cout, '"', spec_prec(o.r->mean), '"', ',');
-            to_stream(std::cout, '"', spec_prec(o.r->median), '"', ',');
-            if (!std::isnan(o.r->stdev))
-                to_stream(std::cout, '"', spec_prec(o.r->stdev), '"');
-        } else {
-            to_stream(std::cout, "Number,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',');
-            to_stream(std::cout, spec_prec(o.r->smallest_value), ',');
-            to_stream(std::cout, spec_prec(o.r->largest_value), ',');
-            to_stream(std::cout, spec_prec(o.r->sum), ',');
-            to_stream(std::cout, spec_prec(o.r->mean), ',');
-            to_stream(std::cout, spec_prec(o.r->median), ',');
-            if (!std::isnan(o.r->stdev))
-                to_stream(std::cout, spec_prec(o.r->stdev));
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+
+        to_stream(std::cout, "Number,", std::boolalpha, o.nulls() > 0, ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), o.non_nulls(), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), o.uniques(), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->smallest_value), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->largest_value), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->sum), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->mean), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->median), (q ? R"(")" : R"()"), ',');
+        if (!o.r->stdev_none)
+            to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->stdev), (q ? R"(")" : R"()"));
 
         to_stream(std::cout, ",,");
         if (!o.args().get().no_mdp)
@@ -2256,7 +2258,7 @@ namespace csvstat {
                   , prep->add_indent(), R"("sum": )", o.r->sum, ", "
                   , prep->add_indent(), R"("mean": )", o.r->mean, ", "
                   , prep->add_indent(), R"("median": )", o.r->median, ", ");
-        if (!std::isnan(o.r->stdev))
+        if (!o.r->stdev_none)
             to_stream(std::cout, prep->add_indent(), R"("stdev": )", o.r->stdev, ", ");
         if (!o.args().get().no_mdp)
             to_stream(std::cout, prep->add_indent(), R"("maxprecision": )", o.r->mdp, ", ");
