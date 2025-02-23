@@ -335,6 +335,11 @@ namespace csvsuite::cli {
 
     public:
         void write(std::ostream& stream) const {
+            // TODO: Note: we are not currently printing NaNs as most common values.
+            if (std::isinf(value)) {
+                stream << (value < 0.0 ? "-Infinity" : "Infinity");
+                return;
+            }
             std::ios_base::fmtflags flags = stream.flags();
             if (flags & std::ios::fixed) {
                 stream.unsetf(std::ios_base::floatfield);
