@@ -291,6 +291,10 @@ namespace csvsuite::cli {
                 stream << "NaN";
                 return;
             }
+            if (std::isinf(value)) {
+                stream << (value < 0.0 ? "-Infinity" : "Infinity");
+                return;
+            }
             std::ios_base::fmtflags flags = stream.flags();
             if (flags & std::ios::fixed) {
                 stream.unsetf(std::ios_base::floatfield);
