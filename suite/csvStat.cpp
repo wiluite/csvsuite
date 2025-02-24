@@ -1996,18 +1996,14 @@ namespace csvstat {
     template<class T>
     void csv_print_visitor::operator()(bool_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"',o.uniques(), '"', ',', ",,,,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-            else
-                to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"',o.uniques(), '"', ',', ",,,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-        }
-        else {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', ",,,,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-            else
-                to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', ",,,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+
+        to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', (q ? R"(")" : R"()"), o.non_nulls(), (q ? R"(")" : R"()"), ',', (q ? R"(")" : R"()"), o.uniques(), (q ? R"(")" : R"()"), ',', ",,,,,,,");
+        if (!o.args().get().no_mdp)
+            to_stream(std::cout, ',');
+
+        to_stream(std::cout, std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
     }
 
     template<class T>
