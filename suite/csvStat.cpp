@@ -1975,17 +1975,17 @@ namespace csvstat {
         prep->print_col_header(o);
         auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
                            or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
-
+        auto const maybe_quoted = (q ? R"(")" : R"()");
         to_stream(std::cout, "Number,", std::boolalpha, o.nulls() > 0, ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), o.non_nulls(), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), o.uniques(), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->smallest_value), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->largest_value), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->sum), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->mean), (q ? R"(")" : R"()"), ',');
-        to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->median), (q ? R"(")" : R"()"), ',');
+        to_stream(std::cout, maybe_quoted, o.non_nulls(), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, o.uniques(), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, spec_prec(o.r->smallest_value), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, spec_prec(o.r->largest_value), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, spec_prec(o.r->sum), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, spec_prec(o.r->mean), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, spec_prec(o.r->median), maybe_quoted, ',');
         if (!o.r->stdev_none)
-            to_stream(std::cout, (q ? R"(")" : R"()"), spec_prec(o.r->stdev), (q ? R"(")" : R"()"));
+            to_stream(std::cout, maybe_quoted, spec_prec(o.r->stdev), maybe_quoted);
 
         to_stream(std::cout, ",,");
         if (!o.args().get().no_mdp)
@@ -1998,8 +1998,8 @@ namespace csvstat {
         prep->print_col_header(o);
         auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
                            or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
-
-        to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', (q ? R"(")" : R"()"), o.non_nulls(), (q ? R"(")" : R"()"), ',', (q ? R"(")" : R"()"), o.uniques(), (q ? R"(")" : R"()"), ',', ",,,,,,,");
+        auto const maybe_quoted = (q ? R"(")" : R"()");
+        to_stream(std::cout, "Boolean,", std::boolalpha, o.nulls() > 0, ',', maybe_quoted, o.non_nulls(), maybe_quoted, ',', maybe_quoted, o.uniques(), maybe_quoted, ',', ",,,,,,,");
         if (!o.args().get().no_mdp)
             to_stream(std::cout, ',');
 
@@ -2009,20 +2009,15 @@ namespace csvstat {
     template<class T>
     void csv_print_visitor::operator()(timedelta_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            to_stream(std::cout, "TimeDelta,", std::boolalpha, o.nulls() > 0, ',');
-            to_stream(std::cout, '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',');
-            to_stream(std::cout, '"', csv_co::time_storage().str(o.r->smallest_value), '"', ',');
-            to_stream(std::cout, '"', csv_co::time_storage().str(o.r->largest_value), '"', ',');
-            to_stream(std::cout, '"', csv_co::time_storage().str(o.r->sum), '"', ',');
-            to_stream(std::cout, '"', csv_co::time_storage().str(o.r->mean), '"', ',');
-        } else {
-            to_stream(std::cout, "TimeDelta,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',');
-            to_stream(std::cout, csv_co::time_storage().str(o.r->smallest_value), ',');
-            to_stream(std::cout, csv_co::time_storage().str(o.r->largest_value), ',');
-            to_stream(std::cout, csv_co::time_storage().str(o.r->sum), ',');
-            to_stream(std::cout, csv_co::time_storage().str(o.r->mean), ',');
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+        auto const maybe_quoted = (q ? R"(")" : R"()");
+        to_stream(std::cout, "TimeDelta,", std::boolalpha, o.nulls() > 0, ',');
+        to_stream(std::cout, maybe_quoted, o.non_nulls(), maybe_quoted, ',', maybe_quoted, o.uniques(), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, csv_co::time_storage().str(o.r->smallest_value), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, csv_co::time_storage().str(o.r->largest_value), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, csv_co::time_storage().str(o.r->sum), maybe_quoted, ',');
+        to_stream(std::cout, maybe_quoted, csv_co::time_storage().str(o.r->mean), maybe_quoted, ',');
         to_stream(std::cout, ",,,");
         if (!o.args().get().no_mdp)
             to_stream(std::cout, ',');
