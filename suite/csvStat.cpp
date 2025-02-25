@@ -2027,52 +2027,43 @@ namespace csvstat {
     template<class T>
     void csv_print_visitor::operator()(text_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Text,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', ",,,,,,", o.r->longest_value, ",,", '"', mcv(o, csv_none_print, csv_space_print, prep), '"', '\n');
-            else
-                to_stream(std::cout, "Text,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', ",,,,,,", o.r->longest_value, ",", '"', mcv(o, csv_none_print, csv_space_print, prep), '"', '\n');
-        }
-        else {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Text,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', ",,,,,,", o.r->longest_value, ",,", '"', mcv(o, csv_none_print, csv_space_print, prep), '"', '\n');
-            else
-                to_stream(std::cout, "Text,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', ",,,,,,", o.r->longest_value, ",", '"', mcv(o, csv_none_print, csv_space_print, prep), '"', '\n');
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+        auto const maybe_quoted = (q ? R"(")" : R"()");
+        to_stream(std::cout, "Text,", std::boolalpha, o.nulls() > 0, ',',
+            maybe_quoted, o.non_nulls(), maybe_quoted, ',', maybe_quoted, o.uniques(), maybe_quoted, ',', ",,,,,,",
+            o.r->longest_value, ",");
+        if (!o.args().get().no_mdp)
+            to_stream(std::cout, ',');
+        to_stream(std::cout, '"', mcv(o, csv_none_print, csv_space_print, prep), '"', '\n');
     }
 
     template<class T>
     void csv_print_visitor::operator()(date_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Date,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-            else
-                to_stream(std::cout, "Date,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-        }
-        else {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "Date,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-            else
-                to_stream(std::cout, "Date,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+        auto const maybe_quoted = (q ? R"(")" : R"()");
+        to_stream(std::cout, "Date,", std::boolalpha, o.nulls() > 0, ',',
+            maybe_quoted, o.non_nulls(), maybe_quoted, ',', maybe_quoted, o.uniques(), maybe_quoted, ',',
+            o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,");
+        if (!o.args().get().no_mdp)
+            to_stream(std::cout, ',');
+        to_stream(std::cout, std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
     }
 
     template<class T>
     void csv_print_visitor::operator()(datetime_class<T> const & o) const {
         prep->print_col_header(o);
-        if (std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ',' or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',') {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "DateTime,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-            else
-                to_stream(std::cout, "DateTime,", std::boolalpha, o.nulls() > 0, ',', '"', o.non_nulls(), '"', ',', '"', o.uniques(), '"', ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
-        }
-        else {
-            if (!o.args().get().no_mdp)
-                to_stream(std::cout, "DateTime,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-            else
-                to_stream(std::cout, "DateTime,", std::boolalpha, o.nulls() > 0, ',', o.non_nulls(), ',', o.uniques(), ',', o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,", std::quoted(mcv(o, csv_none_print, csv_space_print, prep)),'\n');
-        }
+        auto const q = std::use_facet<std::numpunct<char>>(std::locale()).decimal_point() == ','
+                           or std::use_facet<std::numpunct<char>>(std::locale()).thousands_sep() == ',';
+        auto const maybe_quoted = (q ? R"(")" : R"()");
+        to_stream(std::cout, "DateTime,", std::boolalpha, o.nulls() > 0, ',',
+            maybe_quoted, o.non_nulls(), maybe_quoted, ',', maybe_quoted, o.uniques(), maybe_quoted, ',',
+            o.r->smallest_value, ',', o.r->largest_value, ',', ",,,,,");
+        if (!o.args().get().no_mdp)
+            to_stream(std::cout, ',');
+        to_stream(std::cout, std::quoted(mcv(o, csv_none_print, csv_space_print, prep)), '\n');
     }
 
     struct json_print_visitor::rep {
@@ -2087,10 +2078,6 @@ namespace csvstat {
 
             auto format_value = [&](auto const & value) -> std::variant<char const*, long double> {
                 //TODO: note we currently do not print NaNs
-#if 0
-                if (std::isnan(value))
-                    return "NaN";
-#endif
                 if (std::isinf(value))
                     return (value < 0.0 ? "-Infinity" : "Infinity");
                 return value;
@@ -2211,13 +2198,11 @@ namespace csvstat {
         if (is_first_col)
             std::cout << "[";
 
-        std::cout << prep->add_indent();
-        std::cout << "{";
+        std::cout << prep->add_indent() << "{";
     }
 
     json_print_visitor::~json_print_visitor() {
-        std::cout << prep->add_indent();
-        std::cout << "}";
+        std::cout << prep->add_indent() << "}";
         if (prep->cur_col != prep->col_num-1)
             std::cout << ", ";
         else {
@@ -2225,8 +2210,7 @@ namespace csvstat {
             prep->dec_indent();
             std::cout << prep->add_indent() << "]";
 #endif
-            std::cout << prep->add_lf();
-            std::cout << "]";
+            std::cout << prep->add_lf() << "]";
         }
     }
 
