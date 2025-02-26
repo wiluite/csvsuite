@@ -208,6 +208,9 @@ namespace csvsuite::cli::compare {
     using compare_fun = std::variant<bc_fun<type>, tdc_fun<type>, nc_fun<type>, dtc_fun<type>, dc_fun<type>, tc_fun<type>>;
 
     template <class ElemType>
+    using column_fun_tuple = std::tuple<unsigned, compare_fun<ElemType>>;
+
+    template <class ElemType>
     auto obtain_compare_functionality (auto const & ids, auto const & types_blanks, auto const & args ) {
         std::unordered_map<column_type, compare_fun<ElemType>> hash {
             {column_type::bool_t, bc_fun<ElemType>()}
@@ -218,7 +221,7 @@ namespace csvsuite::cli::compare {
             , {column_type::text_t, tc_fun<ElemType>()}
         };
 
-        std::vector<std::tuple<unsigned, compare_fun<ElemType>>> result;
+        std::vector<column_fun_tuple<ElemType>> result;
 #if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
 #else
@@ -246,7 +249,7 @@ namespace csvsuite::cli::compare {
             , {column_type::text_t, tc_fun<ElemType>()}
         };
 
-        std::tuple<unsigned, compare_fun<ElemType>> result;
+        column_fun_tuple<ElemType> result;
 #if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
 #else
@@ -286,8 +289,8 @@ namespace csvsuite::cli::compare {
 
     // partial specialization for single key/column comparison
     template <class ElemType, class CPP_COMP>
-    class sort_comparator<std::tuple<unsigned, compare_fun<ElemType>>, CPP_COMP> {
-        std::tuple<unsigned, compare_fun<ElemType>> compare_fun_;
+    class sort_comparator<column_fun_tuple<ElemType>, CPP_COMP> {
+        column_fun_tuple<ElemType> compare_fun_;
         CPP_COMP cpp_cmp;
     public:
         bool operator()(auto & a, auto & b) {
@@ -299,7 +302,7 @@ namespace csvsuite::cli::compare {
 
             return result != 0 && cpp_cmp(result, 0);
         }
-        sort_comparator(std::tuple<unsigned, compare_fun<ElemType>> cf, CPP_COMP cmp)
+        sort_comparator(column_fun_tuple<ElemType> cf, CPP_COMP cmp)
             : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
     };
 
@@ -367,7 +370,7 @@ namespace csvsuite::cli::compare {
     template <typename R>
     using typed_span_t = typename R::template typed_span<csv_co::quoted>;
 
-    template <typename R, typename F = std::tuple<unsigned, compare_fun<typed_span_t<R>>>>
+    template <typename R, typename F = column_fun_tuple<typed_span_t<R>>>
     struct equal_range_comparator {
         explicit equal_range_comparator(F const & f) : column(std::get<0>(f)), cmp_func(std::get<1>(f)) {}
         bool operator()(typed_span_t<R> key, const std::vector<typed_span_t<R>>& v) const {

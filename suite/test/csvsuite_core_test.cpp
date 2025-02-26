@@ -9,6 +9,7 @@
 #include <cli.h>
 #include "test_reader_macros.h"
 #include "common_args.h"
+#include <cli-compare.h>
 
 int main() {
     using namespace boost::ut;
@@ -1116,5 +1117,14 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         expect(s == "hdrFT");
         expect(r.cols() == 1);
         expect(r.rows() == 3);
+    };
+
+    "next"_test = [&] {
+        using namespace ::csvsuite::cli::compare;
+        struct args : common_args, type_aware_args {} a;
+
+        notrimming_reader_type r("h1\n10.1\n10.1234\n10.12\n");
+
+        //compromise_hash t(r, a);
     };
 }
