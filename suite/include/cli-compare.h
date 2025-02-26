@@ -1,10 +1,9 @@
 ///
 /// \file   suite/include/cli-compare.h
 /// \author wiluite
-/// \brief  All possible comparison operations, type-aware and type-independent.
+/// \brief  All possible comparison classes, operations: type-aware and type-independent.
 
-#ifndef CSV_CO_CLI_COMPARE_H
-#define CSV_CO_CLI_COMPARE_H
+#pragma once
 
 namespace csvsuite::cli::compare::detail {
 
@@ -312,21 +311,22 @@ namespace csvsuite::cli::compare {
         using field_array = std::vector<element_type>;
         using table = std::vector<field_array>;
         std::unique_ptr<table> impl;
-        struct hibernator {
-            explicit hibernator(auto &reader, Args const & args) : reader_(reader), args_(args) { reader_.skip_rows(0); }
-            ~hibernator() {
-                reader_.skip_rows(0);
-                if constexpr(HibernateToFirstRow)
-                    obtain_header_and_<skip_header>(reader_, args_);
-            }
-        private:
-            R & reader_;
-            Args const & args_;
-        };
     public:
         explicit compromise_table_MxN(R & reader, Args const & args) {
             using namespace csv_co;
-            hibernator h(reader, args);
+
+            struct hibernator {
+                explicit hibernator(R & reader, Args const & args) : reader_(reader), args_(args) { reader_.skip_rows(0); }
+                ~hibernator() {
+                    reader_.skip_rows(0);
+                    if constexpr(HibernateToFirstRow)
+                        obtain_header_and_<skip_header>(reader_, args_);
+                }
+            private:
+                R & reader_;
+                Args const & args_;
+            } h(reader, args);
+
             skip_lines(reader, args);
             auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
             auto const header_size = obtain_header_and_<skip_header>(reader, args).size();
@@ -394,4 +394,3 @@ namespace csvsuite::cli::compare {
 
 }
 
-#endif
