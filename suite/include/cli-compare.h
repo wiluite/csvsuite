@@ -210,17 +210,15 @@ namespace csvsuite::cli::compare {
     template <class ElemType>
     using column_fun_tuple = std::tuple<unsigned, compare_fun<ElemType>>;
 
+    using col_t = column_type;
+    template<typename E>
+    std::unordered_map<column_type, compare_fun<E>> column_fun_hash = {
+        {col_t::bool_t, bc_fun<E>()}, {col_t::number_t, nc_fun<E>()}, {col_t::datetime_t, dtc_fun<E>()}
+        , {col_t::date_t, dc_fun<E>()}, {col_t::timedelta_t, tdc_fun<E>()}, {col_t::text_t, tc_fun<E>()}
+    };
+
     template <class ElemType>
     auto obtain_compare_functionality (auto const & ids, auto const & types_blanks, auto const & args ) {
-        std::unordered_map<column_type, compare_fun<ElemType>> hash {
-            {column_type::bool_t, bc_fun<ElemType>()}
-            , {column_type::number_t, nc_fun<ElemType>()}
-            , {column_type::datetime_t, dtc_fun<ElemType>()}
-            , {column_type::date_t, dc_fun<ElemType>()}
-            , {column_type::timedelta_t, tdc_fun<ElemType>()}
-            , {column_type::text_t, tc_fun<ElemType>()}
-        };
-
         std::vector<column_fun_tuple<ElemType>> result;
 #if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
@@ -231,7 +229,7 @@ namespace csvsuite::cli::compare {
         for (auto elem : ids) {
             std::visit([&](auto & arg) {
                 result.push_back({elem, arg.clone(args, blanks[elem])});
-            }, hash[types[elem]]);
+            }, column_fun_hash<ElemType>[types[elem]]);
         }
 
         return result;
@@ -240,15 +238,6 @@ namespace csvsuite::cli::compare {
     // Overrides the above one for an unique key/column
     template <class ElemType>
     auto obtain_compare_functionality (unsigned id, auto const & types_blanks, auto const & args ) {
-        std::unordered_map<column_type, compare_fun<ElemType>> hash {
-            {column_type::bool_t, bc_fun<ElemType>()}
-            , {column_type::number_t, nc_fun<ElemType>()}
-            , {column_type::datetime_t, dtc_fun<ElemType>()}
-            , {column_type::date_t, dc_fun<ElemType>()}
-            , {column_type::timedelta_t, tdc_fun<ElemType>()}
-            , {column_type::text_t, tc_fun<ElemType>()}
-        };
-
         column_fun_tuple<ElemType> result;
 #if !defined(__clang__) || __clang_major__ >= 16
         auto const [types, blanks] = types_blanks;
@@ -259,7 +248,7 @@ namespace csvsuite::cli::compare {
 
         std::visit([&](auto & arg) {
             result = {id, arg.clone(args, blanks[id])};
-        }, hash[types[id]]);
+        }, column_fun_hash<ElemType>[types[id]]);
 
         return result;
     }
