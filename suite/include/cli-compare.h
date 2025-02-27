@@ -112,15 +112,12 @@ namespace csvsuite::cli::compare::detail {
             return e1 == e2 ? 0 : (e1 < e2 ? -1 : 1);
         }
         explicit datetime_compare_impl(auto & args) {
-            locale = args.num_locale;
             datetime_fmt = args.datetime_fmt;
         };
         datetime_compare_impl() = default;
     private:
-        static std::string locale;
         static std::string datetime_fmt;
     };
-    inline std::string datetime_compare_impl::locale;
     inline std::string datetime_compare_impl::datetime_fmt;
 
     class date_compare_impl {
@@ -133,15 +130,12 @@ namespace csvsuite::cli::compare::detail {
             return e1 == e2 ? 0 : (e1 < e2 ? -1 : 1);
         }
         explicit date_compare_impl(auto & args) {
-            locale = args.num_locale;
             date_fmt = args.date_fmt;
         };
         date_compare_impl() = default;
     private:
-        static std::string locale;
         static std::string date_fmt;
     };
-    inline std::string date_compare_impl::locale;
     inline std::string date_compare_impl::date_fmt;
 
     class text_compare_impl {
