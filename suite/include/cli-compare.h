@@ -220,12 +220,10 @@ namespace csvsuite::cli::compare {
     template <class ElemType>
     auto obtain_compare_functionality (auto const & ids, auto const & types_blanks, auto const & args ) {
         std::vector<column_fun_tuple<ElemType>> result;
-#if !defined(__clang__) || __clang_major__ >= 16
-        auto const [types, blanks] = types_blanks;
-#else
+
         auto const types = std::get<0>(types_blanks);
         auto const blanks = std::get<1>(types_blanks);
-#endif
+
         for (auto elem : ids) {
             std::visit([&](auto & arg) {
                 result.push_back({elem, arg.clone(args, blanks[elem])});
@@ -239,12 +237,9 @@ namespace csvsuite::cli::compare {
     template <class ElemType>
     auto obtain_compare_functionality (unsigned id, auto const & types_blanks, auto const & args ) {
         column_fun_tuple<ElemType> result;
-#if !defined(__clang__) || __clang_major__ >= 16
-        auto const [types, blanks] = types_blanks;
-#else
+
         auto const types = std::get<0>(types_blanks);
         auto const blanks = std::get<1>(types_blanks);
-#endif
 
         std::visit([&](auto & arg) {
             result = {id, arg.clone(args, blanks[id])};
@@ -260,12 +255,10 @@ namespace csvsuite::cli::compare {
     public:
         bool operator()(auto & a, auto & b) {
             for (auto & elem : compare_fun_) {
-#if !defined(__clang__) || __clang_major__ >= 16
-                auto & [col, fun] = elem;
-#else
+
                 auto & col = std::get<0>(elem);
                 auto & fun = std::get<1>(elem);
-#endif
+
                 int result;
                 std::visit([&](auto & c_cmp) { result = c_cmp(a[col], b[col]); }, fun);
                 if (result)
