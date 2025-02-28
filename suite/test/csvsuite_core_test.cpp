@@ -638,6 +638,13 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         }
     };
 
+    "parse column identifiers"_test = [] {
+        std::vector<std::string> headers{"id", "name", "i_work_here", "1", "more-header-values", "stuff", "blueberry"};
+        expect(parse_column_identifiers(columns{"i_work_here,1,name"}, headers, 1, excludes{""}) == std::vector<unsigned>{{2,0,1}});
+        expect(parse_column_identifiers(columns{"i_work_here,1,name"}, headers, 0, excludes{""}) == std::vector<unsigned>{{2,1,1}});
+        expect(parse_column_identifiers(columns{"i_work_here,1,name"}, headers, 0, excludes{"i_work_here,foo"} ) == std::vector<unsigned>{{1,1}});
+    };
+
     "generate column names"_test = [] {
         { 
             csv_co::reader r("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27\n");
