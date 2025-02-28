@@ -133,6 +133,20 @@ int main() {
         expect(cout_buffer.str() == "b\n2\n");
     };
 
+    "exclude unknown columns"_test = [] {
+        struct Args : csvCut_args {
+            Args() { file = "examples/dummy.csv"; not_columns = "1,foo,42"; }
+            bool x_ {false};
+        } args;
+
+        notrimming_reader_type r (args.file);
+
+        expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT
+            std::cerr << cout_buffer.str() << std::endl;
+            expect(cout_buffer.str() == "b,c\n2,3\n");
+        }));
+    };
+
     "include and exclude"_test = [] {
         struct Args : csvCut_args {
             Args() { file = "examples/dummy.csv"; columns = "1,3"; not_columns = "3"; }

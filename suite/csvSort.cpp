@@ -152,8 +152,7 @@ namespace csvsort {
 
         try {
             args.columns = args.columns == "all columns" ? "" : args.columns;
-            std::string not_columns;
-            auto const ids = parse_column_identifiers(columns{args.columns}, header, get_column_offset(args), excludes{not_columns});
+            auto const ids = parse_column_identifiers(columns{args.columns}, header, get_column_offset(args), excludes{std::string{}});
 
             setup_string_comparison_type(reader, args);
 

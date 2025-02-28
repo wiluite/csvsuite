@@ -278,8 +278,7 @@ namespace csvsuite::cli::compare {
 
             return result != 0 && cpp_cmp(result, 0);
         }
-        sort_comparator(column_fun_tuple<ElemType> cf, CPP_COMP cmp)
-            : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
+        sort_comparator(column_fun_tuple<ElemType> cf, CPP_COMP cmp) : compare_fun_(std::move(cf)), cpp_cmp(std::move(cmp)) {}
     };
 
     template <class R, class Args, bool HibernateToFirstRow = false, bool Quoted_or_not=csv_co::quoted>

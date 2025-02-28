@@ -1099,7 +1099,8 @@ namespace csvsuite::cli {
                 try {
                     not_columns.insert(match_column_identifier(column_names, column.c_str(), column_offset));
                 } catch (ColumnIdentifierError const &) {
-                    column_identifier_error_handler(column.c_str(), column_names, not_columns, column_offset);
+                    // ignore unknown columns
+                    continue;
                 }
             }
         }

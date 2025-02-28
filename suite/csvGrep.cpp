@@ -86,8 +86,7 @@ namespace csvgrep {
             throw std::runtime_error("Syntax option type --r-icase is for regex search only.");
 
         try {
-            std::string not_columns {};
-            auto ids = parse_column_identifiers(columns{args.columns}, header, get_column_offset(args), excludes(not_columns));
+            auto ids = parse_column_identifiers(columns{args.columns}, header, get_column_offset(args), excludes(std::string{}));
 
             std::ostringstream oss;
             std::ostream & oss_ = args.asap ? std::cout : oss;

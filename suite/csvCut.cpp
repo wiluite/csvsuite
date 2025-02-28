@@ -15,7 +15,7 @@ namespace csvcut {
     struct Args final : ARGS_positional_1 {
         bool & names = flag ("n,names","Display column names and indices from the input CSV and exit.");
         std::string & columns = kwarg("c,columns","A comma-separated list of column indices, names or ranges to be extracted, e.g. \"1,id,3-5\".").set_default("all columns");
-        std::string & not_columns = kwarg("C,not-columns","A comma-separated list of column indices, names or ranges to be excluded, e.g. \"1,id,3-5\".").set_default("no columns");
+        std::string & not_columns = kwarg("C,not-columns","A comma-separated list of column indices, names or ranges to be excluded, e.g. \"1,id,3-5\". Ignores unknown columns.").set_default("no columns");
         bool & x_ = flag("x,delete-empty-rows", "After cutting delete rows which are completely empty.");
         bool & asap = flag("ASAP","Print result output stream as soon as possible.").set_default(true);
 
