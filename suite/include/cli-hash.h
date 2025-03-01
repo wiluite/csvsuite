@@ -178,9 +178,6 @@ namespace csvsuite::cli::hash {
     template<class T>
     using hash_fun = std::variant<bh_fun<T>, tdh_fun<T>, nc_fun<T>, dth_fun<T>, dh_fun<T>, th_fun<T>>;
 
-    template <class E>
-    using column_fun_tuple = std::tuple<unsigned, hash_fun<E>>;
-
     using col_t = column_type;
     template<typename E>
     std::unordered_map<column_type, hash_fun<E>> column_fun_hash = {
@@ -190,17 +187,31 @@ namespace csvsuite::cli::hash {
 
     template <class E>
     auto obtain_hash_functionality(unsigned column, auto const & types_blanks, auto const & args ) {
-        column_fun_tuple<E> result;
+        hash_fun<E> result;
 
         auto const types = std::get<0>(types_blanks);
         auto const blanks = std::get<1>(types_blanks);
 
         std::visit([&](auto & arg) {
-            result = {id, arg.clone(args, blanks[column])};
+            result = arg.clone(args, blanks[column]);
         }, column_fun_hash<E>[types[column]]);
 
         return result;
     }
 
+    template <class E, class ComparePair>
+    class equality_checker {
+        std::decay_t<decltype(std::get<1>(std::declval<ComparePair>()))> c_lang_compare_function;
+    public:
+        bool is_equal(auto & this_one, auto & other) {
+            int result;
+            std::visit([&](auto & arg) {
+                result = arg(this_one, other);
+            }, c_lang_compare_function);
+            return result == 0;
+        }
+        // only getting function from a column-function pair
+        equality_checker(ComparePair & compare_pair) : c_lang_compare_function(std::get<1>(compare_pair)) {}
+    };
 }
 
