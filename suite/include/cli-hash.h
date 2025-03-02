@@ -4,13 +4,14 @@
 /// \brief  All possible hash classes, operations: type-aware and type-independent.
 
 #pragma once
+#include "cli-compare.h"
 
 namespace csvsuite::cli::hash::detail {
 
-    template <class E, class Native>
+    template <class EType, class Native>
     class common_hash_impl : Native {
     protected:
-        std::size_t operator()(E const & e) const {
+        std::size_t operator()(EType const & e) const {
             return std_fun(e);
         }
 
@@ -36,27 +37,27 @@ namespace csvsuite::cli::hash::detail {
         }
 
     protected:
-        using class_type = common_hash_impl<E, Native>;
+        using class_type = common_hash_impl<EType, Native>;
 
         common_hash_impl(auto & args, bool has_blanks) : Native(args) {
             if (!args.no_inference && !has_blanks) {
-                std_fun = class_type::template native_hash<E>;
+                std_fun = class_type::template native_hash<EType>;
                 return;
             }
             if (!args.blanks && !args.no_inference && has_blanks) {
-                std_fun = class_type::template hash_no_blanks_no_I_when_blanks<E>;
+                std_fun = class_type::template hash_no_blanks_no_I_when_blanks<EType>;
                 return;
             }
             if (!args.blanks && args.no_inference && has_blanks) {
-                std_fun = class_type::template hash_no_blanks_I_when_blanks<E>;
+                std_fun = class_type::template hash_no_blanks_I_when_blanks<EType>;
                 return;
             }
-            std_fun = class_type::template hash_blanks_no_I_when_blanks<E>;
+            std_fun = class_type::template hash_blanks_no_I_when_blanks<EType>;
         }
         common_hash_impl() = default;
 
     private:
-        std::function<std::size_t(E const &)> std_fun;
+        std::function<std::size_t(EType const &)> std_fun;
     };
 
     class bool_hash_impl {
@@ -116,8 +117,8 @@ namespace csvsuite::cli::hash::detail {
     class date_hash_impl {
     protected:
         template <class E>
-        static inline std::size_t native_hash (E const & elem1) {
-            using UElemType = typename ElemType::template rebind<csv_co::unquoted>::other;
+        static inline std::size_t native_hash (E const & e) {
+            using UElemType = typename E::template rebind<csv_co::unquoted>::other;
             auto const value = std::get<1>(e.operator UElemType const&().date(date_hash_impl::date_fmt));
             return std::hash<std::size_t>{}(value.time_since_epoch().count());
         }
@@ -156,6 +157,7 @@ namespace csvsuite::cli::hash::detail {
 namespace csvsuite::cli::hash {
 
     using namespace detail;
+    using namespace csvsuite::cli::compare;
 
     template<class T>
     using bh_fun = hash_host_class<T, bool_hash_impl>;
@@ -176,7 +178,7 @@ namespace csvsuite::cli::hash {
     using th_fun = hash_host_class<T, text_hash_impl>;
 
     template<class T>
-    using hash_fun = std::variant<bh_fun<T>, tdh_fun<T>, nc_fun<T>, dth_fun<T>, dh_fun<T>, th_fun<T>>;
+    using hash_fun = std::variant<bh_fun<T>, tdh_fun<T>, nh_fun<T>, dth_fun<T>, dh_fun<T>, th_fun<T>>;
 
     using col_t = column_type;
     template<typename E>
@@ -213,5 +215,48 @@ namespace csvsuite::cli::hash {
         // only getting function from a column-function pair
         equality_checker(ComparePair & compare_pair) : c_lang_compare_function(std::get<1>(compare_pair)) {}
     };
-}
 
+    // E -- typed_span
+    template<class E, class ComparePair>
+    struct Hashable : E {
+        bool operator==(Hashable const& other) const {
+#if 0
+            std::cerr << "bool operator==(Hashable)\n";
+#endif
+            assert(eq_checker);
+            return eq_checker->is_equal(*this, other);
+        }
+        static void create_equality_checker(ComparePair compare_functionality) {
+            eq_checker = std::make_unique<equality_checker<E, ComparePair>> (compare_functionality);
+        }
+    private:
+        inline static std::unique_ptr<equality_checker<E, ComparePair>> eq_checker = nullptr;
+    };
+    template <class E>
+    using hashable_typed_span = Hashable<E, column_fun_tuple<E>>;
+
+    template<class E, class ComparePair, class HashFun>
+    struct Hash
+    {
+        std::size_t operator()(Hashable<E, ComparePair> const & value) const noexcept
+        {
+#if 0
+            std::cerr << "std::size_t operator()(Hashable)\n";
+#endif
+            std::size_t result;
+            std::visit([&](auto & arg) {
+                result = arg(value);
+            }, hashfun);
+            return result;
+        }
+        HashFun hashfun;
+    };
+    template<class E>
+    using hash = Hash<E, column_fun_tuple<E>, hash_fun<E>>;
+
+    template<class E>
+    using hash_map_value = std::vector<std::vector<E>>;
+
+    template<class E>
+    using hash_map = std::unordered_map<hashable_typed_span<E>, hash_map_value<E>, hash<E>>;
+}

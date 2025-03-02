@@ -10,6 +10,7 @@
 #include "test_reader_macros.h"
 #include "common_args.h"
 #include <cli-compare.h>
+#include <cli-hash.h>
 
 int main() {
     using namespace boost::ut;
