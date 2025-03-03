@@ -220,11 +220,15 @@ namespace csvsuite::cli::hash {
     template<class E, class ComparePair>
     struct Hashable : E {
         bool operator==(Hashable const& other) const {
-#if 0
+#if TRACE_
             std::cerr << "bool operator==(Hashable)\n";
 #endif
             assert(eq_checker);
-            return eq_checker->is_equal(*this, other);
+            auto result = eq_checker->is_equal(*this, other);
+#if TRACE_
+            std::cerr << "bool operator==(Hashable) finished\n";
+#endif
+            return result;
         }
         static void create_equality_checker(ComparePair compare_functionality) {
             eq_checker = std::make_unique<equality_checker<E, ComparePair>> (compare_functionality);
@@ -240,23 +244,87 @@ namespace csvsuite::cli::hash {
     {
         std::size_t operator()(Hashable<E, ComparePair> const & value) const noexcept
         {
-#if 0
+#if TRACE_
             std::cerr << "std::size_t operator()(Hashable)\n";
 #endif
             std::size_t result;
             std::visit([&](auto & arg) {
                 result = arg(value);
             }, hashfun);
+#if TRACE_
+            std::cerr << "std::size_t operator()(Hashable) finished\n";
+#endif
             return result;
         }
-        HashFun hashfun;
+        static void assign_hash_function(auto value) {
+            hashfun = std::move(value);
+        }
+    private:
+        inline static HashFun hashfun;
     };
+
     template<class E>
     using hash = Hash<E, column_fun_tuple<E>, hash_fun<E>>;
 
     template<class E>
-    using hash_map_value = std::vector<std::vector<E>>;
+    using field_array = std::vector<E>;
+
+    template<class E>
+    using hash_map_value = std::vector<field_array<E>>;
 
     template<class E>
     using hash_map = std::unordered_map<hashable_typed_span<E>, hash_map_value<E>, hash<E>>;
+
+    template <class R, class Args, bool HibernateToFirstRow = false, bool Quoted_or_not=csv_co::quoted>
+    class compromise_hash {
+    public:
+        using typed_span = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
+        using map_value = hash_map_value<typed_span>;
+    private:
+        hash_map<typed_span> map_;
+    public:
+        explicit compromise_hash(R & reader, Args const & args, auto const & types_blanks, unsigned hash_column) {
+            using namespace csv_co;
+
+            struct hibernator {
+                explicit hibernator(R & reader, Args const & args) : reader_(reader), args_(args) { reader_.skip_rows(0); }
+                ~hibernator() {
+                    reader_.skip_rows(0);
+                    if constexpr(HibernateToFirstRow)
+                        obtain_header_and_<skip_header>(reader_, args_);
+                }
+            private:
+                R & reader_;
+                Args const & args_;
+            } h(reader, args);
+
+            skip_lines(reader, args);
+            auto const rest_rows = reader.rows() - (args.no_header ? 0 : 1);
+            auto const header_size = obtain_header_and_<skip_header>(reader, args).size();
+            if (!rest_rows)
+                throw no_body_exception("compromise_hash constructor. No data rows.", static_cast<unsigned>(header_size));
+
+            auto compare_fun = obtain_compare_functionality<typed_span>(hash_column, types_blanks, args);
+            hashable_typed_span<typed_span>::create_equality_checker(compare_fun);
+
+            auto hash_fun = obtain_hash_functionality<typed_span>(hash_column, types_blanks, args);
+            hash<typed_span>::assign_hash_function(hash_fun);
+
+            reader.run_rows([&] (auto & row_span) {
+                unsigned i = 0;
+                hashable_typed_span<typed_span> key;
+                field_array<typed_span> row;
+                for (auto & elem : row_span) {
+                    if (i++ == hash_column)
+                        key = hashable_typed_span<typed_span>{typed_span{elem}};
+                    row.push_back(typed_span{elem});
+                }
+                map_[key].push_back(std::move(row));
+            });
+        }
+        map_value const & value(hashable_typed_span<typed_span> const & key) const {
+            return map_[key];
+        }
+    };
+
 }

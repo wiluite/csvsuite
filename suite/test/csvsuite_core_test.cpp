@@ -1127,12 +1127,14 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         expect(r.rows() == 3);
     };
 
-    "next"_test = [&] {
+    "compromize_hash"_test = [&] {
         using namespace ::csvsuite::cli::compare;
+        using namespace ::csvsuite::cli::hash;
         struct args : common_args, type_aware_args {} a;
 
-        notrimming_reader_type r("h1\n10.1\n10.1234\n10.12\n");
-
-        //compromise_hash t(r, a);
+        notrimming_reader_type r("h1,h2\n10.1,string1\n10.1234,string3\n10.12,string2\n10.1234,string4\n");
+        auto types_blanks = std::get<1>(typify(r, a, typify_option::typify_without_precisions));
+        auto only_key_idx = 0u;
+        compromise_hash chash(r, a, types_blanks, only_key_idx);
     };
 }
