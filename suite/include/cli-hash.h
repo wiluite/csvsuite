@@ -256,7 +256,7 @@ namespace csvsuite::cli::hash {
 #endif
             return result;
         }
-        static void assign_hash_function(auto value) {
+        static void assign_hash_function(HashFun value) {
             hashfun = std::move(value);
         }
     private:
@@ -279,7 +279,9 @@ namespace csvsuite::cli::hash {
     class compromise_hash {
     public:
         using typed_span = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
-        using map_value = hash_map_value<typed_span>;
+        using key_type = hashable_typed_span<typed_span>;
+        using value_type = hash_map_value<typed_span>;
+        using hashing = hash<typed_span>;
     private:
         hash_map<typed_span> map_;
     public:
@@ -304,25 +306,24 @@ namespace csvsuite::cli::hash {
             if (!rest_rows)
                 throw no_body_exception("compromise_hash constructor. No data rows.", static_cast<unsigned>(header_size));
 
-            auto compare_fun = obtain_compare_functionality<typed_span>(hash_column, types_blanks, args);
-            hashable_typed_span<typed_span>::create_equality_checker(compare_fun);
+            key_type::create_equality_checker(obtain_compare_functionality<typed_span>(hash_column, types_blanks, args));
 
-            auto hash_fun = obtain_hash_functionality<typed_span>(hash_column, types_blanks, args);
-            hash<typed_span>::assign_hash_function(hash_fun);
+            hashing::assign_hash_function(obtain_hash_functionality<typed_span>(hash_column, types_blanks, args));
 
             reader.run_rows([&] (auto & row_span) {
                 unsigned i = 0;
-                hashable_typed_span<typed_span> key;
+                key_type key;
                 field_array<typed_span> row;
                 for (auto & elem : row_span) {
                     if (i++ == hash_column)
-                        key = hashable_typed_span<typed_span>{typed_span{elem}};
+                        key = key_type{typed_span{elem}};
                     row.push_back(typed_span{elem});
                 }
                 map_[key].push_back(std::move(row));
             });
         }
-        map_value const & value(hashable_typed_span<typed_span> const & key) const {
+
+        value_type const & value(key_type const & key) {
             return map_[key];
         }
     };
