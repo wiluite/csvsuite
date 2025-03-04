@@ -1,6 +1,7 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
 auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, &cache_values, &align_blanks] {
+    (void)align_blanks;
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
