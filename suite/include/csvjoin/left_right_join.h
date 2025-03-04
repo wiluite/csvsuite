@@ -1,6 +1,6 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, &cache_values] {
+auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, &cache_values, &align_blanks] {
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
@@ -37,6 +37,7 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                 auto & other_reader = std::get<0>(other_source);
 
                 try {
+                    (void)align_blanks;
                     compromise_table_MxN other(other_reader, args);
                     auto compare_fun = compose_compare_function();
                     std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
@@ -45,7 +46,10 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                     using row_t = std::vector<std::string>;
                     using rows_t = std::vector<row_t>;
 
-                    auto process = [&](auto & this_table, auto & join_vec) {
+                    auto process = [&](auto & this_table, std::size_t sz) {
+                        if (!sz)
+                            return;
+                        std::vector<rows_t> join_vec(sz);
                         auto const table_addr = std::addressof(this_table[0]);
                         std::for_each(poolstl::par, this_table.begin(), this_table.end(), [&](auto & row) {
 
@@ -72,18 +76,11 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
 
                     if constexpr(std::is_same_v<std::decay_t<decltype(arg)>, reader_type>) {
                         compromise_table_MxN this_table(arg, args);
-                        auto const rows = this_table.rows();
-                        assert(rows);
-                        std::vector<rows_t> join_vec(rows);
-                        process(this_table, join_vec);
+                        process(this_table, this_table.rows());
                     } else {
                         static_assert(std::is_same_v<std::decay_t<decltype(arg)>, reader_fake<reader_type>>);
                         auto const & this_table = arg.operator typename reader_fake<reader_type>::table &();
-                        auto const sz = this_table.size();
-                        if (sz) {
-                            std::vector<rows_t> join_vec(sz);
-                            process(this_table, join_vec);
-                        }
+                        process(this_table, this_table.size());
                     }
                 }
                 catch (typename reader_type::implementation_exception const &) {}
