@@ -26,7 +26,7 @@ auto inner_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                 assert(!std::holds_alternative<reader_fake<reader_type>>(other_source));
 
                 auto & other_reader = std::get<0>(other_source);
-#define USE_HASH_INSTEAD_EQUAL_RANGE 1
+//#define USE_HASH_INSTEAD_EQUAL_RANGE 1
                 try {
 #ifndef USE_HASH_INSTEAD_EQUAL_RANGE
                     compromise_table_MxN other(other_reader, args);
