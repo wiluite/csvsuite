@@ -310,15 +310,17 @@ namespace csvsuite::cli::hash {
 
             hashing::assign_hash_function(obtain_hash_functionality<typed_span>(hash_column, types_blanks, args));
 
+            key_type key;
+            field_array<typed_span> row;
+
             reader.run_rows([&] (auto & row_span) {
                 unsigned i = 0;
-                key_type key;
-                field_array<typed_span> row;
                 for (auto & elem : row_span) {
                     if (i++ == hash_column)
                         key = key_type{typed_span{elem}};
                     row.push_back(typed_span{elem});
                 }
+                assert(row.size() == std::get<0>(types_blanks).size());
                 map_[key].push_back(std::move(row));
             });
         }

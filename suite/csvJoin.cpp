@@ -5,6 +5,7 @@
 
 #include <cli.h>
 #include <cli-compare.h>
+#include <cli-hash.h>
 #include "type_name.h"
 #include <printer_concepts.h>
 #include "external/poolstl/poolstl.hpp"
@@ -12,6 +13,7 @@
 
 using namespace ::csvsuite::cli;
 using namespace ::csvsuite::cli::compare;
+using namespace ::csvsuite::cli::hash;
 
 namespace csvjoin {
     struct Args final : ARGS_positional_files {
