@@ -205,7 +205,7 @@ namespace csvsuite::cli::hash {
     class equality_checker {
         std::decay_t<decltype(std::get<1>(std::declval<ComparePair>()))> c_lang_compare_function;
     public:
-        bool is_equal(auto & this_one, auto & other) {
+        bool is_equal(auto & this_one, auto & other) const {
             int result;
             std::visit([&](auto & arg) {
                 result = arg(this_one, other);
@@ -325,8 +325,8 @@ namespace csvsuite::cli::hash {
             });
         }
 
-        value_type const & value(key_type const & key) {
-            return map_[key];
+        auto const & hash() const {
+            return map_;
         }
     };
 

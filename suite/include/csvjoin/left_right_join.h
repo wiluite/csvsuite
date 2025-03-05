@@ -76,14 +76,14 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                             using typed_span = decltype(chash)::typed_span;
                             using key_type = decltype(chash)::key_type;
 
-                            auto const & val = chash.value(key_type{typed_span{row[c_ids[0]]}});
-                            if (!val.empty()) {
-                                for (auto i = 0u; i < val.size(); i++) {
+                            auto & hash = chash.hash();
+                            if (auto search = hash.find(key_type{typed_span{row[c_ids[0]]}}); search != hash.cend()) {
+                                for (auto i = 0u; i < search->second.size(); i++) {
                                     std::vector<std::string> joins;
-                                    joins.reserve(row.size() + val[i].size() - 1);
+                                    joins.reserve(row.size() + search->second[i].size() - 1);
                                     joins.assign(row.begin(), row.end());
-                                    joins.insert(joins.end(), val[i].begin(), val[i].begin() + c_ids[1]);
-                                    joins.insert(joins.end(), val[i].begin() + c_ids[1] + 1, val[i].end());
+                                    joins.insert(joins.end(), search->second[i].begin(), search->second[i].begin() + c_ids[1]);
+                                    joins.insert(joins.end(), search->second[i].begin() + c_ids[1] + 1, search->second[i].end());
                                     join_vec[std::addressof(row) - table_addr].emplace_back(std::move(joins));
                                 }
                             }
