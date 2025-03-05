@@ -659,7 +659,7 @@ Options:
     --help : print help [implicit: "true", default: false]
     -n,--names : Display column names and indices from the input CSV and exit. [implicit: "true", default: false]
     -c,--columns : A comma-separated list of column indices, names or ranges to be extracted, e.g. "1,id,3-5". [default: all columns]
-    -C,--not-columns : A comma-separated list of column indices, names or ranges to be excluded, e.g. "1,id,3-5". [default: no columns]
+    -C,--not-columns : A comma-separated list of column indices, names or ranges to be excluded, e.g. "1,id,3-5". Ignores unknown columns. [default: no columns]
     -x,--delete-empty-rows : After cutting delete rows which are completely empty. [implicit: "true", default: false]
 
 See also: [Arguments common to all tools](#arguments-common-to-all-tools).
