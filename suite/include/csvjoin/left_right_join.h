@@ -1,7 +1,6 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &compose_compare_function, &cache_values, &align_blanks] {
-    (void)align_blanks;
+auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &cache_values, &align_blanks] {
     assert(!c_ids.empty());
     while (deq.size() > 1) {
 #if !defined(__clang__) || __clang_major__ >= 16
@@ -26,7 +25,6 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
 
         if (can_compare(types0, types1, blanks0, blanks1)) {
             using namespace ::csvsuite::cli::compare;
-            using elem_t = typename reader_type::template typed_span<quoted>;
 
             auto & this_source = deq.front();
             auto & other_source = deq[1];
@@ -36,46 +34,22 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                 assert(!std::holds_alternative<reader_fake<reader_type>>(other_source));
 
                 auto & other_reader = std::get<0>(other_source);
-//#define USE_HASH_INSTEAD_EQUAL_RANGE_IN_LR_JOIN 1
                 try {
-#ifndef USE_HASH_INSTEAD_EQUAL_RANGE_IN_LR_JOIN
-                    compromise_table_MxN other(other_reader, args);
-                    auto compare_fun = compose_compare_function();
-                    std::stable_sort(poolstl::par, other.begin(), other.end(), sort_comparator(compare_fun, std::less<>()));
-                    cache_values(other);
-#else
                     compromise_hash chash(other_reader, args, align_blanks(), c_ids[1]);
-#endif
+
                     using row_t = std::vector<std::string>;
                     using rows_t = std::vector<row_t>;
 
                     auto process = [&](auto & this_table, std::size_t sz) {
                         if (!sz)
                             return;
+
                         std::vector<rows_t> join_vec(sz);
                         auto const table_addr = std::addressof(this_table[0]);
-#ifndef USE_HASH_INSTEAD_EQUAL_RANGE_IN_LR_JOIN
-                        auto erc = equal_range_comparator<reader_type>(compare_fun);
-#endif
-                        std::for_each(poolstl::par, this_table.begin(), this_table.end(), [&](auto & row) {
-#ifndef USE_HASH_INSTEAD_EQUAL_RANGE_IN_LR_JOIN
-                            const auto p = std::equal_range(other.begin(), other.end(), elem_t{row[c_ids[0]]}, erc);
-                            if (p.first != p.second)
-                                for (auto next = p.first; next != p.second; ++next) {
-                                    std::vector<std::string> joins;
 
-                                    joins.reserve(row.size() + next->size() - 1);
-                                    joins.assign(row.begin(), row.end());
-                                    joins.insert(joins.end(), next->begin(), next->begin() + c_ids[1]);
-                                    joins.insert(joins.end(), next->begin() + c_ids[1] + 1, next->end());
-                                    join_vec[std::addressof(row) - table_addr].emplace_back(std::move(joins));
-                                }
-                            else
-                                join_vec[std::addressof(row) - table_addr].emplace_back(std::move(compose_distinct_record(row)));
-#else
+                        std::for_each(poolstl::par, this_table.begin(), this_table.end(), [&](auto & row) {
                             using typed_span = decltype(chash)::typed_span;
                             using key_type = decltype(chash)::key_type;
-
                             auto & hash = chash.hash();
                             if (auto search = hash.find(key_type{typed_span{row[c_ids[0]]}}); search != hash.cend()) {
                                 for (auto i = 0u; i < search->second.size(); i++) {
@@ -89,7 +63,6 @@ auto left_or_right_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &c
                             }
                             else
                                 join_vec[std::addressof(row) - table_addr].emplace_back(std::move(compose_distinct_record(row)));
-#endif
                         });
                         for (auto & rows : join_vec) {
                             for (auto & row : rows)
