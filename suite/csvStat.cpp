@@ -144,7 +144,7 @@ namespace csvstat {
         void stdev(std::size_t output_lines) override;
         void max_precision(std::size_t output_lines) override;
         void freq(std::size_t output_lines) override;
-        std::map<long double, std::size_t> mcv_map_;
+        std::unordered_map<long double, std::size_t> mcv_map_;
         std::vector<std::pair<long double, std::size_t>> mcv_vec_;
     public:
         [[nodiscard]] auto const & mcv_map() const { return mcv_map_; }
@@ -167,7 +167,7 @@ namespace csvstat {
         void sum(std::size_t output_lines) override;
         void mean(std::size_t output_lines) override;
         void freq(std::size_t output_lines) override;
-        std::map<long double, std::size_t> mcv_map_;
+        std::unordered_map<long double, std::size_t> mcv_map_;
         std::vector<std::pair<long double, std::size_t>> mcv_vec_;
     public:
         [[nodiscard]] auto const & mcv_map() const { return mcv_map_; }
@@ -182,7 +182,7 @@ namespace csvstat {
         void type(std::size_t output_lines) override;
         void unique(std::size_t output_lines) override;
         void freq(std::size_t output_lines) override;
-        std::map<bool, std::size_t> mcv_map_;
+        std::unordered_map<bool, std::size_t> mcv_map_;
         std::vector<std::pair<bool, std::size_t>> mcv_vec_;
     public:
         [[nodiscard]] auto const & mcv_map() const { return mcv_map_; }
