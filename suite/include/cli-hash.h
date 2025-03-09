@@ -264,7 +264,7 @@ namespace csvsuite::cli::hash {
     };
 
     template<class E>
-    using hash = Hash<E, column_fun_tuple<E>, hash_fun<E>>;
+    using hash_ = Hash<E, column_fun_tuple<E>, hash_fun<E>>;
 
     template<class E>
     using field_array = std::vector<E>;
@@ -273,7 +273,7 @@ namespace csvsuite::cli::hash {
     using hash_map_value = std::vector<field_array<E>>;
 
     template<class E>
-    using hash_map = std::unordered_map<hashable_typed_span<E>, hash_map_value<E>, hash<E>>;
+    using hash_map = std::unordered_map<hashable_typed_span<E>, hash_map_value<E>, hash_<E>>;
 
     template <class R, class Args, bool HibernateToFirstRow = false, bool Quoted_or_not=csv_co::quoted>
     class compromise_hash {
@@ -281,7 +281,7 @@ namespace csvsuite::cli::hash {
         using typed_span = typename std::decay_t<R>::template typed_span<Quoted_or_not>;
         using key_type = hashable_typed_span<typed_span>;
         using value_type = hash_map_value<typed_span>;
-        using hashing = hash<typed_span>;
+        using hashing = hash_<typed_span>;
     private:
         hash_map<typed_span> map_;
     public:

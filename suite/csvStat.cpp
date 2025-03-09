@@ -2076,7 +2076,7 @@ namespace csvstat {
             to_stream(oss, add_indent(), '{');
             inc_indent();
 
-            auto format_value = [&](auto const & value) -> std::variant<char const*, long double> {
+            auto const format_value = [](auto const value) -> std::variant<char const*, long double> {
                 //TODO: note we currently do not print NaNs
                 if (std::isinf(value))
                     return (value < 0.0 ? "-Infinity" : "Infinity");

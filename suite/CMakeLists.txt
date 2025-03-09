@@ -28,6 +28,7 @@ else()
     if (IS_GNU)
         add_definitions(-Wno-redundant-move)
     endif()
+    add_definitions(-Wno-psabi) # suppress that I can't expose union with long double (eg. std::variant<something, long double>) to the World
 endif()
 
 find_package(Threads REQUIRED)
