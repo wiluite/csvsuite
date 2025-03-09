@@ -435,6 +435,10 @@ to establish global paths.
     >  export PATH=$PATH:/path/to/unpacked/archive <br>
        export LD_LIBRARY_PATH=/path/to/unpacked/archive/lib:$LD_LIBRARY_PATH
 
+    If not installed, please install C++ standard library package too:
+    >  sudo apt-get update  
+       sudo apt-get install libstdc++6
+
       and reboot.
   
   
@@ -443,7 +447,8 @@ to establish global paths.
   - If you've built it, add the path to your\build\suite directory to the Path environment variable.
   - If you've downloaded it as a binary release, add the path to the suite directory of the unpacked archive to the Path
     environment variable.
-  - If you've downloaded a MSVC binary archive, please install a redistributable package as well.
+  - If you've downloaded a MSVC binary archive, please install the redistributable package too:
+    [VC_redist.x64.exe](https://github.com/wiluite/csvsuite/releases/download/v0.2.0/VC_redist.x64.exe)
 
 ---
 
