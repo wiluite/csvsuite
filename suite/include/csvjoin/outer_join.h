@@ -1,6 +1,6 @@
 //------------------- This is just a code to inline it "in place" by the C preprocessor directive #include. See csvJoin.cpp --------------
 
-auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &cache_values, &align_blanks, &symmetric_align_blanks] {
+auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compare, &align_blanks, &symmetric_align_blanks] {
     assert(!c_ids.empty());
     assert (!args.left_join and !args.right_join and args.outer_join);
     while (deq.size() > 1) {
