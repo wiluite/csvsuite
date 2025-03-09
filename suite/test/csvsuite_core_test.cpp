@@ -1143,13 +1143,15 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
             r2.skip_rows(1);
             std::size_t row_count = 0;
             r2.run_rows<1>([&](auto & span) {
-                auto const & val = chash.value(key_type{typed_span{span[only_key_idx]}});
+                auto & hash = chash.hash();
                 if (row_count == 0) {
-                    expect(val.size() == 2);
-                    expect(val[0][1].str() == "string3");
-                    expect(val[1][1].str() == "string4");
+                    auto search = hash.find(key_type{typed_span{span[only_key_idx]}});
+                    expect(search != hash.cend());
+                    expect(search->second.size() == 2);
+                    expect(search->second[0][1].str() == "string3");
+                    expect(search->second[1][1].str() == "string4");
                 } else
-                    expect(val.size() == 0);
+                    expect(hash.find(key_type{typed_span{span[only_key_idx]}}) == hash.cend());
                 row_count++;
             });
             r2.skip_rows(0); // hibernate this reader
@@ -1163,21 +1165,24 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
             r2.skip_rows(1);
             std::size_t row_count = 0;
             r2.run_rows<1>([&](auto & span) {
-                auto const & val = chash.value(key_type{typed_span{span[only_key_idx]}});
+                auto & hash = chash.hash();
                 if (row_count == 0) {
-                    expect(val.size() == 1);
-                    expect(val[0][1].str() == "string4");
+                    auto search = hash.find(key_type{typed_span{span[only_key_idx]}});
+                    expect(search != hash.cend());
+                    expect(search->second.size() == 1);
+                    expect(search->second[0][1].str() == "string4");
                 } else
-                    expect(val.size() == 0);
+                    expect(hash.find(key_type{typed_span{span[only_key_idx]}}) == hash.cend());
                 row_count++;
             });
         }
         {   // having blanks in one of the two files
             notrimming_reader_type r3("h1,h2,h3\n10.1234,string3,1\n ,string2,0\n");
 
-            a.no_inference = false; // now we will have only one hit instead 2.
+            a.no_inference = false; // return it back concerning to the previous case
             auto [tps1, blks1] = std::get<1>(typify(r, a, typify_option::typify_without_precisions));
             auto [tps2, blks2] = std::get<1>(typify(r3, a, typify_option::typify_without_precisions));
+            expect(blks2[0]);
             blks1[only_key_idx] = blks2[0]; // in r3 there is true in blks2[0]
             compromise_hash chash(r, a, std::pair{tps1, blks1}, only_key_idx);
 
@@ -1186,13 +1191,15 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
             r3.skip_rows(1);
             std::size_t row_count = 0;
             r3.run_rows<1>([&](auto & span) {
-                auto const & val = chash.value(key_type{typed_span{span[only_key_idx]}});
+                auto & hash = chash.hash();
                 if (row_count == 0) {
-                    expect(val.size() == 2);
-                    expect(val[0][1].str() == "string3");
-                    expect(val[1][1].str() == "string4");
+                    auto search = hash.find(key_type{typed_span{span[only_key_idx]}});
+                    expect(search != hash.cend());
+                    expect(search->second.size() == 2);
+                    expect(search->second[0][1].str() == "string3");
+                    expect(search->second[1][1].str() == "string4");
                 } else
-                    expect(val.size() == 0);
+                    expect(hash.find(key_type{typed_span{span[only_key_idx]}}) == hash.cend());
                 row_count++;
             });
         }
