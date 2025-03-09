@@ -68,7 +68,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                                     joins.reserve(row.size() + search->second[i].size());
                                     joins.assign(row.begin(), row.end());
-                                    joins.insert(joins.end(), search->second[i].begin(), search->second[i].end()); 
+                                    joins.insert(joins.end(), search->second[i].begin(), search->second[i].end());
                                     join_vec[std::addressof(row) - table_addr].emplace_back(std::move(joins));
                                 }
                             }
@@ -125,6 +125,7 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
 
                 try {
                     compromise_hash chash(tmp_reader, tmp_args, symmetric_align_blanks(), c_ids[0]);
+                    auto & hash = chash.hash();
 
                     using row_t = std::vector<std::string>;
                     using rows_t = std::vector<row_t>;
@@ -138,7 +139,6 @@ auto outer_join = [&deq, &ts_n_blanks, &c_ids, &args, &cycle_cleanup, &can_compa
                             using typed_span = decltype(chash)::typed_span;
                             using key_type = decltype(chash)::key_type;
 
-                            auto & hash = chash.hash();
                             if (auto search = hash.find(key_type{typed_span{row[c_ids[1]]}}); search == hash.cend()) {
                                 join_vec[std::addressof(row) - table_addr].emplace_back(std::move(compose_distinct_right_part(row)));
                                 if (!recalculate_types_blanks)
