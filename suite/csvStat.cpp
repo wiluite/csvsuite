@@ -101,7 +101,7 @@ namespace csvstat {
         std::size_t unique_values_{0};
         std::size_t numeric_NaNs {0};
         void set_numeric_NaNs(std::size_t nans) { numeric_NaNs = nans; }
-        friend class number_class<base<TabularType, ArgsType>>;
+        friend struct number_class<base<TabularType, ArgsType>>;
     protected:
         [[nodiscard]] std::reference_wrapper<TabularType> const & dim_2() const { return _2d_; };
         template <typename OutputType = std::string>
