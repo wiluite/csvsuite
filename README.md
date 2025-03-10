@@ -262,7 +262,7 @@ probably because the _csvsql_ spends a significant part of the time determining 
 Now we will try to display the first 10 results corresponding to the conditions when the City and AccentCity fields in
 the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ only by a factor of 4.
 
-<img alt="image info" height="612" src="./img/join.png" width="708"/>
+<img alt="image info" height="660" src="./img/join.png" width="739"/>
 
 We see that the results calculated using the _csvjoin_ and the _csvJoin_ are the same, which is not the case with
 the _xsv_, whose results are incorrect, although they are mind-blowingly fast.
