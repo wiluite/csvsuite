@@ -2,6 +2,7 @@
 ## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
 
 *    [About](#about)
+*    [Sharing](#sharing)
 *    [Restrictions](#restrictions)
 *    [Tutorial](#tutorial)
 *    [Statistics performance](#statistics-performance)
@@ -17,15 +18,17 @@
 _csvsuite_ is written to dramatically increase the speed of working with large amounts of data by taking advantage of
 the high-performance compiled programming language C++.
 
+It tries to reproduce the functionality of the [csvkit](https://csvkit.readthedocs.io/en/latest/) whenever possible.
 It is written on top of the [csv_co](https://github.com/wiluite/CSV_co) CSV reader and, where needed, with the help of
 the task-based parallelism library [transwarp](https://github.com/bloomen/transwarp) and the thread pool-based library
-[poolSTL](https://github.com/alugowski/poolSTL).
-It tries to reproduce the functionality of the [csvkit](https://csvkit.readthedocs.io/en/latest/) whenever possible.
+[poolSTL](https://github.com/alugowski/poolSTL). Interaction with SQL databases is carried out on the basis of the
+[SOCI](https://github.com/SOCI/soci) and [OCILIB](https://vrogier.github.io/ocilib/) libraries. More than a dozen other
+libraries support the rest of the product's functionality.
 
 The goals for the reproduction were: to find out the complexity and limitations of the applicability of the C++
 ecosystem for broad universal tasks, where Python is good with its rich environment for data processing, text encoding,
 localization, SQL databases and so on. It was also interesting to see the performance benefits of C++ applications in
-non-traditional areas. These utilities (from 14) seem to be almost fully operational at the moment:
+non-traditional areas. These utilities (of those 14) seem to be almost fully operational at the moment:
 1) csvClean (ala [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html))
 2) csvCut (ala [csvcut](https://csvkit.readthedocs.io/en/latest/scripts/csvcut.html))
 3) csvGrep (ala [csvgrep](https://csvkit.readthedocs.io/en/latest/scripts/csvgrep.html))
@@ -39,9 +42,18 @@ non-traditional areas. These utilities (from 14) seem to be almost fully operati
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
-> The _csvsuite_ is in the active stage of development, but already may be usable. Bug reports, scenarios that failed
-> are very welcome. Well, it is imperfect, but it will improve.
+### Sharing
+The _csvsuite_ is not meant to replace the _csvkit_, it has its limitations. Moreover, data import ([In2csv](#in2csv))
+is less complete and generally less tested in terms of data diversity. But as you gain more confidence in the tool,
+you could use it in a streaming bundle to essentially speed up the processing of larger documents.
+For example:
+  
+in2csv ... | csvCut ... | csvGrep ... | csvSort ... | ... | csvformat
 
+If you are used to working with the _csvkit_, and other tools don't support your data types (6 types of data: Boolean,
+Number, TimeDelta, DateTime, Date, Text) or are just not comfortable for you, give the _csvsuite_ a chance! Bug reports,
+scenarios that failed and so on are very welcome. I can keep this in active development. Also, see performance
+statistics after the next two sections.
 
 ### Restrictions
 1) Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
@@ -84,7 +96,6 @@ such support somewhere (for example MinGW/Windows), you will not be able to work
 
 6) Other restrictions and some substitutions are presented in section [Reference](#reference), describing utilities.
 
-
 ### Tutorial
 ### 1. Getting started
 #### 1.1. About this tutorial
@@ -95,7 +106,7 @@ This tutorial should be almost exactly the same as the original
 The best way to install the tool is to simply download a required binary archive from the
 [release](https://github.com/wiluite/csvsuite/releases) page and unpack it. Then add the path to the unpacked directory
 root to the list of directories in which to search for commands, according to the rules for doing this for this
-particular operating system. See [Installation](#installation) section for details.
+particular operating system. See [Installation](#installation) section for details. 
 
 See also [Build All](#build-all) section.
 
@@ -260,13 +271,11 @@ probably because the _csvsql_ spends a significant part of the time determining 
 
 ### Joining performance
 Now we will try to display the first 10 results corresponding to the conditions when the City and AccentCity fields in
-the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ only by a factor of 4.
+the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ by a factor of 8 as well.
 
 <img alt="image info" height="660" src="./img/join.png" width="739"/>
 
-We see that the results calculated using the _csvjoin_ and the _csvJoin_ are the same, which is not the case with
-the _xsv_, whose results are incorrect, although they are mind-blowingly fast.
-Despite the _xsv_'s enormous performance in all previous tests (in many tests not shown, the _xsv_ simply outperforms
+Despite the _xsv_'s awesome performance in all previous tests (in many tests not shown, the _xsv_ simply outperforms
 the _csvsuite_ by many-many times), it doesn't do everything right. Let's criticize it a little more.
 
 Suppose we have got two CSV files: a.csv and b.csv:
