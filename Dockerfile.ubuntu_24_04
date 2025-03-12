@@ -19,6 +19,7 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     clang-18 \
     libc++-18-dev \
     libc++abi-18-dev \
+    lld \
     pip \
     libmysql++-dev \
     libpq-dev \

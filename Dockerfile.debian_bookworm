@@ -20,6 +20,7 @@ RUN apt-get update && apt-get -qy --no-install-recommends install \
     libc++-19-dev \
     libc++abi-19-dev \
     libclang-rt-19-dev \
+    lld \
     pip \
     libmysql++-dev \
     libpq-dev \
