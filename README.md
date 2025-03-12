@@ -42,6 +42,10 @@ non-traditional areas. These utilities (of those 14) seem to be almost fully ope
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
+There are binary packages for these Linux distributions: Debian 11 (Bullseye), Debian 12 (Bookworm), Ubuntu 22.04,
+Ubuntu 24.04. And there are two binary packages for Windows x64: MSVC 2022 Community, MinGW. Otherwise, please build it
+yourself using one of the methods listed in the [Build All](#build-all) section.
+
 ### Sharing
 The _csvsuite_ is not meant to replace the _csvkit_, it has its limitations. Moreover, data import ([In2csv](#in2csv))
 is less complete and generally less tested in terms of data diversity. But as you gain more confidence in the tool,

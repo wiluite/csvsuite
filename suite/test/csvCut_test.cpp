@@ -142,7 +142,6 @@ int main() {
         notrimming_reader_type r (args.file);
 
         expect(nothrow([&]{CALL_TEST_AND_REDIRECT_TO_COUT
-            std::cerr << cout_buffer.str() << std::endl;
             expect(cout_buffer.str() == "b,c\n2,3\n");
         }));
     };
