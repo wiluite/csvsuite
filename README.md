@@ -1,5 +1,5 @@
 # csvsuite
-## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++
+## The same as [csvkit](https://csvkit.readthedocs.io/en/latest/), but written in C++.
 
 *    [About](#about)
 *    [Sharing](#sharing)
@@ -27,8 +27,8 @@ libraries support the rest of the product's functionality.
 
 The goals for the reproduction were: to find out the complexity and limitations of the applicability of the C++
 ecosystem for broad universal tasks, where Python is good with its rich environment for data processing, text encoding,
-localization, SQL databases and so on. It was also interesting to see the performance benefits of C++ applications in
-non-traditional areas. These utilities (of those 14) seem to be almost fully operational at the moment:
+numeric format localization, SQL databases and so on. It was also interesting to see the performance benefits of C++
+applications in non-traditional areas. These utilities (of those 14) seem to be almost fully operational at the moment:
 1) csvClean (ala [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html))
 2) csvCut (ala [csvcut](https://csvkit.readthedocs.io/en/latest/scripts/csvcut.html))
 3) csvGrep (ala [csvgrep](https://csvkit.readthedocs.io/en/latest/scripts/csvgrep.html))
@@ -42,17 +42,17 @@ non-traditional areas. These utilities (of those 14) seem to be almost fully ope
 11) Sql2csv (ala [sql2csv](https://csvkit.readthedocs.io/en/latest/scripts/sql2csv.html))
 12) In2csv (ala [in2csv](https://csvkit.readthedocs.io/en/latest/scripts/in2csv.html))
 
-There are binary packages for these Linux distributions: Debian 11 (Bullseye), Debian 12 (Bookworm), Ubuntu 22.04,
-Ubuntu 24.04. And there are two binary packages for Windows x64: MSVC 2022 Community, MinGW. Otherwise, please build it
-yourself using one of the methods listed in the [Build All](#build-all) section.
+There are binary packages for these Linux distributions: Debian 11 Bullseye (amd64), Debian 12 Bookworm (amd64),
+Ubuntu 22.04 (amd64), Ubuntu 24.04 (amd64). And there are two binary packages for Windows x64: MSVC 2022 Community,
+MinGW. Otherwise, please build it yourself using one of the methods listed in the [Build All](#build-all) section.
 
 ### Sharing
 The _csvsuite_ is not meant to replace the _csvkit_, it has its limitations. Moreover, data import ([In2csv](#in2csv))
 is less complete and generally less tested in terms of data diversity. But as you gain more confidence in the tool,
 you could use it in a streaming bundle to essentially speed up the processing of larger documents.
-For example:
+For example (on case-sensitive systems):
   
-in2csv ... | csvCut ... | csvGrep ... | csvSort ... | ... | csvformat
+    in2csv ... | csvCut ... | csvGrep ... | csvSort ... | ... | csvformat
 
 If you are used to working with the _csvkit_, and other tools don't support your data types (6 types of data: Boolean,
 Number, TimeDelta, DateTime, Date, Text) or are just not comfortable for you, give the _csvsuite_ a chance! Bug reports,
@@ -60,17 +60,14 @@ scenarios that failed and so on are very welcome. I can keep this in active deve
 statistics after the next two sections.
 
 ### Restrictions
-1) Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
+Your CSV sources must be [RFC-4180](https://en.wikipedia.org/wiki/Comma-separated_values)-compliant. Fortunately, the
 overwhelming percentage of documents in the world adhere to this rule. If not, you can/should always resort to the
 [csvClean](#csvclean) (or even a more powerful one from the original package:
 [csvclean](https://csvkit.readthedocs.io/en/latest/scripts/csvclean.html)), to fix your document. In any case, such
-document just obviously needs to be fixed.
+document just obviously needs to be fixed. When running, any utility tries to quickly check the strong tabular shape of
+your documents to match [RFC-4180] and whistles if this is not the case.
 
-2) The only 2 of utilities of the Python's original are not implemented for not being too actual:
-[csvformat](https://csvkit.readthedocs.io/en/latest/scripts/csvformat.html),
-[csvpy](https://csvkit.readthedocs.io/en/latest/scripts/csvpy.html).
-
-3) Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following options are unsupported:
+Due to the fact the _csvsuite_ will work with RFC-4180-compliant only, the following options are unsupported:
 
 | unsupported options                      |
 |------------------------------------------|
@@ -81,11 +78,7 @@ document just obviously needs to be fixed.
 | -b, --no-doublequote                     |
 | -y SNIFF_LIMIT, --snifflimit SNIFF_LIMIT |
 
-   The remaining options (or even newly introduced by the _csvsuite_ ) are present and almost certainly implemented.
-When running, any utility tries to quickly check the strong tabular shape of your documents to match [RFC-4180] and
-whistles if this is not the case.  
-
-4) When handling date and datetime data types and their localization, the _csvkit_ relies on the rich Python datetime
+When handling date and datetime data types and their localization, the _csvkit_ relies on the rich Python datetime
 library. It also allows you to work with time representations such as 'yesterday', 'today', 'tomorrow', and so on.
 The _csvsuite_ , though, is tightly bound to the `--date-format` and `--datetime-format` options and works well only on
 those platforms where this is supported by the environment/compiler/runtime. And the `--date-lib-parser` option engages
@@ -95,10 +88,10 @@ everywhere (on most platforms). For more info see tests located in the
 complete info see [formatting section](https://howardhinnant.github.io/date/date.html#from_stream_formatting) of the
 documentation.
 
-5) Locale-formatted support for numbers is provided out of the box, that is, by the development tool. If there is no
+Locale-formatted support for numbers is provided out of the box, that is, by the development tool. If there is no
 such support somewhere (for example MinGW/Windows), you will not be able to work with locale-formatted numbers.
 
-6) Other restrictions and some substitutions are presented in section [Reference](#reference), describing utilities.
+Other restrictions and some substitutions are presented in section [Reference](#reference), describing utilities.
 
 ### Tutorial
 ### 1. Getting started
@@ -274,7 +267,7 @@ probably because the _csvsql_ spends a significant part of the time determining 
 <img alt="image info" height="547" src="./img/sql.png" width="761"/>
 
 ### Joining performance
-Now we will try to display the first 10 results corresponding to the conditions when the City and AccentCity fields in
+Now we will try to display the first 9 results corresponding to the conditions when the City and AccentCity fields in
 the worldcitiespop.csv file are equal. Here the _csvJoin_ outperforms the _csvjoin_ by a factor of 8 as well.
 
 <img alt="image info" height="660" src="./img/join.png" width="739"/>
