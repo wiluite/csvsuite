@@ -52,9 +52,12 @@ int main() {
             args_copy.no_inference = true;
             args_copy.columns = "1";
             CALL_TEST_AND_REDIRECT_TO_COUT(csvjoin::join_wrapper(args_copy))
+            // depending on how current system decides "pattern *" to apply
             expect(cout_buffer.str() == R"(b,c,a,c2,a2,d
 2,3,1,3,1,4
-)");
+)"              or cout_buffer.str() == R"(b,c,a,d,c2,a2
+2,3,1,4,3,1
+)" );
         };
 
         "sequential"_test = [&] {

@@ -41,6 +41,7 @@ int main() {
         struct Args : csvStack_args {
         } args;
 
+        // stack dummy, dummy(2,3,4), dummy_col* (n! combinations)
         args.files = std::vector<std::string>{"examples/dummy*.csv"};
 
         CALL_TEST_AND_REDIRECT_TO_COUT(
@@ -63,6 +64,15 @@ int main() {
 0,2,3,
 1,2,3,
 1,4,5,
+1,2,3,
+)" or
+        cout_buffer.str() == R"(a,b,c,d
+0,2,3,
+1,2,3,
+1,2,3,
+1,4,5,
+1,2,3,
+1,2,3,4
 1,2,3,
 )");
     };
