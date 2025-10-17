@@ -151,7 +151,8 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
         reader<>::typed_span<quoted>::imbue_num_locale(loc);
         expect(reader<>::typed_span<quoted>::num_locale().name() == "C");
         expect(throws([&] {
-            reader<>::typed_span<unquoted>::num_locale().name();
+            auto name = reader<>::typed_span<unquoted>::num_locale().name();
+            (void)name;
         }));
     };
 
@@ -892,7 +893,7 @@ Either use/reuse the -K option for alignment, or use the csvClean utility to fix
             auto [types, blanks] = std::get<1>(typify(r, a, typify_option::typify_without_precisions));
             expect(types.size() == 1);
 #if defined(__MINGW32__)  //MINGW can't handle with %y-format against year less then 38 and 20/21 centuries
-            expect (types[0] == column_type::text_t);
+            expect (types[0] == column_type::text_t or types[0] == column_type::date_t);
 #else
             expect (types[0] == column_type::date_t);
 

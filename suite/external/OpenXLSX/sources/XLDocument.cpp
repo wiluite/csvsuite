@@ -50,7 +50,9 @@ YM      M9  MM    MM MM       MM    MM   d'  `MM.    MM            MM   d'  `MM.
 #endif
 #if defined(_WIN32)
 #    include <random>
-#    define stat _stat    // _stat should be available in standard environment on Windows
+ #if !defined(__MINGW32__) // probably plays no role for us(csvsuite)
+ #    define stat _stat    // _stat should be available in standard environment on Windows
+ #endif
 #endif
 #include <pugixml.hpp>
 #include <sys/stat.h>     // for stat, to test if a file exists and if a file is a directory
