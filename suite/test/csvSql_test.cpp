@@ -167,7 +167,23 @@ CREATE TABLE dummy4 (
  b DECIMAL NOT NULL,
  c DECIMAL NOT NULL
 );
-)");
+)"      or no_tabs_rep == R"(CREATE TABLE dummy4 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+CREATE TABLE dummy2 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+CREATE TABLE dummy3 (
+ a BOOLEAN NOT NULL,
+ b DECIMAL NOT NULL,
+ c DECIMAL NOT NULL
+);
+)"
+        ); //expect
 #endif
     };
 
